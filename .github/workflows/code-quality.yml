@@ -30,18 +30,15 @@ jobs:
 
     - name: Restore dependencies
       run: dotnet restore
-      working-directory: ./Jellyfin.Xtream.V2
 
     - name: Run code analysis
       run: |
         dotnet build --configuration Release --no-restore -p:TreatWarningsAsErrors=true
-      working-directory: ./Jellyfin.Xtream.V2
       continue-on-error: true
 
     - name: Check for security vulnerabilities
       run: |
         dotnet restore --force-evaluate
-      working-directory: ./Jellyfin.Xtream.V2
       continue-on-error: true
 
   codeql:
@@ -68,11 +65,9 @@ jobs:
 
     - name: Restore dependencies
       run: dotnet restore
-      working-directory: ./Jellyfin.Xtream.V2
 
     - name: Build
       run: dotnet build --configuration Release --no-restore
-      working-directory: ./Jellyfin.Xtream.V2
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
@@ -94,5 +89,4 @@ jobs:
       run: |
         dotnet restore --force-evaluate
         dotnet list package --vulnerable
-      working-directory: ./Jellyfin.Xtream.V2
       continue-on-error: true
