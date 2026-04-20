@@ -1,12 +1,12 @@
 {
   "guid": "a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
   "name": "Jellyfin Xtream",
-  "description": "Performance-optimized IPTV plugin for Xtream Codes API. Support for 25,000+ entities with advanced caching and memory management.",
+  "description": "Performance-optimized IPTV plugin for Xtream Codes API. Support for large catalogs with advanced caching and memory management.",
   "overview": "Stream Live TV, Movies, and Series from an Xtream-compatible server using this optimized plugin.",
   "owner": "Dynamic365Rookie",
   "category": "LiveTV",
-  "version": "3.1.4",
+  "version": "3.1.5",
   "targetAbi": "10.11.0.0",
-  "changelog": "Performance optimized IPTV plugin with configuration UI",
+  "changelog": "Plugin loading compatibility fixes for Jellyfin 10.11",
   "timestamp": "2026-04-20T16:00:00Z"
 }

@@ -8,10 +8,10 @@ param(
     [string]$RepoName = "Jellyfin.Xtream.V3"
 )
 
-# Plugin metadata
+# Plugin metadata (ASCII-safe to avoid encoding issues in clients)
 $PluginGuid = "a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
 $PluginName = "Jellyfin Xtream"
-$PluginDescription = "Performance-optimized IPTV plugin for Xtream Codes API. Support for 25,000+ entities with advanced caching and memory management.`n"
+$PluginDescription = "Performance-optimized IPTV plugin for Xtream Codes API. Support for large catalogs with advanced caching and memory management."
 $PluginOverview = "Stream Live TV, Movies, and Series from an Xtream-compatible server using this optimized plugin."
 $PluginOwner = "Dynamic365Rookie"
 $PluginCategory = "LiveTV"
@@ -34,6 +34,36 @@ function Get-RemoteFileMD5 {
         Write-Host "  Warning: Could not calculate checksum for $Url" -ForegroundColor Yellow
         return ""
     }
+}
+
+# Function to sanitize text for safe JSON/Jellyfin consumption
+function Convert-ToSafeText {
+    param([string]$Text)
+
+    if ([string]::IsNullOrEmpty($Text)) {
+        return ""
+    }
+
+    # Normalize line endings first
+    $sanitized = $Text -replace "`r`n", "`n"
+
+    # Remove invalid replacement character often produced by bad encodings
+    $sanitized = $sanitized -replace [char]0xFFFD, ""
+
+    # Remove control characters except tab/newline/carriage return
+    $sanitized = [regex]::Replace($sanitized, "[\x00-\x08\x0B\x0C\x0E-\x1F]", "")
+
+    # Remove surrogate pairs (emojis / unsupported symbols in some clients)
+    $chars = $sanitized.ToCharArray() | Where-Object { -not [char]::IsSurrogate($_) }
+    $sanitized = -join $chars
+
+    # Keep output ASCII-safe for maximum compatibility in Jellyfin clients
+    $sanitized = [regex]::Replace($sanitized, "[^\u0009\u000A\u000D\u0020-\u007E]", "")
+
+    # Unicode normalization for stable output
+    $sanitized = $sanitized.Normalize([Text.NormalizationForm]::FormC)
+
+    return $sanitized
 }
 
 Write-Host ""
@@ -72,8 +102,15 @@ foreach ($release in $releases) {
     Write-Host "Processing release: $tagName (version: $version)" -ForegroundColor Cyan
 
     $sourceUrl = $zipAsset.browser_download_url
-    $changelog = if ($release.body) { $release.body } else { "Release version $version" }
-    $timestamp = $release.published_at
+    $releaseTitle = if ($release.name) { $release.name } else { "Release $tagName" }
+    $changelogRaw = "$releaseTitle - $tagName"
+    $changelog = Convert-ToSafeText -Text $changelogRaw
+    $timestamp = if ($release.published_at) {
+        [DateTime]::Parse($release.published_at).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+    }
+    else {
+        [DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ")
+    }
 
     # Calculate checksum
     $checksum = Get-RemoteFileMD5 -Url $sourceUrl
@@ -101,12 +138,12 @@ Write-Host "Included $($versions.Count) version(s) in manifest" -ForegroundColor
 # Build the repository structure
 $repository = @(
     @{
-        category = $PluginCategory
-        description = $PluginDescription
+        category = (Convert-ToSafeText -Text $PluginCategory)
+        description = (Convert-ToSafeText -Text $PluginDescription)
         guid = $PluginGuid
-        name = $PluginName
-        overview = $PluginOverview
-        owner = $PluginOwner
+        name = (Convert-ToSafeText -Text $PluginName)
+        overview = (Convert-ToSafeText -Text $PluginOverview)
+        owner = (Convert-ToSafeText -Text $PluginOwner)
         versions = $versions
     }
 )
