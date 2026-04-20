@@ -13,11 +13,11 @@ param(
 # Plugin metadata
 $PluginGuid = "5d774c35-8567-46d3-a950-9bb8227a0c5d"
 $PluginName = "Jellyfin Xtream"
-$PluginDescription = "Plugin IPTV Xtream optimisé pour les services Xtream - Support jusqu'à 25,000+ entités"
-$PluginOverview = "Plugin IPTV Xtream optimisé pour les services Xtream - Support jusqu'à 25,000+ entités"
+$PluginDescription = "Performance-optimized IPTV plugin for Xtream Codes API. Support for 25,000+ entities with advanced caching and memory management.`n"
+$PluginOverview = "Stream Live TV, Movies, and Series from an Xtream-compatible server using this optimized plugin."
 $PluginOwner = "Dynamic365Rookie"
-$PluginCategory = "Live TV"
-$PluginImageUrl = "https://raw.githubusercontent.com/Dynamic365Rookie/Jellyfin.Xtream.V3/main/Assets/icon.png"
+$PluginCategory = "LiveTV"
+$PluginImageUrl = ""
 $JellyfinTargetAbi = "10.11.0.0"
 
 # Function to calculate MD5 checksum
@@ -67,23 +67,23 @@ if (-not $ReleaseUrl) {
 }
 
 # Build the repository structure compatible with Jellyfin
+# Must match the exact structure expected by Jellyfin's PackageInfo[]
 $repository = @(
     @{
+        category = $PluginCategory
+        description = $PluginDescription
         guid = $PluginGuid
         name = $PluginName
-        description = $PluginDescription
         overview = $PluginOverview
         owner = $PluginOwner
-        category = $PluginCategory
-        imageUrl = $PluginImageUrl
         versions = @(
             @{
-                version = $Version
                 changelog = "Release version $Version - Performance optimized IPTV plugin. Commit: $CommitHash"
-                targetAbi = $JellyfinTargetAbi
-                sourceUrl = $ReleaseUrl
                 checksum = $checksum
+                sourceUrl = $ReleaseUrl
+                targetAbi = $JellyfinTargetAbi
                 timestamp = $timestamp
+                version = $Version
             }
         )
     }
