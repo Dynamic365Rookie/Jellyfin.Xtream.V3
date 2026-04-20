@@ -35,6 +35,10 @@ jobs:
     - name: Get latest release information
       id: version
       run: |
+        # Wait a bit for the release to be fully published with assets
+        echo "Waiting for release to be published..."
+        sleep 10
+
         # Get the latest release from GitHub API
         LATEST_RELEASE=$(curl -s https://api.github.com/repos/Dynamic365Rookie/Jellyfin.Xtream.V3/releases/latest)
 
@@ -44,8 +48,17 @@ jobs:
         # Get ZIP download URL
         ZIP_URL=$(echo "$LATEST_RELEASE" | jq -r '.assets[] | select(.name | endswith(".zip")) | .browser_download_url' | head -1)
 
-        # Fallback if no release found
-        if [ -z "$VERSION" ] || [ "$VERSION" == "null" ]; then
+        # Build expected ZIP filename
+        if [ ! -z "$VERSION" ] && [ "$VERSION" != "null" ]; then
+          EXPECTED_ZIP_NAME="Jellyfin.Xtream.V3-v${VERSION}.zip"
+
+          # If ZIP_URL is empty, construct it
+          if [ -z "$ZIP_URL" ] || [ "$ZIP_URL" == "null" ]; then
+            ZIP_URL="https://github.com/Dynamic365Rookie/Jellyfin.Xtream.V3/releases/download/v${VERSION}/${EXPECTED_ZIP_NAME}"
+            echo "Warning: Asset not found in release, using constructed URL"
+          fi
+        else
+          # Fallback if no release found
           VERSION="3.0.0-$(date +%Y%m%d.%H%M%S)"
           ZIP_URL="https://github.com/Dynamic365Rookie/Jellyfin.Xtream.V3/releases/download/v${VERSION}/Jellyfin.Xtream.V3-v${VERSION}.zip"
         fi
