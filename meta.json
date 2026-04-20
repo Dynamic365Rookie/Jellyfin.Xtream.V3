@@ -5,9 +5,8 @@
   "overview": "Stream Live TV, Movies, and Series from an Xtream-compatible server using this optimized plugin.",
   "owner": "Dynamic365Rookie",
   "category": "LiveTV",
-  "imageUrl": "",
-  "version": "3.1.2.0",
+  "version": "3.1.4",
   "targetAbi": "10.11.0.0",
-  "changelog": "Performance optimized IPTV plugin with advanced features",
-  "timestamp": "2026-04-20T15:00:00Z"
+  "changelog": "Performance optimized IPTV plugin with configuration UI",
+  "timestamp": "2026-04-20T16:00:00Z"
 }
