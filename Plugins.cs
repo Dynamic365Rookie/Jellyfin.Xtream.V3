@@ -26,7 +26,7 @@ public sealed class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     public override string Name => "Jellyfin Xtream";
 
     /// <inheritdoc />
-    public override Guid Id => Guid.Parse("5d774c35-8567-46d3-a950-9bb8227a0c5d");
+    public override Guid Id => Guid.Parse("a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d");
 
     /// <inheritdoc />
     public override string Description => "Performance-optimized IPTV plugin for Xtream Codes API. Support for 25,000+ entities with advanced caching and memory management.";
@@ -38,8 +38,8 @@ public sealed class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         {
             new PluginPageInfo
             {
-                Name = Name,
-                EmbeddedResourcePath = GetType().Namespace + ".Configuration.configPage.html"
+                Name = this.Name,
+                EmbeddedResourcePath = $"{GetType().Namespace}.Configuration.configPage.html"
             }
         };
     }
