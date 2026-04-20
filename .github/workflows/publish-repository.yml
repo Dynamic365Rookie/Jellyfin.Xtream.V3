@@ -32,35 +32,66 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Extract version and commit
+    - name: Get latest release information
       id: version
       run: |
-        if [[ $GITHUB_REF == refs/tags/v* ]]; then
-          VERSION=${GITHUB_REF#refs/tags/v}
-        else
+        # Get the latest release from GitHub API
+        LATEST_RELEASE=$(curl -s https://api.github.com/repos/Dynamic365Rookie/Jellyfin.Xtream.V3/releases/latest)
+
+        # Extract version (tag_name without 'v' prefix)
+        VERSION=$(echo "$LATEST_RELEASE" | jq -r '.tag_name' | sed 's/^v//')
+
+        # Get ZIP download URL
+        ZIP_URL=$(echo "$LATEST_RELEASE" | jq -r '.assets[] | select(.name | endswith(".zip")) | .browser_download_url' | head -1)
+
+        # Fallback if no release found
+        if [ -z "$VERSION" ] || [ "$VERSION" == "null" ]; then
           VERSION="3.0.0-$(date +%Y%m%d.%H%M%S)"
+          ZIP_URL="https://github.com/Dynamic365Rookie/Jellyfin.Xtream.V3/releases/download/v${VERSION}/Jellyfin.Xtream.V3-v${VERSION}.zip"
         fi
+
         COMMIT=$(git rev-parse --short HEAD)
+
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         echo "commit=$COMMIT" >> $GITHUB_OUTPUT
+        echo "zip_url=$ZIP_URL" >> $GITHUB_OUTPUT
+
         echo "Version: $VERSION"
         echo "Commit: $COMMIT"
+        echo "ZIP URL: $ZIP_URL"
 
     - name: Setup PowerShell
       run: |
         pwsh --version
 
+    - name: Download release ZIP for checksum calculation
+      run: |
+        ZIP_URL="${{ steps.version.outputs.zip_url }}"
+        if [ -n "$ZIP_URL" ] && [ "$ZIP_URL" != "null" ]; then
+          echo "Downloading ZIP from: $ZIP_URL"
+          curl -L -o plugin.zip "$ZIP_URL" || echo "Failed to download ZIP, will generate manifest without checksum"
+        else
+          echo "No ZIP URL available, will generate manifest without checksum"
+        fi
+
     - name: Generate repository.json
       run: |
+        # Check if plugin.zip was downloaded
+        if [ -f plugin.zip ]; then
+          ZIP_PATH="plugin.zip"
+        else
+          ZIP_PATH=""
+        fi
+
         pwsh -Command "
-          . ./.github/scripts/generate-repository.ps1
           \$params = @{
             OutputPath = 'repository.json'
+            PluginZipPath = '$ZIP_PATH'
             Version = '${{ steps.version.outputs.version }}'
             CommitHash = '${{ steps.version.outputs.commit }}'
-            ReleaseUrl = 'https://github.com/Dynamic365Rookie/Jellyfin.Xtream.V3/releases/download/v${{ steps.version.outputs.version }}/Jellyfin.Xtream.V3-v${{ steps.version.outputs.version }}.zip'
+            ReleaseUrl = '${{ steps.version.outputs.zip_url }}'
           }
-          & (Resolve-Path './.github/scripts/generate-repository.ps1').Path @params
+          & './.github/scripts/generate-repository.ps1' @params
         "
 
     - name: Verify repository.json
