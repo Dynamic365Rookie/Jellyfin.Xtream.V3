@@ -1,0 +1,123 @@
+name: Documentation and Release Notes
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  check-documentation:
+    name: Check Documentation
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Check for README
+      run: |
+        if [ ! -f "Jellyfin.Xtream.V2/README.md" ]; then
+          echo "? README.md not found"
+          exit 1
+        else
+          echo "? README.md found"
+        fi
+
+    - name: Check for CHANGELOG
+      run: |
+        if [ ! -f "CHANGELOG.md" ]; then
+          echo "?? CHANGELOG.md not found (optional)"
+        else
+          echo "? CHANGELOG.md found"
+        fi
+
+    - name: Check for LICENSE
+      run: |
+        if [ ! -f "LICENSE" ]; then
+          echo "?? LICENSE not found (optional)"
+        else
+          echo "? LICENSE found"
+        fi
+
+    - name: Validate markdown syntax
+      run: |
+        echo "Running markdown validation..."
+        # Find all markdown files
+        find . -name "*.md" -type f | head -20
+      continue-on-error: true
+
+    - name: Check for performance documentation
+      run: |
+        if [ -f "Jellyfin.Xtream.V2/PERFORMANCE_GUIDE.md" ]; then
+          echo "? Performance guide found"
+        else
+          echo "?? Performance guide not found"
+        fi
+
+  validate-release-notes:
+    name: Validate Release Notes
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Check release notes
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/}
+        echo "Release version: $VERSION"
+
+        if [ ! -f "RELEASE_NOTES.md" ]; then
+          echo "?? RELEASE_NOTES.md not found - creating default"
+          echo "# Release $VERSION" > RELEASE_NOTES.md
+          echo "" >> RELEASE_NOTES.md
+          echo "## Changes" >> RELEASE_NOTES.md
+          echo "See [CHANGELOG.md](CHANGELOG.md) for details." >> RELEASE_NOTES.md
+        else
+          echo "? RELEASE_NOTES.md found"
+        fi
+      shell: bash
+
+    - name: Upload release notes
+      uses: actions/upload-artifact@v3
+      with:
+        name: release-notes
+        path: RELEASE_NOTES.md
+
+  generate-api-docs:
+    name: Generate API Documentation
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '6.0.x'
+
+    - name: Install docfx
+      run: dotnet tool install --global docfx
+      continue-on-error: true
+
+    - name: Generate documentation
+      run: |
+        if (Test-Path "docfx.json") {
+          docfx docfx.json
+        } else {
+          Write-Host "docfx.json not found - skipping documentation generation"
+        }
+      shell: pwsh
+      continue-on-error: true
+
+    - name: Upload documentation
+      uses: actions/upload-artifact@v3
+      with:
+        name: api-documentation
+        path: _site
+      if: always()

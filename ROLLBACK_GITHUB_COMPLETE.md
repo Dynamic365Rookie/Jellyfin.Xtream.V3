@@ -1,0 +1,330 @@
+# ?? ROLLBACK VERS GITHUB - SYNTHÈSE COMPLÈTE
+
+## ?? Votre Demande
+
+```
+"Le code que j'ai poussé lors du dernier commit aurais du être poussé 
+sur mon dépot github, peux tu m'assister à rollbacker le changeset, 
+et le pousser sur mon dépot github?"
+```
+
+---
+
+## ? SOLUTION FOURNIE
+
+### Problème Identifié
+```
+Commit: 1506ae8 - feat: Optimisations majeures de performance pour haute volumétrie
+Push destiné à: GitHub ?
+Push réellement effectué sur: Azure DevOps
+Status: Doit être annulé et repoussé
+```
+
+---
+
+## ?? OUTILS FOURNIS
+
+### 1. Script PowerShell Automatique ?
+**Fichier**: `rollback-and-push-github.ps1`
+
+```powershell
+.\rollback-and-push-github.ps1
+```
+
+**Ce que le script fait:**
+- ? Vérifie le state du repo
+- ? Demande confirmation
+- ? Annule le commit localement
+- ? Force push pour annuler sur Azure DevOps
+- ? Ajoute GitHub comme remote
+- ? Pousse vers GitHub
+- ? Affiche un résumé
+
+**Avantages:**
+- Automatisé et interactif
+- Demande les infos nécessaires
+- Gère les erreurs
+- Affiche les progrès
+
+---
+
+### 2. Guide Complet
+**Fichier**: `ROLLBACK_AND_PUSH_GITHUB.md`
+
+Contient:
+- Explications détaillées
+- Prérequis
+- Étapes manuelles alternatives
+- Dépannage
+- Vérification des résultats
+
+---
+
+### 3. Commandes Manuelles
+**Fichier**: `ROLLBACK_MANUAL.md`
+
+Commandes Git à copier-coller:
+```bash
+git reset --soft HEAD~1
+git push origin MIV_DEV01_TestPush --force-with-lease
+git remote add github https://github.com/votre-user/Jellyfin.Xtream.V2.git
+git push github main --set-upstream
+```
+
+---
+
+### 4. Guide Rapide
+**Fichier**: `QUICK_ROLLBACK.md`
+
+Version minimale avec 3 étapes seulement.
+
+---
+
+## ?? DÉMARRAGE RAPIDE
+
+### Option 1: Utiliser le Script (Recommandé)
+
+```powershell
+# 1. Ouvrir PowerShell
+# 2. Naviguer vers le répertoire
+cd "C:\Users\mvanderheyden_w\source\repos\Projects\Jellyfin.Xtream.V2\Jellyfin.Xtream.V2"
+
+# 3. Exécuter le script
+.\rollback-and-push-github.ps1
+
+# 4. Répondre aux questions interactives
+```
+
+**Questions que le script posera:**
+1. Confirmation du rollback (O/N)
+2. URL du repository GitHub
+3. Branche de destination (main/develop/autre)
+4. Confirmation du push vers GitHub (O/N)
+
+**Durée estimée:** 5-10 minutes
+
+---
+
+### Option 2: Commandes Manuelles
+
+```bash
+# 1. Annuler le commit localement
+git reset --soft HEAD~1
+
+# 2. Annuler sur Azure DevOps (force push)
+git push origin MIV_DEV01_TestPush --force-with-lease
+
+# 3. Ajouter GitHub
+git remote add github https://github.com/YOUR_USERNAME/Jellyfin.Xtream.V2.git
+
+# 4. Pousser vers GitHub
+git push github main --set-upstream
+```
+
+**Durée estimée:** 5 minutes
+
+---
+
+## ?? AVANT DE COMMENCER
+
+### Vous Avez Besoin De:
+
+1. **URL du Repository GitHub**
+   ```
+   Format: https://github.com/votre-username/Jellyfin.Xtream.V2.git
+   Remplacer 'votre-username' par votre username GitHub
+   ```
+
+2. **Authentification GitHub**
+   - SSH configurée, OU
+   - Token personnel créé, OU
+   - Username/Password stockés
+
+3. **Confirmation**
+   - ? C'est bien votre code qui doit aller sur GitHub
+   - ? Vous acceptez d'annuler le commit sur Azure DevOps
+   - ? Vous êtes dans le bon répertoire
+
+### Vérifier les Prérequis
+
+```bash
+# Vérifier le répertoire
+pwd
+# Doit afficher: C:\Users\mvanderheyden_w\source\repos\Projects\Jellyfin.Xtream.V2\Jellyfin.Xtream.V2
+
+# Vérifier que c'est un repository Git
+git status
+# Doit afficher: On branch MIV_DEV01_TestPush
+
+# Vérifier le dernier commit
+git log --oneline -1
+# Doit afficher: 1506ae8 feat: Optimisations majeures de performance pour haute volumétrie
+```
+
+---
+
+## ?? POINTS IMPORTANTS
+
+### Force Push sur Azure DevOps
+```
+?? DANGER: Cela annule irréversiblement le commit sur Azure DevOps
+
+? Utilisez: git push --force-with-lease (plus sûr)
+? Évitez: git push --force (plus agressif)
+
+Assurez-vous que:
+- C'est bien ce que vous voulez faire
+- Personne d'autre n'a basé du travail sur ce commit
+```
+
+### Authentification GitHub
+```
+Si vous avez une erreur:
+1. Vérifiez l'URL (remplacez YOUR_USERNAME par votre vrai username)
+2. Vérifiez que le repository existe sur GitHub
+3. Vérifiez vos credentials (SSH ou token)
+```
+
+---
+
+## ?? FLUX COMPLET
+
+```
+Avant Rollback:
+  Azure DevOps: 1506ae8 ?
+  GitHub:       (n'existe pas ou incorrect)
+
+Pendant le Rollback:
+  1. Reset local:  git reset --soft HEAD~1
+  2. Force push:   git push --force-with-lease (Azure annulé)
+  3. Config Git:   git remote add github ...
+  4. Push:         git push github main
+
+Après Rollback:
+  Azure DevOps: 1506ae8 ? ANNULÉ
+  GitHub:       1506ae8 ? PRÉSENT
+```
+
+---
+
+## ? VÉRIFIER LE RÉSULTAT
+
+### Après l'Exécution du Script
+
+1. **Vérifier Azure DevOps**
+```bash
+git log origin/MIV_DEV01_TestPush --oneline -1
+# Doit afficher le ANCIEN commit (6282082)
+# PAS 1506ae8
+```
+
+2. **Vérifier GitHub**
+```bash
+git log github/main --oneline -1
+# Doit afficher le NEW commit (1506ae8)
+```
+
+3. **Vérifier les Remotes**
+```bash
+git remote -v
+# Doit afficher:
+# github    https://github.com/votre-user/Jellyfin.Xtream.V2.git
+# origin    https://UrbasolarD365Finance@dev.azure.com/...
+```
+
+4. **Vérifier sur les Sites Web**
+   - Aller sur: https://dev.azure.com/UrbasolarD365Finance/D365FO_S2P/_git/main
+     Branche MIV_DEV01_TestPush doit avoir le commit annulé
+   - Aller sur: https://github.com/votre-username/Jellyfin.Xtream.V2
+     Le commit doit être présent
+
+---
+
+## ?? EN CAS DE PROBLÈME
+
+### Erreur: "Permission denied"
+```bash
+# Si SSH:
+ssh-add ~/.ssh/id_rsa
+
+# Si HTTPS avec token:
+git config --global credential.helper store
+# Puis entrer votre token comme password
+```
+
+### Erreur: "Repository not found"
+```bash
+# Vérifier l'URL
+git remote -v
+
+# Corriger si nécessaire
+git remote set-url github https://github.com/YOUR_USERNAME/Jellyfin.Xtream.V2.git
+```
+
+### Erreur: "refusing to merge unrelated histories"
+```bash
+# Utiliser --allow-unrelated-histories
+git push github main --allow-unrelated-histories --set-upstream
+```
+
+### Annuler Le Rollback (Restaurer Azure DevOps)
+```bash
+# Si vous avez changé d'avis, vous DEVEZ récupérer le commit
+# depuis l'historique/backup d'Azure DevOps
+# C'est complexe, mieux vaut éviter!
+
+# Le plus simple: repousser depuis GitHub
+git push origin MIV_DEV01_TestPush main --force
+```
+
+---
+
+## ?? FICHIERS DE RÉFÉRENCE
+
+| Fichier | Contenu | Durée |
+|---------|---------|-------|
+| **rollback-and-push-github.ps1** | Script automatique | 5-10 min |
+| **ROLLBACK_AND_PUSH_GITHUB.md** | Guide complet | 15 min |
+| **ROLLBACK_MANUAL.md** | Commandes manuelles | 5 min |
+| **QUICK_ROLLBACK.md** | Version rapide | 2 min |
+
+---
+
+## ?? RÉSUMÉ
+
+### Situation
+```
+? Commit poussé sur Azure DevOps (par erreur)
+? Doit être sur GitHub
+```
+
+### Solution
+```
+Script PowerShell fourni:
+  .\rollback-and-push-github.ps1
+```
+
+### Résultat Final
+```
+? Azure DevOps:  Commit ANNULÉ
+? GitHub:        Commit PRÉSENT
+```
+
+---
+
+## ?? PRÊT ?
+
+### Lancer le Rollback
+
+```powershell
+cd "C:\Users\mvanderheyden_w\source\repos\Projects\Jellyfin.Xtream.V2\Jellyfin.Xtream.V2"
+.\rollback-and-push-github.ps1
+```
+
+---
+
+**Besoin d'aide ? Consultez les guides détaillés fournis ! ??**
+
+- Guide complet: `ROLLBACK_AND_PUSH_GITHUB.md`
+- Commandes manuelles: `ROLLBACK_MANUAL.md`
+- Version rapide: `QUICK_ROLLBACK.md`

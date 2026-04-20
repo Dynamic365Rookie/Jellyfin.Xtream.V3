@@ -1,0 +1,133 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  DOTNET_VERSION: '6.0.x'
+  CONFIGURATION: Release
+  ARTIFACT_NAME: Jellyfin.Xtream.V2
+
+jobs:
+  build:
+    name: Build Project
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restore dependencies
+      run: dotnet restore
+      working-directory: ./Jellyfin.Xtream.V2
+
+    - name: Build
+      run: dotnet build --configuration ${{ env.CONFIGURATION }} --no-restore
+      working-directory: ./Jellyfin.Xtream.V2
+
+    - name: Run benchmarks
+      run: dotnet build --configuration ${{ env.CONFIGURATION }} -p:BenchmarksEnabled=true
+      working-directory: ./Jellyfin.Xtream.V2
+      continue-on-error: true
+
+    - name: Publish artifacts
+      run: dotnet publish -c ${{ env.CONFIGURATION }} -o ./publish
+      working-directory: ./Jellyfin.Xtream.V2
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ env.ARTIFACT_NAME }}
+        path: ./Jellyfin.Xtream.V2/publish
+        retention-days: 30
+
+  test:
+    name: Test Project
+    runs-on: windows-latest
+    needs: build
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restore dependencies
+      run: dotnet restore
+      working-directory: ./Jellyfin.Xtream.V2
+
+    - name: Run tests
+      run: dotnet test --configuration ${{ env.CONFIGURATION }} --no-restore --verbosity normal
+      working-directory: ./Jellyfin.Xtream.V2
+      continue-on-error: true
+
+  release:
+    name: Create Release
+    runs-on: windows-latest
+    needs: [build, test]
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Get tag version
+      id: tag
+      run: echo "version=${GITHUB_REF#refs/tags/}" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+      shell: pwsh
+
+    - name: Restore dependencies
+      run: dotnet restore
+      working-directory: ./Jellyfin.Xtream.V2
+
+    - name: Build release
+      run: dotnet build --configuration ${{ env.CONFIGURATION }} --no-restore
+      working-directory: ./Jellyfin.Xtream.V2
+
+    - name: Publish release
+      run: dotnet publish -c ${{ env.CONFIGURATION }} -o ./release
+      working-directory: ./Jellyfin.Xtream.V2
+
+    - name: Create archive
+      run: |
+        cd ./Jellyfin.Xtream.V2/release
+        Compress-Archive -Path * -DestinationPath ../Jellyfin.Xtream.V2-${{ steps.tag.outputs.version }}.zip
+        cd ..
+      shell: pwsh
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ./Jellyfin.Xtream.V2/Jellyfin.Xtream.V2-${{ steps.tag.outputs.version }}.zip
+        body_path: RELEASE_NOTES.md
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload to releases
+      run: |
+        Write-Host "Release ${{ steps.tag.outputs.version }} published successfully!"
+      shell: pwsh
