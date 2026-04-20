@@ -19,7 +19,7 @@ jobs:
 
     - name: Check for README
       run: |
-        if [ ! -f "Jellyfin.Xtream.V2/README.md" ]; then
+        if [ ! -f "README.md" ]; then
           echo "? README.md not found"
           exit 1
         else
@@ -51,7 +51,7 @@ jobs:
 
     - name: Check for performance documentation
       run: |
-        if [ -f "Jellyfin.Xtream.V2/PERFORMANCE_GUIDE.md" ]; then
+        if [ -f "PERFORMANCE_GUIDE.md" ]; then
           echo "? Performance guide found"
         else
           echo "?? Performance guide not found"

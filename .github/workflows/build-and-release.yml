@@ -31,26 +31,22 @@ jobs:
 
     - name: Restore dependencies
       run: dotnet restore
-      working-directory: ./Jellyfin.Xtream.V2
 
     - name: Build
       run: dotnet build --configuration ${{ env.CONFIGURATION }} --no-restore
-      working-directory: ./Jellyfin.Xtream.V2
 
     - name: Run benchmarks
       run: dotnet build --configuration ${{ env.CONFIGURATION }} -p:BenchmarksEnabled=true
-      working-directory: ./Jellyfin.Xtream.V2
       continue-on-error: true
 
     - name: Publish artifacts
       run: dotnet publish -c ${{ env.CONFIGURATION }} -o ./publish
-      working-directory: ./Jellyfin.Xtream.V2
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.ARTIFACT_NAME }}
-        path: ./Jellyfin.Xtream.V2/publish
+        path: ./publish
         retention-days: 30
 
   test:
@@ -69,11 +65,9 @@ jobs:
 
     - name: Restore dependencies
       run: dotnet restore
-      working-directory: ./Jellyfin.Xtream.V2
 
     - name: Run tests
       run: dotnet test --configuration ${{ env.CONFIGURATION }} --no-restore --verbosity normal
-      working-directory: ./Jellyfin.Xtream.V2
       continue-on-error: true
 
   release:
@@ -100,27 +94,24 @@ jobs:
 
     - name: Restore dependencies
       run: dotnet restore
-      working-directory: ./Jellyfin.Xtream.V2
 
     - name: Build release
       run: dotnet build --configuration ${{ env.CONFIGURATION }} --no-restore
-      working-directory: ./Jellyfin.Xtream.V2
 
     - name: Publish release
       run: dotnet publish -c ${{ env.CONFIGURATION }} -o ./release
-      working-directory: ./Jellyfin.Xtream.V2
 
     - name: Create archive
       run: |
-        cd ./Jellyfin.Xtream.V2/release
-        Compress-Archive -Path * -DestinationPath ../Jellyfin.Xtream.V2-${{ steps.tag.outputs.version }}.zip
+        cd ./release
+        Compress-Archive -Path * -DestinationPath ../Jellyfin.Xtream.V3-${{ steps.tag.outputs.version }}.zip
         cd ..
       shell: pwsh
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:
-        files: ./Jellyfin.Xtream.V2/Jellyfin.Xtream.V2-${{ steps.tag.outputs.version }}.zip
+        files: ./Jellyfin.Xtream.V3-${{ steps.tag.outputs.version }}.zip
         body_path: RELEASE_NOTES.md
         draft: false
         prerelease: false
