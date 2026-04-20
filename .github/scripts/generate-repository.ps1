@@ -91,7 +91,15 @@ $repository = @(
 
 # Convert to JSON with proper formatting for Jellyfin
 # Note: Jellyfin expects specific property names (case-sensitive)
-$json = $repository | ConvertTo-Json -Depth 10 -Compress:$false
+# Force array output even with single element using -AsArray parameter (PS 7.3+)
+# For older PS versions, we wrap in @() and use ConvertTo-Json
+if ($PSVersionTable.PSVersion.Major -ge 7 -and $PSVersionTable.PSVersion.Minor -ge 3) {
+    $json = $repository | ConvertTo-Json -Depth 10 -Compress:$false -AsArray
+} else {
+    # Fallback for older PowerShell - manually add brackets
+    $jsonObject = $repository[0] | ConvertTo-Json -Depth 10 -Compress:$false
+    $json = "[$jsonObject]"
+}
 
 # Ensure proper encoding
 $utf8NoBom = New-Object System.Text.UTF8Encoding $false
