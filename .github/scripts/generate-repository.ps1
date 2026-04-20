@@ -66,7 +66,7 @@ if (-not $ReleaseUrl) {
     $ReleaseUrl = "https://github.com/Dynamic365Rookie/Jellyfin.Xtream.V3/releases/download/v${Version}/Jellyfin.Xtream.V3-v${Version}.zip"
 }
 
-# Build the repository structure
+# Build the repository structure compatible with Jellyfin
 $repository = @(
     @{
         guid = $PluginGuid
@@ -89,11 +89,13 @@ $repository = @(
     }
 )
 
-# Convert to JSON
-$json = $repository | ConvertTo-Json -Depth 10 | ForEach-Object { [System.Text.RegularExpressions.Regex]::Unescape($_) }
+# Convert to JSON with proper formatting for Jellyfin
+# Note: Jellyfin expects specific property names (case-sensitive)
+$json = $repository | ConvertTo-Json -Depth 10 -Compress:$false
 
-# Write to file
-$json | Out-File -FilePath $OutputPath -Encoding UTF8 -Force
+# Ensure proper encoding
+$utf8NoBom = New-Object System.Text.UTF8Encoding $false
+[System.IO.File]::WriteAllText($OutputPath, $json, $utf8NoBom)
 
 Write-Host ""
 Write-Host "? repository.json generated successfully!" -ForegroundColor Green
