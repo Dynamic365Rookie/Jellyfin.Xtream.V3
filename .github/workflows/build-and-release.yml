@@ -11,7 +11,7 @@ on:
 env:
   DOTNET_VERSION: '6.0.x'
   CONFIGURATION: Release
-  ARTIFACT_NAME: Jellyfin.Xtream.V2
+  ARTIFACT_NAME: Jellyfin.Xtream.V3
 
 jobs:
   build:
@@ -75,6 +75,9 @@ jobs:
     runs-on: windows-latest
     needs: [build, test]
     if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+      repository-projects: read
 
     steps:
     - name: Checkout code
@@ -116,7 +119,7 @@ jobs:
         draft: false
         prerelease: false
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ github.token }}
 
     - name: Upload to releases
       run: |
