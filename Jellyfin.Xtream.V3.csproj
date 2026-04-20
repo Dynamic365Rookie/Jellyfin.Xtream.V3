@@ -13,7 +13,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include=".github\scripts\generate-repository.ps1" />
+    <None Include=".github\workflows\publish-repository.yml" />
     <None Include="Jellyfin.Xtream.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Configuration\configPage.html" />
   </ItemGroup>
 
   <ItemGroup>

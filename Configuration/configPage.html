@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Jellyfin Xtream Configuration</title>
+</head>
+<body>
+    <div id="XtreamConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-select,emby-checkbox">
+        <div data-role="content">
+            <div class="content-primary">
+                <form id="XtreamConfigForm">
+                    <div class="verticalSection">
+                        <h2>Xtream Server Configuration</h2>
+
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="txtServerUrl">Server URL</label>
+                            <input id="txtServerUrl" name="txtServerUrl" type="text" is="emby-input" class="emby-input" placeholder="http://example.com:8080" />
+                            <div class="fieldDescription">The URL of your Xtream Codes server</div>
+                        </div>
+
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="txtUsername">Username</label>
+                            <input id="txtUsername" name="txtUsername" type="text" is="emby-input" class="emby-input" />
+                            <div class="fieldDescription">Your Xtream Codes username</div>
+                        </div>
+
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="txtPassword">Password</label>
+                            <input id="txtPassword" name="txtPassword" type="password" is="emby-input" class="emby-input" />
+                            <div class="fieldDescription">Your Xtream Codes password</div>
+                        </div>
+                    </div>
+
+                    <div class="verticalSection">
+                        <h2>Performance Options</h2>
+
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input type="checkbox" is="emby-checkbox" id="chkEnableCaching" />
+                                <span>Enable Advanced Caching</span>
+                            </label>
+                            <div class="fieldDescription checkboxFieldDescription">Cache metadata to improve performance (recommended for large catalogs)</div>
+                        </div>
+
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="txtCacheDuration">Cache Duration (hours)</label>
+                            <input id="txtCacheDuration" name="txtCacheDuration" type="number" is="emby-input" class="emby-input" min="1" max="168" value="24" />
+                            <div class="fieldDescription">How long to cache metadata (1-168 hours)</div>
+                        </div>
+
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="txtMaxConcurrentRequests">Max Concurrent Requests</label>
+                            <input id="txtMaxConcurrentRequests" name="txtMaxConcurrentRequests" type="number" is="emby-input" class="emby-input" min="1" max="20" value="5" />
+                            <div class="fieldDescription">Maximum number of concurrent API requests (1-20)</div>
+                        </div>
+
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="txtBatchSize">Batch Size</label>
+                            <input id="txtBatchSize" name="txtBatchSize" type="number" is="emby-input" class="emby-input" min="100" max="5000" value="1000" />
+                            <div class="fieldDescription">Number of items to process per batch (100-5000)</div>
+                        </div>
+                    </div>
+
+                    <div class="verticalSection">
+                        <h2>Content Options</h2>
+
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input type="checkbox" is="emby-checkbox" id="chkEnableLiveTV" />
+                                <span>Enable Live TV</span>
+                            </label>
+                            <div class="fieldDescription checkboxFieldDescription">Import live TV channels from Xtream</div>
+                        </div>
+
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input type="checkbox" is="emby-checkbox" id="chkEnableMovies" />
+                                <span>Enable Movies</span>
+                            </label>
+                            <div class="fieldDescription checkboxFieldDescription">Import movies from Xtream</div>
+                        </div>
+
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input type="checkbox" is="emby-checkbox" id="chkEnableSeries" />
+                                <span>Enable Series</span>
+                            </label>
+                            <div class="fieldDescription checkboxFieldDescription">Import TV series from Xtream</div>
+                        </div>
+
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input type="checkbox" is="emby-checkbox" id="chkEnableEPG" />
+                                <span>Enable EPG (Electronic Program Guide)</span>
+                            </label>
+                            <div class="fieldDescription checkboxFieldDescription">Download and display TV guide information</div>
+                        </div>
+                    </div>
+
+                    <div class="verticalSection">
+                        <h2>Synchronization</h2>
+
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="txtSyncInterval">Sync Interval (hours)</label>
+                            <input id="txtSyncInterval" name="txtSyncInterval" type="number" is="emby-input" class="emby-input" min="1" max="72" value="6" />
+                            <div class="fieldDescription">How often to sync with Xtream server (1-72 hours)</div>
+                        </div>
+
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input type="checkbox" is="emby-checkbox" id="chkAutoSync" />
+                                <span>Enable Auto-Sync</span>
+                            </label>
+                            <div class="fieldDescription checkboxFieldDescription">Automatically sync on schedule</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button is="emby-button" type="submit" class="raised button-submit block">
+                            <span>Save</span>
+                        </button>
+                        <button is="emby-button" type="button" class="raised button-cancel block btnCancel">
+                            <span>Cancel</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            var XtreamConfigPage = {
+                pluginUniqueId: '5d774c35-8567-46d3-a950-9bb8227a0c5d'
+            };
+
+            document.getElementById('XtreamConfigPage').addEventListener('pageshow', function () {
+                Dashboard.showLoadingMsg();
+
+                ApiClient.getPluginConfiguration(XtreamConfigPage.pluginUniqueId).then(function (config) {
+                    // Server settings
+                    document.getElementById('txtServerUrl').value = config.ServerUrl || '';
+                    document.getElementById('txtUsername').value = config.Username || '';
+                    document.getElementById('txtPassword').value = config.Password || '';
+
+                    // Performance options
+                    document.getElementById('chkEnableCaching').checked = config.EnableCaching || false;
+                    document.getElementById('txtCacheDuration').value = config.CacheDurationHours || 24;
+                    document.getElementById('txtMaxConcurrentRequests').value = config.MaxConcurrentRequests || 5;
+                    document.getElementById('txtBatchSize').value = config.BatchSize || 1000;
+
+                    // Content options
+                    document.getElementById('chkEnableLiveTV').checked = config.EnableLiveTV !== false;
+                    document.getElementById('chkEnableMovies').checked = config.EnableMovies !== false;
+                    document.getElementById('chkEnableSeries').checked = config.EnableSeries !== false;
+                    document.getElementById('chkEnableEPG').checked = config.EnableEPG !== false;
+
+                    // Sync options
+                    document.getElementById('txtSyncInterval').value = config.SyncIntervalHours || 6;
+                    document.getElementById('chkAutoSync').checked = config.AutoSync !== false;
+
+                    Dashboard.hideLoadingMsg();
+                });
+            });
+
+            document.getElementById('XtreamConfigForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                Dashboard.showLoadingMsg();
+
+                ApiClient.getPluginConfiguration(XtreamConfigPage.pluginUniqueId).then(function (config) {
+                    // Server settings
+                    config.ServerUrl = document.getElementById('txtServerUrl').value;
+                    config.Username = document.getElementById('txtUsername').value;
+                    config.Password = document.getElementById('txtPassword').value;
+
+                    // Performance options
+                    config.EnableCaching = document.getElementById('chkEnableCaching').checked;
+                    config.CacheDurationHours = parseInt(document.getElementById('txtCacheDuration').value);
+                    config.MaxConcurrentRequests = parseInt(document.getElementById('txtMaxConcurrentRequests').value);
+                    config.BatchSize = parseInt(document.getElementById('txtBatchSize').value);
+
+                    // Content options
+                    config.EnableLiveTV = document.getElementById('chkEnableLiveTV').checked;
+                    config.EnableMovies = document.getElementById('chkEnableMovies').checked;
+                    config.EnableSeries = document.getElementById('chkEnableSeries').checked;
+                    config.EnableEPG = document.getElementById('chkEnableEPG').checked;
+
+                    // Sync options
+                    config.SyncIntervalHours = parseInt(document.getElementById('txtSyncInterval').value);
+                    config.AutoSync = document.getElementById('chkAutoSync').checked;
+
+                    ApiClient.updatePluginConfiguration(XtreamConfigPage.pluginUniqueId, config).then(function (result) {
+                        Dashboard.processPluginConfigurationUpdateResult(result);
+                    });
+                });
+
+                return false;
+            });
+
+            document.querySelector('.btnCancel').addEventListener('click', function () {
+                Dashboard.navigate('configurationpage?name=plugins');
+            });
+        </script>
+    </div>
+</body>
+</html>
