@@ -1,4 +1,4 @@
-# ?? Guide de Démarrage Rapide
+# ?? Guide de Dï¿½marrage Rapide
 
 ## Installation
 
@@ -9,7 +9,7 @@ dotnet restore
 dotnet build
 ```
 
-### 2. Vérifier les dépendances
+### 2. Vï¿½rifier les dï¿½pendances
 Les packages suivants sont requis :
 - ? `LiteDB` 5.0.21
 - ? `Microsoft.Extensions.Caching.Memory` 6.0.1
@@ -20,16 +20,16 @@ Les packages suivants sont requis :
 
 ## Configuration Minimale
 
-### 1. Initialiser la base de données optimisée
+### 1. Initialiser la base de donnï¿½es optimisï¿½e
 
 ```csharp
 using Jellyfin.Xtream.Infrastructure.Persistence;
 using Microsoft.Extensions.Logging;
 
-// Créer la base de données avec configuration optimisée
+// Crï¿½er la base de donnï¿½es avec configuration optimisï¿½e
 var db = LiteDbConfiguration.CreateOptimizedDatabase("Filename=xtream.db");
 
-// Créer les repositories
+// Crï¿½er les repositories
 var movieRepo = new LiteDbXtreamRepository<XtreamMovie>(db, "movies");
 var seriesRepo = new LiteDbXtreamRepository<XtreamSeries>(db, "series");
 var channelRepo = new LiteDbXtreamRepository<XtreamChannel>(db, "channels");
@@ -73,11 +73,11 @@ using (perfMonitor.Track("FirstSync"))
 {
     try
     {
-        // Synchronisation complète (parallèle)
+        // Synchronisation complï¿½te (parallï¿½le)
         await syncService.SyncAllAsync("http://your-xtream-api.com", cancellationToken);
 
-        // Vérifier la mémoire
-        memManager.LogMemoryUsage("Après synchronisation");
+        // Vï¿½rifier la mï¿½moire
+        memManager.LogMemoryUsage("Aprï¿½s synchronisation");
     }
     catch (Exception ex)
     {
@@ -129,21 +129,21 @@ namespace Jellyfin.Xtream.Example
             var perfOptions = PerformanceOptions.Default;
             perfOptions.Validate();
 
-            Console.WriteLine("=== Jellyfin Xtream - Démarrage ===");
+            Console.WriteLine("=== Jellyfin Xtream - Dï¿½marrage ===");
             Console.WriteLine($"BatchSize: {perfOptions.BatchSize}");
             Console.WriteLine($"MaxMemory: {perfOptions.MaxMemoryMB}MB");
             Console.WriteLine($"Parallelism: {perfOptions.MaxDegreeOfParallelism}");
             Console.WriteLine();
 
-            // 3. Initialisation de la base de données
+            // 3. Initialisation de la base de donnï¿½es
             var db = LiteDbConfiguration.CreateOptimizedDatabase("Filename=xtream.db");
-            Console.WriteLine("? Base de données initialisée");
+            Console.WriteLine("? Base de donnï¿½es initialisï¿½e");
 
-            // 4. Création des repositories
+            // 4. Crï¿½ation des repositories
             var movieRepo = new LiteDbXtreamRepository<XtreamMovie>(db, "movies");
             var seriesRepo = new LiteDbXtreamRepository<XtreamSeries>(db, "series");
             var channelRepo = new LiteDbXtreamRepository<XtreamChannel>(db, "channels");
-            Console.WriteLine("? Repositories créés");
+            Console.WriteLine("? Repositories crï¿½ï¿½s");
 
             // 5. Initialisation des services
             var perfMonitor = new PerformanceMonitor(perfLogger);
@@ -164,45 +164,45 @@ namespace Jellyfin.Xtream.Example
                 channelRepo,
                 logger
             );
-            Console.WriteLine("? Services initialisés");
+            Console.WriteLine("? Services initialisï¿½s");
             Console.WriteLine();
 
-            // 6. Afficher l'état initial
-            Console.WriteLine("=== État Initial ===");
+            // 6. Afficher l'ï¿½tat initial
+            Console.WriteLine("=== ï¿½tat Initial ===");
             Console.WriteLine($"Films: {movieRepo.Count()}");
-            Console.WriteLine($"Séries: {seriesRepo.Count()}");
-            Console.WriteLine($"Chaînes: {channelRepo.Count()}");
+            Console.WriteLine($"Sï¿½ries: {seriesRepo.Count()}");
+            Console.WriteLine($"Chaï¿½nes: {channelRepo.Count()}");
             memManager.LogMemoryUsage("Initial");
             Console.WriteLine();
 
             // 7. Lancer la synchronisation
             try
             {
-                Console.WriteLine("=== Démarrage de la synchronisation ===");
+                Console.WriteLine("=== Dï¿½marrage de la synchronisation ===");
                 var cts = new CancellationTokenSource();
 
                 // Permettre l'annulation avec Ctrl+C
                 Console.CancelKeyPress += (s, e) =>
                 {
-                    Console.WriteLine("\n??  Annulation demandée...");
+                    Console.WriteLine("\n??  Annulation demandï¿½e...");
                     cts.Cancel();
                     e.Cancel = true;
                 };
 
                 using (perfMonitor.Track("FullSync"))
                 {
-                    // TODO: Remplacer par votre URL Xtream réelle
+                    // TODO: Remplacer par votre URL Xtream rï¿½elle
                     var baseUrl = "http://your-xtream-server.com";
 
                     await syncService.SyncAllAsync(baseUrl, cts.Token);
                 }
 
                 Console.WriteLine();
-                Console.WriteLine("? Synchronisation terminée avec succès");
+                Console.WriteLine("? Synchronisation terminï¿½e avec succï¿½s");
             }
             catch (OperationCanceledException)
             {
-                Console.WriteLine("??  Synchronisation annulée par l'utilisateur");
+                Console.WriteLine("??  Synchronisation annulï¿½e par l'utilisateur");
             }
             catch (Exception ex)
             {
@@ -213,11 +213,11 @@ namespace Jellyfin.Xtream.Example
             {
                 Console.WriteLine();
 
-                // 8. Afficher l'état final
-                Console.WriteLine("=== État Final ===");
+                // 8. Afficher l'ï¿½tat final
+                Console.WriteLine("=== ï¿½tat Final ===");
                 Console.WriteLine($"Films: {movieRepo.Count()}");
-                Console.WriteLine($"Séries: {seriesRepo.Count()}");
-                Console.WriteLine($"Chaînes: {channelRepo.Count()}");
+                Console.WriteLine($"Sï¿½ries: {seriesRepo.Count()}");
+                Console.WriteLine($"Chaï¿½nes: {channelRepo.Count()}");
                 memManager.LogMemoryUsage("Final");
                 Console.WriteLine();
 
@@ -230,7 +230,7 @@ namespace Jellyfin.Xtream.Example
                 memManager.ForceGarbageCollection();
                 db.Dispose();
 
-                Console.WriteLine("? Nettoyage terminé");
+                Console.WriteLine("? Nettoyage terminï¿½");
             }
 
             Console.WriteLine();
@@ -252,11 +252,11 @@ using Jellyfin.Xtream.Infrastructure.Benchmarks;
 
 var benchmark = new RepositoryBenchmark(logger);
 
-// Test 1: Individual vs Batch (1000 entités)
+// Test 1: Individual vs Batch (1000 entitï¿½s)
 var result1 = await benchmark.BenchmarkIndividualVsBatch(movieRepo, 1000);
 Console.WriteLine(result1);
 
-// Test 2: Change Detection (10000 entités, 10% de changements)
+// Test 2: Change Detection (10000 entitï¿½s, 10% de changements)
 var result2 = await benchmark.BenchmarkChangeDetection(movieRepo, 10000, 0.1);
 Console.WriteLine(result2);
 
@@ -270,7 +270,7 @@ var result3 = await benchmark.BenchmarkFullSync(
 Console.WriteLine(result3);
 ```
 
-### Résultats Attendus
+### Rï¿½sultats Attendus
 
 Pour 15,000 films:
 - **Individual upserts**: ~30-60 secondes
@@ -279,28 +279,28 @@ Pour 15,000 films:
 
 ---
 
-## Configuration pour Différentes Volumétries
+## Configuration pour Diffï¿½rentes Volumï¿½tries
 
-### Petite Volumétrie (< 5,000 entités)
+### Petite Volumï¿½trie (< 5,000 entitï¿½s)
 ```csharp
 var options = PerformanceOptions.LowVolume;
 ```
 
-### Volumétrie Moyenne (5,000 - 30,000 entités)
+### Volumï¿½trie Moyenne (5,000 - 30,000 entitï¿½s)
 ```csharp
 var options = PerformanceOptions.Default;
 ```
 
-### Haute Volumétrie (> 30,000 entités)
+### Haute Volumï¿½trie (> 30,000 entitï¿½s)
 ```csharp
 var options = PerformanceOptions.HighVolume;
 ```
 
-### Configuration Personnalisée
+### Configuration Personnalisï¿½e
 ```csharp
 var options = new PerformanceOptions
 {
-    BatchSize = 1500,              // Ajuster selon volumétrie
+    BatchSize = 1500,              // Ajuster selon volumï¿½trie
     MaxCacheEntries = 15000,       // Plus grand cache
     MaxMemoryMB = 3072,            // 3GB de RAM
     MaxDegreeOfParallelism = 6,    // Plus de threads
@@ -315,27 +315,27 @@ options.Validate(); // Toujours valider
 
 ## Monitoring en Production
 
-### 1. Activer le Logging Détaillé
+### 1. Activer le Logging Dï¿½taillï¿½
 
 ```csharp
 builder.SetMinimumLevel(LogLevel.Debug); // Pour debugging
 builder.SetMinimumLevel(LogLevel.Information); // Pour production
 ```
 
-### 2. Surveiller la Mémoire
+### 2. Surveiller la Mï¿½moire
 
 ```csharp
-// Vérifier périodiquement
+// Vï¿½rifier pï¿½riodiquement
 var timer = new Timer(_ =>
 {
     memManager.CheckMemoryUsage("Periodic check");
 }, null, TimeSpan.Zero, TimeSpan.FromMinutes(5));
 ```
 
-### 3. Capturer les Métriques
+### 3. Capturer les Mï¿½triques
 
 ```csharp
-// À chaque synchronisation
+// ï¿½ chaque synchronisation
 using (perfMonitor.Track("Sync"))
 {
     await syncService.SyncAllAsync(url, ct);
@@ -350,25 +350,24 @@ perfMonitor.LogStatistics();
 ## Troubleshooting Rapide
 
 ### ? "Out of Memory Exception"
-**Solution**: Diminuer `BatchSize` à 500 et `MaxCacheEntries` à 5000
+**Solution**: Diminuer `BatchSize` ï¿½ 500 et `MaxCacheEntries` ï¿½ 5000
 
 ### ? Synchronisation trop lente
-**Solution**: Augmenter `BatchSize` à 2000 et `MaxDegreeOfParallelism` à 8
+**Solution**: Augmenter `BatchSize` ï¿½ 2000 et `MaxDegreeOfParallelism` ï¿½ 8
 
 ### ? Timeouts API
 **Solution**: Augmenter `ApiTimeoutSeconds` et activer `EnableApiRetry`
 
-### ? Base de données verrouillée
-**Solution**: Vérifier que le fichier DB n'est pas ouvert ailleurs
+### ? Base de donnï¿½es verrouillï¿½e
+**Solution**: Vï¿½rifier que le fichier DB n'est pas ouvert ailleurs
 
 ---
 
 ## Ressources
 
 - ?? **PERFORMANCE_GUIDE.md** - Guide complet
-- ?? **PERFORMANCE_OPTIMIZATIONS.md** - Détails techniques
-- ?? **CHANGES_SUMMARY.md** - Liste des modifications
+- ?? **PERFORMANCE_OPTIMIZATIONS.md** - Dï¿½tails techniques
 
 ---
 
-**Prêt à commencer ? Exécutez l'exemple ci-dessus et regardez les performances !** ??
+**Prï¿½t ï¿½ commencer ? Exï¿½cutez l'exemple ci-dessus et regardez les performances !** ??

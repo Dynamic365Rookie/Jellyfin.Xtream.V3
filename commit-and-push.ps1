@@ -7,24 +7,24 @@ Write-Host "  Jellyfin.Xtream.V2 - Prepare Commit  " -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
-# Vérifier si Git est disponible
+# Vï¿½rifier si Git est disponible
 $gitCommand = Get-Command git -ErrorAction SilentlyContinue
 if (-not $gitCommand) {
-    Write-Host "? Git n'est pas installé ou pas dans le PATH" -ForegroundColor Red
+    Write-Host "? Git n'est pas installï¿½ ou pas dans le PATH" -ForegroundColor Red
     Write-Host "   Installez Git depuis: https://git-scm.com/download/win" -ForegroundColor Yellow
     exit 1
 }
 
-# Vérifier qu'on est dans le bon répertoire
+# Vï¿½rifier qu'on est dans le bon rï¿½pertoire
 $currentDir = Get-Location
 if (-not (Test-Path "Jellyfin.Xtream.V2.csproj")) {
-    Write-Host "? Vous n'êtes pas dans le répertoire du projet" -ForegroundColor Red
-    Write-Host "   Répertoire actuel: $currentDir" -ForegroundColor Yellow
-    Write-Host "   Changez de répertoire vers Jellyfin.Xtream.V2\" -ForegroundColor Yellow
+    Write-Host "? Vous n'ï¿½tes pas dans le rï¿½pertoire du projet" -ForegroundColor Red
+    Write-Host "   Rï¿½pertoire actuel: $currentDir" -ForegroundColor Yellow
+    Write-Host "   Changez de rï¿½pertoire vers Jellyfin.Xtream.V2\" -ForegroundColor Yellow
     exit 1
 }
 
-Write-Host "?? Répertoire du projet: $currentDir" -ForegroundColor Green
+Write-Host "?? Rï¿½pertoire du projet: $currentDir" -ForegroundColor Green
 Write-Host ""
 
 # Afficher le statut Git
@@ -33,21 +33,21 @@ Write-Host "--------------------" -ForegroundColor Gray
 git status --short
 Write-Host ""
 
-# Lister les fichiers modifiés et nouveaux
+# Lister les fichiers modifiï¿½s et nouveaux
 Write-Host "?? Analyse des modifications..." -ForegroundColor Cyan
 $modifiedFiles = @(git diff --name-only)
 $newFiles = @(git ls-files --others --exclude-standard)
 $stagedFiles = @(git diff --cached --name-only)
 
 Write-Host ""
-Write-Host "Fichiers modifiés: $($modifiedFiles.Count)" -ForegroundColor Yellow
+Write-Host "Fichiers modifiï¿½s: $($modifiedFiles.Count)" -ForegroundColor Yellow
 Write-Host "Nouveaux fichiers: $($newFiles.Count)" -ForegroundColor Green
-Write-Host "Fichiers stagés: $($stagedFiles.Count)" -ForegroundColor Cyan
+Write-Host "Fichiers stagï¿½s: $($stagedFiles.Count)" -ForegroundColor Cyan
 Write-Host ""
 
-# Afficher les détails
+# Afficher les dï¿½tails
 if ($modifiedFiles.Count -gt 0) {
-    Write-Host "?? Fichiers modifiés:" -ForegroundColor Yellow
+    Write-Host "?? Fichiers modifiï¿½s:" -ForegroundColor Yellow
     $modifiedFiles | ForEach-Object { Write-Host "   - $_" -ForegroundColor White }
     Write-Host ""
 }
@@ -64,7 +64,7 @@ Write-Host ""
 $response = Read-Host "Voulez-vous ajouter tous ces fichiers au commit? (O/N)"
 
 if ($response -ne 'O' -and $response -ne 'o') {
-    Write-Host "? Opération annulée" -ForegroundColor Red
+    Write-Host "? Opï¿½ration annulï¿½e" -ForegroundColor Red
     exit 0
 }
 
@@ -73,54 +73,53 @@ Write-Host ""
 Write-Host "?? Ajout des fichiers au staging..." -ForegroundColor Cyan
 git add .
 
-# Vérifier le commit message
+# Vï¿½rifier le commit message
 $commitMsgFile = "COMMIT_MESSAGE.md"
 if (Test-Path $commitMsgFile) {
-    Write-Host "? Message de commit trouvé: $commitMsgFile" -ForegroundColor Green
+    Write-Host "? Message de commit trouvï¿½: $commitMsgFile" -ForegroundColor Green
 } else {
     Write-Host "??  Fichier COMMIT_MESSAGE.md introuvable" -ForegroundColor Yellow
-    Write-Host "   Création d'un message de commit par défaut..." -ForegroundColor Yellow
+    Write-Host "   Crï¿½ation d'un message de commit par dï¿½faut..." -ForegroundColor Yellow
 }
 
 # Lire le message de commit
 $commitMessage = @"
-feat: Optimisations majeures de performance pour haute volumétrie
+feat: Optimisations majeures de performance pour haute volumï¿½trie
 
-?? Optimiser le plugin pour gérer 25,000+ entités (15K films + 8.5K séries + 1.5K chaînes)
+?? Optimiser le plugin pour gï¿½rer 25,000+ entitï¿½s (15K films + 8.5K sï¿½ries + 1.5K chaï¿½nes)
 
-? Nouveautés:
-- Batch operations (99.9% moins de requêtes DB)
-- Synchronisation parallèle
-- Cache optimisé avec gestion automatique
-- Monitoring de performance et mémoire
+? Nouveautï¿½s:
+- Batch operations (99.9% moins de requï¿½tes DB)
+- Synchronisation parallï¿½le
+- Cache optimisï¿½ avec gestion automatique
+- Monitoring de performance et mï¿½moire
 - Configuration flexible (presets)
 - Documentation exhaustive (5 fichiers MD)
 
 ?? Performance:
-- Sync complète: ~60 min ? ~15 min (75% plus rapide)
-- Sync incrémentale: ~30 min ? ~2 min (93% plus rapide)
-- Requêtes DB: 30,000+ ? 10-20 (99.9% moins)
-- Mémoire: Non contrôlée ? < 1.5 GB (stable)
+- Sync complï¿½te: ~60 min ? ~15 min (75% plus rapide)
+- Sync incrï¿½mentale: ~30 min ? ~2 min (93% plus rapide)
+- Requï¿½tes DB: 30,000+ ? 10-20 (99.9% moins)
+- Mï¿½moire: Non contrï¿½lï¿½e ? < 1.5 GB (stable)
 
 ?? Modifications:
 - Models convertis en record (class ? record)
-- Repository étendu (nouvelles méthodes batch)
+- Repository ï¿½tendu (nouvelles mï¿½thodes batch)
 - API client avec retry automatique
 - Cache avec expiration/compaction auto
-- XtreamLiveTvService temporairement désactivé
+- XtreamLiveTvService temporairement dï¿½sactivï¿½
 
-?? Sécurité:
+?? Sï¿½curitï¿½:
 - Correction CVE dans Microsoft.Extensions.Caching.Memory
 
 ?? Documentation:
-- README.md - Vue d'ensemble complète
-- QUICKSTART.md - Guide de démarrage
-- PERFORMANCE_GUIDE.md - Configuration détaillée
-- PERFORMANCE_OPTIMIZATIONS.md - Détails techniques
-- CHANGES_SUMMARY.md - Résumé des changements
+- README.md - Vue d'ensemble complï¿½te
+- QUICKSTART.md - Guide de dï¿½marrage
+- PERFORMANCE_GUIDE.md - Configuration dï¿½taillï¿½e
+- PERFORMANCE_OPTIMIZATIONS.md - Dï¿½tails techniques
 
 Breaking Changes: Minor (conversion class ? record)
-Version: 2.0 - Optimisé pour Haute Volumétrie
+Version: 2.0 - Optimisï¿½ pour Haute Volumï¿½trie
 Target: .NET 6.0
 "@
 
@@ -131,22 +130,22 @@ Write-Host $commitMessage -ForegroundColor White
 Write-Host "--------------------" -ForegroundColor Gray
 Write-Host ""
 
-$response = Read-Host "Voulez-vous créer le commit avec ce message? (O/N)"
+$response = Read-Host "Voulez-vous crï¿½er le commit avec ce message? (O/N)"
 
 if ($response -ne 'O' -and $response -ne 'o') {
-    Write-Host "? Commit annulé" -ForegroundColor Red
+    Write-Host "? Commit annulï¿½" -ForegroundColor Red
     exit 0
 }
 
-# Créer le commit
+# Crï¿½er le commit
 Write-Host ""
-Write-Host "?? Création du commit..." -ForegroundColor Cyan
+Write-Host "?? Crï¿½ation du commit..." -ForegroundColor Cyan
 git commit -m $commitMessage
 
 if ($LASTEXITCODE -eq 0) {
-    Write-Host "? Commit créé avec succès!" -ForegroundColor Green
+    Write-Host "? Commit crï¿½ï¿½ avec succï¿½s!" -ForegroundColor Green
 } else {
-    Write-Host "? Échec de la création du commit" -ForegroundColor Red
+    Write-Host "? ï¿½chec de la crï¿½ation du commit" -ForegroundColor Red
     exit 1
 }
 
@@ -155,15 +154,15 @@ Write-Host "----------------------------------------" -ForegroundColor Gray
 Write-Host ""
 
 # Demander si on veut pusher
-$response = Read-Host "Voulez-vous pusher vers le dépôt distant? (O/N)"
+$response = Read-Host "Voulez-vous pusher vers le dï¿½pï¿½t distant? (O/N)"
 
 if ($response -ne 'O' -and $response -ne 'o') {
-    Write-Host "??  Commit local créé mais non pushé" -ForegroundColor Yellow
+    Write-Host "??  Commit local crï¿½ï¿½ mais non pushï¿½" -ForegroundColor Yellow
     Write-Host "   Pour pusher plus tard, utilisez: git push" -ForegroundColor Cyan
     exit 0
 }
 
-# Récupérer la branche actuelle
+# Rï¿½cupï¿½rer la branche actuelle
 $currentBranch = git rev-parse --abbrev-ref HEAD
 Write-Host ""
 Write-Host "?? Branche actuelle: $currentBranch" -ForegroundColor Cyan
@@ -175,20 +174,20 @@ git push origin $currentBranch
 if ($LASTEXITCODE -eq 0) {
     Write-Host ""
     Write-Host "========================================" -ForegroundColor Green
-    Write-Host "  ? COMMIT ET PUSH RÉUSSIS!" -ForegroundColor Green
+    Write-Host "  ? COMMIT ET PUSH Rï¿½USSIS!" -ForegroundColor Green
     Write-Host "========================================" -ForegroundColor Green
     Write-Host ""
-    Write-Host "?? Résumé:" -ForegroundColor Cyan
-    Write-Host "   - Fichiers modifiés: $($modifiedFiles.Count)" -ForegroundColor White
+    Write-Host "?? Rï¿½sumï¿½:" -ForegroundColor Cyan
+    Write-Host "   - Fichiers modifiï¿½s: $($modifiedFiles.Count)" -ForegroundColor White
     Write-Host "   - Nouveaux fichiers: $($newFiles.Count)" -ForegroundColor White
     Write-Host "   - Branche: $currentBranch" -ForegroundColor White
-    Write-Host "   - Version: 2.0 - Optimisé Haute Volumétrie" -ForegroundColor White
+    Write-Host "   - Version: 2.0 - Optimisï¿½ Haute Volumï¿½trie" -ForegroundColor White
     Write-Host ""
 } else {
     Write-Host ""
-    Write-Host "? Échec du push" -ForegroundColor Red
-    Write-Host "   Le commit local est créé mais n'a pas été pushé" -ForegroundColor Yellow
-    Write-Host "   Vérifiez vos droits d'accès au dépôt distant" -ForegroundColor Yellow
+    Write-Host "? ï¿½chec du push" -ForegroundColor Red
+    Write-Host "   Le commit local est crï¿½ï¿½ mais n'a pas ï¿½tï¿½ pushï¿½" -ForegroundColor Yellow
+    Write-Host "   Vï¿½rifiez vos droits d'accï¿½s au dï¿½pï¿½t distant" -ForegroundColor Yellow
     exit 1
 }
 

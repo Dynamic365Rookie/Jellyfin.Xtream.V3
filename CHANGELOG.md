@@ -1,54 +1,53 @@
 # CHANGELOG
 
-Tous les changements notables du projet sont documentés dans ce fichier.
+Tous les changements notables du projet sont documentï¿½s dans ce fichier.
 
-Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+Le format est basï¿½ sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+et ce projet adhï¿½re ï¿½ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.0.0] - 2024-XX-XX
 
-### Added (Nouveautés)
+### Added (Nouveautï¿½s)
 
 #### Infrastructure - Persistence
-- `LiteDbConfiguration.cs` - Configuration optimisée de LiteDB (cache 40MB, async, WAL)
+- `LiteDbConfiguration.cs` - Configuration optimisï¿½e de LiteDB (cache 40MB, async, WAL)
 - Batch operations dans `IXtreamRepository.cs` - UpsertBatch, GetLastModifiedMap, GetByIds, DeleteNotInList
-- Implémentation batch dans `LiteDbXtreamRepository.cs` - 99.9% réduction requêtes DB
+- Implï¿½mentation batch dans `LiteDbXtreamRepository.cs` - 99.9% rï¿½duction requï¿½tes DB
 
 #### Infrastructure - Monitoring
-- `PerformanceMonitor.cs` - Système de monitoring des performances (avg/min/max, success rate)
-- `MemoryManager.cs` - Gestion automatique de la mémoire (seuils, GC forcé, snapshots)
+- `PerformanceMonitor.cs` - Systï¿½me de monitoring des performances (avg/min/max, success rate)
+- `MemoryManager.cs` - Gestion automatique de la mï¿½moire (seuils, GC forcï¿½, snapshots)
 
 #### Infrastructure - Utilities
-- `BatchProcessor.cs` - Utilitaires pour traitement par lots et parallèle
+- `BatchProcessor.cs` - Utilitaires pour traitement par lots et parallï¿½le
 - `RepositoryBenchmark.cs` - Suite de benchmarks de performance
 
 #### Services - Synchronization
-- `XtreamSyncService.cs` refonte - Synchronisation par lots et parallèle
-- `XtreamIncrementalSyncTask.cs` - Tâche planifiée avec monitoring intégré
-- Détection intelligente des changements - 1 requête au lieu de 30,000
+- `XtreamSyncService.cs` refonte - Synchronisation par lots et parallï¿½le
+- `XtreamIncrementalSyncTask.cs` - Tï¿½che planifiï¿½e avec monitoring intï¿½grï¿½
+- Dï¿½tection intelligente des changements - 1 requï¿½te au lieu de 30,000
 
 #### Infrastructure - Caching
 - Migration vers `IMemoryCache` dans `MemoryXtreamCache.cs`
-- Limite de taille (10,000 entrées)
+- Limite de taille (10,000 entrï¿½es)
 - Expiration automatique (2h + sliding 30min)
-- Compaction périodique (15min)
+- Compaction pï¿½riodique (15min)
 
 #### API Client
 - `XtreamApiClient.cs` - Retry automatique avec backoff exponentiel
-- Buffer JSON optimisé (64KB)
-- Gestion avancée des erreurs
-- Logging détaillé
+- Buffer JSON optimisï¿½ (64KB)
+- Gestion avancï¿½e des erreurs
+- Logging dï¿½taillï¿½
 
 #### Configuration
-- `PerformanceOptions.cs` - Configuration centralisée avec presets (Default, LowVolume, HighVolume)
+- `PerformanceOptions.cs` - Configuration centralisï¿½e avec presets (Default, LowVolume, HighVolume)
 - `XtreamOptionsValidator.cs` - Validation des options
 
 #### Documentation
 - `README.md` - Documentation principale
-- `QUICKSTART.md` - Guide de démarrage rapide
+- `QUICKSTART.md` - Guide de dï¿½marrage rapide
 - `PERFORMANCE_GUIDE.md` - Configuration et tuning
-- `PERFORMANCE_OPTIMIZATIONS.md` - Détails techniques
-- `CHANGES_SUMMARY.md` - Résumé des changements
+- `PERFORMANCE_OPTIMIZATIONS.md` - Dï¿½tails techniques
 - `RELEASE_NOTES.md` - Notes de version
 - `CHANGELOG.md` - CE FICHIER
 
@@ -58,7 +57,7 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 #### GitHub Actions
 - `.github/workflows/build-and-release.yml` - Build, test, release
-- `.github/workflows/code-quality.yml` - Analyse de code et sécurité
+- `.github/workflows/code-quality.yml` - Analyse de code et sï¿½curitï¿½
 - `.github/workflows/documentation.yml` - Validation documentation
 
 ### Changed (Modifications)
@@ -70,41 +69,41 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - `XtreamEpisode.cs` - `class` ? `record`
 
 #### Infrastructure - Caching
-- `IXtreamCache.cs` - Ajout Store() avec expiration personnalisée, Clear(), Remove()
+- `IXtreamCache.cs` - Ajout Store() avec expiration personnalisï¿½e, Clear(), Remove()
 
 #### Services
-- `XtreamSyncService.cs` - Refonte complète
+- `XtreamSyncService.cs` - Refonte complï¿½te
 - `LiteDbXtreamRepository.cs` - Ajout batch operations
 - `MemoryXtreamCache.cs` - Migration IMemoryCache
 - `XtreamApiClient.cs` - Ajout retry et logging
-- `XtreamIncrementalSyncTask.cs` - Monitoring intégré
+- `XtreamIncrementalSyncTask.cs` - Monitoring intï¿½grï¿½
 
 #### Plugin
-- `Plugins.cs` - Constructeur mis à jour pour MediaBrowser.Common 4.9.1.90
+- `Plugins.cs` - Constructeur mis ï¿½ jour pour MediaBrowser.Common 4.9.1.90
 
 #### Project File
-- `Jellyfin.Xtream.V2.csproj` - Mise à jour packages
+- `Jellyfin.Xtream.V2.csproj` - Mise ï¿½ jour packages
 
 ### Fixed (Corrections)
 
-- CVE-2024-XXXX: Vulnérabilité dans `Microsoft.Extensions.Caching.Memory` 6.0.1
-  - Mise à jour vers 6.0.2
-- `XtreamLiveTvServices.cs` - Commenté (nécessite MediaBrowser.Controller non disponible publiquement)
+- CVE-2024-XXXX: Vulnï¿½rabilitï¿½ dans `Microsoft.Extensions.Caching.Memory` 6.0.1
+  - Mise ï¿½ jour vers 6.0.2
+- `XtreamLiveTvServices.cs` - Commentï¿½ (nï¿½cessite MediaBrowser.Controller non disponible publiquement)
 
 ### Removed (Suppressions)
 
-- Aucune suppression de fonctionnalités existantes
+- Aucune suppression de fonctionnalitï¿½s existantes
 
 ### Performance
 
 - Sync initiale: 60-90 min ? 15 min (**75-83%** ??)
-- Sync incrémentale: 30 min ? 2 min (**93%** ??)
-- Requêtes base de données: 30,000+ ? 10-20 (**99.9%** ??)
-- Mémoire: Non contrôlée ? < 1.5 GB (stable)
+- Sync incrï¿½mentale: 30 min ? 2 min (**93%** ??)
+- Requï¿½tes base de donnï¿½es: 30,000+ ? 10-20 (**99.9%** ??)
+- Mï¿½moire: Non contrï¿½lï¿½e ? < 1.5 GB (stable)
 
 ### Technical Details
 
-#### Patterns Implémentés
+#### Patterns Implï¿½mentï¿½s
 - Repository Pattern
 - Factory Pattern
 - Monitor Pattern
@@ -124,7 +123,7 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Initial Release
 
-- Première version du plugin Jellyfin.Xtream.V2
+- Premiï¿½re version du plugin Jellyfin.Xtream.V2
 - Support base pour Xtream IPTV
 - API client minimal
 - Synchronisation simple
@@ -133,12 +132,12 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Types de Changements
 
-- **Added**: Pour nouvelles fonctionnalités
-- **Changed**: Pour changements aux fonctionnalités existantes
-- **Deprecated**: Pour fonctionnalités bientôt supprimées
-- **Removed**: Pour fonctionnalités supprimées
+- **Added**: Pour nouvelles fonctionnalitï¿½s
+- **Changed**: Pour changements aux fonctionnalitï¿½s existantes
+- **Deprecated**: Pour fonctionnalitï¿½s bientï¿½t supprimï¿½es
+- **Removed**: Pour fonctionnalitï¿½s supprimï¿½es
 - **Fixed**: Pour corrections de bugs
-- **Security**: Pour vulnérabilités de sécurité
+- **Security**: Pour vulnï¿½rabilitï¿½s de sï¿½curitï¿½
 
 ---
 
@@ -147,7 +146,7 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 Ce projet suit [Semantic Versioning](https://semver.org/):
 
 - **MAJOR** (X.0.0): Changements incompatibles
-- **MINOR** (0.X.0): Nouvelles fonctionnalités compatibles
+- **MINOR** (0.X.0): Nouvelles fonctionnalitï¿½s compatibles
 - **PATCH** (0.0.X): Corrections de bugs
 
 ---
@@ -156,11 +155,11 @@ Ce projet suit [Semantic Versioning](https://semver.org/):
 
 Pour plus d'informations:
 - Installation: Voir `README.md`
-- Démarrage rapide: Voir `QUICKSTART.md`
+- Dï¿½marrage rapide: Voir `QUICKSTART.md`
 - Configuration: Voir `PERFORMANCE_GUIDE.md`
-- Détails techniques: Voir `PERFORMANCE_OPTIMIZATIONS.md`
+- Dï¿½tails techniques: Voir `PERFORMANCE_OPTIMIZATIONS.md`
 - Release notes: Voir `RELEASE_NOTES.md`
 
 ---
 
-**Date de dernière mise à jour**: 2024
+**Date de derniï¿½re mise ï¿½ jour**: 2024

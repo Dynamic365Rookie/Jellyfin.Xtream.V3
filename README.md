@@ -1,42 +1,42 @@
-# Jellyfin.Xtream.V2 - Plugin IPTV Optimisé
+# Jellyfin.Xtream.V2 - Plugin IPTV Optimisï¿½
 
 [![.NET](https://img.shields.io/badge/.NET-6.0-512BD4?logo=.net)](https://dotnet.microsoft.com/)
 [![LiteDB](https://img.shields.io/badge/LiteDB-5.0.21-00A4EF)](https://www.litedb.org/)
 [![Performance](https://img.shields.io/badge/Optimized-High%20Volume-success)](PERFORMANCE_OPTIMIZATIONS.md)
 
-Plugin Jellyfin pour l'intégration avec les services IPTV Xtream, **optimisé pour gérer jusqu'à 25,000+ entités** (films, séries, chaînes).
+Plugin Jellyfin pour l'intï¿½gration avec les services IPTV Xtream, **optimisï¿½ pour gï¿½rer jusqu'ï¿½ 25,000+ entitï¿½s** (films, sï¿½ries, chaï¿½nes).
 
 ---
 
-## ?? Caractéristiques Principales
+## ?? Caractï¿½ristiques Principales
 
 ### ? Performance Optimale
-- ? **Synchronisation par lots (Batch)** - 99% moins de requêtes DB
-- ? **Traitement parallèle** - Movies, Series et Channels simultanément
-- ? **Détection intelligente des changements** - Une seule requête au lieu de milliers
-- ? **Cache mémoire optimisé** - Limite de taille, expiration auto, compaction
+- ? **Synchronisation par lots (Batch)** - 99% moins de requï¿½tes DB
+- ? **Traitement parallï¿½le** - Movies, Series et Channels simultanï¿½ment
+- ? **Dï¿½tection intelligente des changements** - Une seule requï¿½te au lieu de milliers
+- ? **Cache mï¿½moire optimisï¿½** - Limite de taille, expiration auto, compaction
 
-### ?? Volumétrie Supportée
+### ?? Volumï¿½trie Supportï¿½e
 - **15,000 films** - Sync en ~8-12 minutes
-- **8,500 séries** - Sync en ~5-7 minutes
-- **1,500 chaînes** - Sync en ~1 minute
-- **Total: 25,000 entités** - Full sync en ~15 minutes
+- **8,500 sï¿½ries** - Sync en ~5-7 minutes
+- **1,500 chaï¿½nes** - Sync en ~1 minute
+- **Total: 25,000 entitï¿½s** - Full sync en ~15 minutes
 
-### ??? Fiabilité
+### ??? Fiabilitï¿½
 - ? Retry automatique avec backoff exponentiel
-- ? Gestion avancée des erreurs
-- ? Monitoring de la mémoire
-- ? Logging détaillé des performances
+- ? Gestion avancï¿½e des erreurs
+- ? Monitoring de la mï¿½moire
+- ? Logging dï¿½taillï¿½ des performances
 
-### ?? Gestion Mémoire
-- ? Limite de mémoire configurable (par défaut 2GB)
-- ? Détection automatique de seuil (80%)
+### ?? Gestion Mï¿½moire
+- ? Limite de mï¿½moire configurable (par dï¿½faut 2GB)
+- ? Dï¿½tection automatique de seuil (80%)
 - ? Garbage collection intelligent
-- ? Pas de fuite mémoire
+- ? Pas de fuite mï¿½moire
 
 ---
 
-## ?? Démarrage Rapide
+## ?? Dï¿½marrage Rapide
 
 ### Installation
 
@@ -54,7 +54,7 @@ using Jellyfin.Xtream.Infrastructure.Persistence;
 using Jellyfin.Xtream.Services.Synchronization;
 using Jellyfin.Xtream.Configuration;
 
-// 1. Base de données optimisée
+// 1. Base de donnï¿½es optimisï¿½e
 var db = LiteDbConfiguration.CreateOptimizedDatabase("Filename=xtream.db");
 
 // 2. Repositories
@@ -84,62 +84,62 @@ Jellyfin.Xtream.V2/
 ?   ??? XtreamApiEndpoints.cs       # Endpoints
 ??? Domain/
 ?   ??? Models/
-?       ??? XtreamMovie.cs          # Entité Film
-?       ??? XtreamSeries.cs         # Entité Série
-?       ??? XtreamChannel.cs        # Entité Chaîne
-?       ??? XtreamEpisode.cs        # Entité Episode
+?       ??? XtreamMovie.cs          # Entitï¿½ Film
+?       ??? XtreamSeries.cs         # Entitï¿½ Sï¿½rie
+?       ??? XtreamChannel.cs        # Entitï¿½ Chaï¿½ne
+?       ??? XtreamEpisode.cs        # Entitï¿½ Episode
 ??? Infrastructure/
 ?   ??? Persistence/
 ?   ?   ??? IXtreamRepository.cs    # Interface repository
-?   ?   ??? LiteDbXtreamRepository.cs # Implémentation optimisée
+?   ?   ??? LiteDbXtreamRepository.cs # Implï¿½mentation optimisï¿½e
 ?   ?   ??? LiteDbConfiguration.cs  # Config LiteDB
 ?   ??? Caching/
 ?   ?   ??? IXtreamCache.cs         # Interface cache
-?   ?   ??? MemoryXtreamCache.cs    # Cache optimisé
+?   ?   ??? MemoryXtreamCache.cs    # Cache optimisï¿½
 ?   ??? Monitoring/
 ?   ?   ??? PerformanceMonitor.cs   # Monitoring performances
 ?   ??? Utilities/
 ?   ?   ??? BatchProcessor.cs       # Traitement par lots
-?   ?   ??? MemoryManager.cs        # Gestion mémoire
+?   ?   ??? MemoryManager.cs        # Gestion mï¿½moire
 ?   ??? Benchmarks/
 ?       ??? RepositoryBenchmark.cs  # Tests de performance
 ??? Services/
 ?   ??? Synchronization/
-?   ?   ??? XtreamSyncService.cs    # Service sync optimisé
+?   ?   ??? XtreamSyncService.cs    # Service sync optimisï¿½
 ?   ??? LiveTv/
 ?       ??? XtreamLiveTvService.cs  # Service Live TV
 ?       ??? EpgService.cs           # Service EPG
-?       ??? StreamUrlResolver.cs    # Résolution URLs
+?       ??? StreamUrlResolver.cs    # Rï¿½solution URLs
 ??? BackgroundTasks/
-?   ??? XtreamIncrementalSyncTask.cs # Tâche planifiée
+?   ??? XtreamIncrementalSyncTask.cs # Tï¿½che planifiï¿½e
 ??? Configuration/
 ?   ??? XtreamOptions.cs            # Configuration plugin
 ?   ??? PerformanceOptions.cs       # Config performance
 ?   ??? XtreamOptionsValidator.cs   # Validation config
 ??? JellyfinIntegration/
-    ??? LibraryUpdater.cs           # Mise à jour bibliothèque
+    ??? LibraryUpdater.cs           # Mise ï¿½ jour bibliothï¿½que
 ```
 
 ---
 
-## ?? Métriques de Performance
+## ?? Mï¿½triques de Performance
 
-### Avant vs Après Optimisation
+### Avant vs Aprï¿½s Optimisation
 
-| Opération | Avant | Après | Amélioration |
+| Opï¿½ration | Avant | Aprï¿½s | Amï¿½lioration |
 |-----------|-------|-------|--------------|
 | **Sync 15K movies** | ~60 min | ~10 min | **83%** ?? |
-| **Sync incrémental** | ~30 min | ~2 min | **93%** ?? |
-| **Requêtes DB** | 30,000+ | 10-20 | **99.9%** ?? |
-| **Utilisation mémoire** | Non contrôlée | < 1.5 GB | **Stable** ? |
+| **Sync incrï¿½mental** | ~30 min | ~2 min | **93%** ?? |
+| **Requï¿½tes DB** | 30,000+ | 10-20 | **99.9%** ?? |
+| **Utilisation mï¿½moire** | Non contrï¿½lï¿½e | < 1.5 GB | **Stable** ? |
 
-### Temps de Synchronisation Détaillés
+### Temps de Synchronisation Dï¿½taillï¿½s
 
-| Type | Quantité | Initial | Incrémental (10%) |
+| Type | Quantitï¿½ | Initial | Incrï¿½mental (10%) |
 |------|----------|---------|-------------------|
 | Films | 15,000 | ~8-12 min | ~1-2 min |
-| Séries | 8,500 | ~5-7 min | ~30-60 sec |
-| Chaînes | 1,500 | ~1 min | ~10-20 sec |
+| Sï¿½ries | 8,500 | ~5-7 min | ~30-60 sec |
+| Chaï¿½nes | 1,500 | ~1 min | ~10-20 sec |
 | **TOTAL** | **25,000** | **~15 min** | **~2-3 min** |
 
 ---
@@ -149,25 +149,25 @@ Jellyfin.Xtream.V2/
 ### Presets de Performance
 
 ```csharp
-// Pour volumétrie standard (5K-30K entités)
+// Pour volumï¿½trie standard (5K-30K entitï¿½s)
 var options = PerformanceOptions.Default;
 
-// Pour petite volumétrie (< 5K)
+// Pour petite volumï¿½trie (< 5K)
 var options = PerformanceOptions.LowVolume;
 
-// Pour haute volumétrie (> 30K)
+// Pour haute volumï¿½trie (> 30K)
 var options = PerformanceOptions.HighVolume;
 ```
 
-### Configuration Personnalisée
+### Configuration Personnalisï¿½e
 
 ```csharp
 var options = new PerformanceOptions
 {
     BatchSize = 1000,               // Taille des lots
     MaxCacheEntries = 10000,        // Limite cache
-    MaxMemoryMB = 2048,             // Limite mémoire (MB)
-    MaxDegreeOfParallelism = 4,     // Threads parallèles
+    MaxMemoryMB = 2048,             // Limite mï¿½moire (MB)
+    MaxDegreeOfParallelism = 4,     // Threads parallï¿½les
     EnablePerformanceLogging = true,
     EnableMemoryMonitoring = true
 };
@@ -175,7 +175,7 @@ var options = new PerformanceOptions
 options.Validate(); // Valider la config
 ```
 
-**?? Voir [PERFORMANCE_GUIDE.md](PERFORMANCE_GUIDE.md) pour tous les paramètres**
+**?? Voir [PERFORMANCE_GUIDE.md](PERFORMANCE_GUIDE.md) pour tous les paramï¿½tres**
 
 ---
 
@@ -183,10 +183,9 @@ options.Validate(); // Valider la config
 
 | Document | Description |
 |----------|-------------|
-| [QUICKSTART.md](QUICKSTART.md) | Guide de démarrage rapide avec exemples |
-| [PERFORMANCE_GUIDE.md](PERFORMANCE_GUIDE.md) | Configuration complète et tuning |
-| [PERFORMANCE_OPTIMIZATIONS.md](PERFORMANCE_OPTIMIZATIONS.md) | Détails techniques des optimisations |
-| [CHANGES_SUMMARY.md](CHANGES_SUMMARY.md) | Résumé de toutes les modifications |
+| [QUICKSTART.md](QUICKSTART.md) | Guide de dï¿½marrage rapide avec exemples |
+| [PERFORMANCE_GUIDE.md](PERFORMANCE_GUIDE.md) | Configuration complï¿½te et tuning |
+| [PERFORMANCE_OPTIMIZATIONS.md](PERFORMANCE_OPTIMIZATIONS.md) | Dï¿½tails techniques des optimisations |
 
 ---
 
@@ -224,31 +223,31 @@ perfMonitor.LogStatistics();
 
 ---
 
-## ??? Dépendances
+## ??? Dï¿½pendances
 
 | Package | Version | Usage |
 |---------|---------|-------|
-| LiteDB | 5.0.21 | Base de données embarquée |
-| MediaBrowser.Common | 4.9.1.90 | Intégration Jellyfin |
-| Microsoft.Extensions.Caching.Memory | 6.0.1 | Cache optimisé |
+| LiteDB | 5.0.21 | Base de donnï¿½es embarquï¿½e |
+| MediaBrowser.Common | 4.9.1.90 | Intï¿½gration Jellyfin |
+| Microsoft.Extensions.Caching.Memory | 6.0.1 | Cache optimisï¿½ |
 | Microsoft.Extensions.Logging.Abstractions | 6.0.4 | Logging |
 
 ---
 
 ## ?? Troubleshooting
 
-### Problèmes Courants
+### Problï¿½mes Courants
 
 #### ? OutOfMemoryException
-**Cause**: Trop de données en mémoire  
-**Solution**: Réduire `BatchSize` à 500 et `MaxCacheEntries` à 5000
+**Cause**: Trop de donnï¿½es en mï¿½moire  
+**Solution**: Rï¿½duire `BatchSize` ï¿½ 500 et `MaxCacheEntries` ï¿½ 5000
 
 #### ? Synchronisation lente
 **Cause**: Configuration non optimale  
-**Solution**: Augmenter `BatchSize` à 2000 et `MaxDegreeOfParallelism` à 8
+**Solution**: Augmenter `BatchSize` ï¿½ 2000 et `MaxDegreeOfParallelism` ï¿½ 8
 
 #### ? Timeouts API
-**Cause**: Réseau lent ou serveur surchargé  
+**Cause**: Rï¿½seau lent ou serveur surchargï¿½  
 **Solution**: Augmenter `ApiTimeoutSeconds` et activer `EnableApiRetry`
 
 #### ? Database locked
@@ -261,11 +260,11 @@ perfMonitor.LogStatistics();
 
 ## ?? Optimisations Futures
 
-- [ ] Migration vers SQLite pour volumes > 50K entités
-- [ ] Cache distribué (Redis) pour clusters
-- [ ] Partitionnement des données par catégorie
-- [ ] Vues matérialisées pour requêtes fréquentes
-- [ ] Compression des données en base
+- [ ] Migration vers SQLite pour volumes > 50K entitï¿½s
+- [ ] Cache distribuï¿½ (Redis) pour clusters
+- [ ] Partitionnement des donnï¿½es par catï¿½gorie
+- [ ] Vues matï¿½rialisï¿½es pour requï¿½tes frï¿½quentes
+- [ ] Compression des donnï¿½es en base
 
 ---
 
@@ -274,9 +273,9 @@ perfMonitor.LogStatistics();
 Les contributions sont les bienvenues ! Avant de contribuer :
 
 1. Lire la documentation de performance
-2. Exécuter les benchmarks existants
-3. Vérifier que les métriques cibles sont maintenues
-4. Ajouter des tests si nécessaire
+2. Exï¿½cuter les benchmarks existants
+3. Vï¿½rifier que les mï¿½triques cibles sont maintenues
+4. Ajouter des tests si nï¿½cessaire
 
 ---
 
@@ -288,15 +287,15 @@ Les contributions sont les bienvenues ! Avant de contribuer :
 
 ## ?? Remerciements
 
-- **LiteDB** pour la base de données embarquée performante
-- **Jellyfin** pour la plateforme média open-source
+- **LiteDB** pour la base de donnï¿½es embarquï¿½e performante
+- **Jellyfin** pour la plateforme mï¿½dia open-source
 - **Microsoft** pour les excellents outils .NET
 
 ---
 
 ## ?? Support
 
-- ?? **Issues**: [Créer un ticket](votre-repo/issues)
+- ?? **Issues**: [Crï¿½er un ticket](votre-repo/issues)
 - ?? **Documentation**: Voir les fichiers MD ci-dessus
 - ?? **Discussions**: [Discussions GitHub](votre-repo/discussions)
 
@@ -304,9 +303,9 @@ Les contributions sont les bienvenues ! Avant de contribuer :
 
 ## ?? Objectifs Atteints
 
-- ? Support de 25,000+ entités
+- ? Support de 25,000+ entitï¿½s
 - ? Synchronisation en < 20 minutes
-- ? Utilisation mémoire < 1.5 GB
+- ? Utilisation mï¿½moire < 1.5 GB
 - ? Taille DB < 1 GB
 - ? Pas de crash ni timeout
 - ? Monitoring complet
@@ -315,8 +314,8 @@ Les contributions sont les bienvenues ! Avant de contribuer :
 
 ---
 
-**Version**: 2.0 - Optimisé pour Haute Volumétrie  
+**Version**: 2.0 - Optimisï¿½ pour Haute Volumï¿½trie  
 **Target Framework**: .NET 6.0  
 **Status**: ? Production Ready
 
-**?? Prêt pour gérer des milliers d'entités avec des performances optimales !**
+**?? Prï¿½t pour gï¿½rer des milliers d'entitï¿½s avec des performances optimales !**
