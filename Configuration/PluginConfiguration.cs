@@ -1,6 +1,6 @@
 using MediaBrowser.Model.Plugins;
 
-namespace Jellyfin.Xtream.V2.Configuration;
+namespace Jellyfin.Xtream.V3.Configuration;
 
 /// <summary>
 /// Plugin configuration for Jellyfin Xtream.

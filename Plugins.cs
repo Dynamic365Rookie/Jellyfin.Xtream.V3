@@ -1,12 +1,13 @@
 ﻿using System;
+using System;
 using System.Collections.Generic;
-using Jellyfin.Xtream.V2.Configuration;
+using Jellyfin.Xtream.V3.Configuration;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
 
-namespace Jellyfin.Xtream.V2;
+namespace Jellyfin.Xtream.V3;
 
 public sealed class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 {
