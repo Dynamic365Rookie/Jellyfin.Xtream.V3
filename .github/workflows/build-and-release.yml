@@ -47,7 +47,7 @@ jobs:
       working-directory: ./Jellyfin.Xtream.V2
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ env.ARTIFACT_NAME }}
         path: ./Jellyfin.Xtream.V2/publish
