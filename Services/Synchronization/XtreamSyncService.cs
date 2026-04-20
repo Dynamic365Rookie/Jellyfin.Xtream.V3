@@ -8,6 +8,7 @@ namespace Jellyfin.Xtream.Services.Synchronization;
 public sealed class XtreamSyncService
 {
     private readonly XtreamApiClient _api;
+    private readonly XtreamSyncValidator _validator;
     private readonly IXtreamRepository<XtreamMovie> _movies;
     private readonly IXtreamRepository<XtreamSeries> _series;
     private readonly IXtreamRepository<XtreamChannel> _channels;
@@ -15,12 +16,14 @@ public sealed class XtreamSyncService
 
     public XtreamSyncService(
         XtreamApiClient api,
+        XtreamSyncValidator validator,
         IXtreamRepository<XtreamMovie> movies,
         IXtreamRepository<XtreamSeries> series,
         IXtreamRepository<XtreamChannel> channels,
         ILogger<XtreamSyncService> logger)
     {
         _api = api;
+        _validator = validator;
         _movies = movies;
         _series = series;
         _channels = channels;
@@ -156,5 +159,41 @@ public sealed class XtreamSyncService
 
         var duration = DateTime.UtcNow - startTime;
         _logger.LogInformation("Full synchronization completed in {Duration}s", duration.TotalSeconds);
+    }
+
+    /// <summary>
+    /// Validates configuration and performs full synchronization if validation passes.
+    /// </summary>
+    public async Task<SyncResult> SyncAllWithValidationAsync(string baseUrl, string username, string password, CancellationToken ct)
+    {
+        _logger.LogInformation("Starting synchronized data load with validation");
+        var startTime = DateTime.UtcNow;
+
+        // Validate before sync
+        var validationResult = await _validator.ValidateBeforeSyncAsync(baseUrl, username, password, ct);
+        if (!validationResult.IsValid)
+        {
+            var errorMessage = $"Sync validation failed: {string.Join("; ", validationResult.Errors)}";
+            _logger.LogError(errorMessage);
+            return SyncResult.Failure(validationResult.Errors);
+        }
+
+        try
+        {
+            await SyncAllAsync(baseUrl, ct);
+            var duration = DateTime.UtcNow - startTime;
+            _logger.LogInformation("Data synchronization completed successfully in {Duration}ms", duration.TotalMilliseconds);
+            return SyncResult.Success();
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogWarning("Synchronization was cancelled");
+            return SyncResult.Failure(new[] { "Synchronization was cancelled" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error during synchronization");
+            return SyncResult.Failure(new[] { $"Synchronization error: {ex.Message}" });
+        }
     }
 }

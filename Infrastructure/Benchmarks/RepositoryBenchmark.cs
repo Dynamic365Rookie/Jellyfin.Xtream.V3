@@ -18,13 +18,13 @@ public sealed class RepositoryBenchmark
     }
 
     /// <summary>
-    /// Benchmark des opérations individuelles vs batch
+    /// Benchmark des opï¿½rations individuelles vs batch
     /// </summary>
     public async Task<BenchmarkResult> BenchmarkIndividualVsBatch(
         IXtreamRepository<XtreamMovie> repository,
         int entityCount)
     {
-        _logger.LogInformation("Démarrage du benchmark: Individual vs Batch ({Count} entités)", entityCount);
+        _logger.LogInformation("Dï¿½marrage du benchmark: Individual vs Batch ({Count} entitï¿½s)", entityCount);
 
         var movies = GenerateTestMovies(entityCount);
 
@@ -64,7 +64,7 @@ public sealed class RepositoryBenchmark
         };
 
         _logger.LogInformation(
-            "Résultat: Batch est {Improvement:F2}x plus rapide ({Individual:F0} ops/s -> {Batch:F0} ops/s)",
+            "Rï¿½sultat: Batch est {Improvement:F2}x plus rapide ({Individual:F0} ops/s -> {Batch:F0} ops/s)",
             improvement,
             result.IndividualOperationsPerSecond,
             result.BatchOperationsPerSecond);
@@ -73,7 +73,7 @@ public sealed class RepositoryBenchmark
     }
 
     /// <summary>
-    /// Benchmark de la détection de changements
+    /// Benchmark de la dï¿½tection de changements
     /// </summary>
     public async Task<BenchmarkResult> BenchmarkChangeDetection(
         IXtreamRepository<XtreamMovie> repository,
@@ -81,7 +81,7 @@ public sealed class RepositoryBenchmark
         double changePercentage)
     {
         _logger.LogInformation(
-            "Démarrage du benchmark: Change Detection ({Count} entités, {Percent}% changements)",
+            "Dï¿½marrage du benchmark: Change Detection ({Count} entitï¿½s, {Percent}% changements)",
             entityCount,
             changePercentage * 100);
 
@@ -90,14 +90,14 @@ public sealed class RepositoryBenchmark
         // Insertion initiale
         repository.UpsertBatch(movies);
 
-        // Modifier un pourcentage des entités
+        // Modifier un pourcentage des entitï¿½s
         var entitiesToChange = (int)(entityCount * changePercentage);
         for (int i = 0; i < entitiesToChange; i++)
         {
-            movies[i] = movies[i] with { LastModified = DateTime.UtcNow };
+            movies[i] = movies[i] with { LastModifiedTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds() };
         }
 
-        // Méthode 1: Vérification individuelle (old way)
+        // Mï¿½thode 1: Vï¿½rification individuelle (old way)
         var sw1 = Stopwatch.StartNew();
         var changedEntities1 = new List<XtreamMovie>();
         foreach (var movie in movies)
@@ -111,11 +111,11 @@ public sealed class RepositoryBenchmark
         var individualTime = sw1.Elapsed;
 
         _logger.LogInformation(
-            "Détection individuelle: {Time}ms, {Count} changements détectés",
+            "Dï¿½tection individuelle: {Time}ms, {Count} changements dï¿½tectï¿½s",
             individualTime.TotalMilliseconds,
             changedEntities1.Count);
 
-        // Méthode 2: Utilisation de GetLastModifiedMap (new way)
+        // Mï¿½thode 2: Utilisation de GetLastModifiedMap (new way)
         var sw2 = Stopwatch.StartNew();
         var existingDates = repository.GetLastModifiedMap();
         var changedEntities2 = movies.Where(m =>
@@ -126,7 +126,7 @@ public sealed class RepositoryBenchmark
         var batchTime = sw2.Elapsed;
 
         _logger.LogInformation(
-            "Détection par map: {Time}ms, {Count} changements détectés",
+            "Dï¿½tection par map: {Time}ms, {Count} changements dï¿½tectï¿½s",
             batchTime.TotalMilliseconds,
             changedEntities2.Count);
 
@@ -143,14 +143,14 @@ public sealed class RepositoryBenchmark
         };
 
         _logger.LogInformation(
-            "Résultat: Map-based est {Improvement:F2}x plus rapide",
+            "Rï¿½sultat: Map-based est {Improvement:F2}x plus rapide",
             improvement);
 
         return result;
     }
 
     /// <summary>
-    /// Benchmark complet simulant une synchronisation réelle
+    /// Benchmark complet simulant une synchronisation rï¿½elle
     /// </summary>
     public async Task<BenchmarkResult> BenchmarkFullSync(
         IXtreamRepository<XtreamMovie> repository,
@@ -159,26 +159,26 @@ public sealed class RepositoryBenchmark
         double changePercentage)
     {
         _logger.LogInformation(
-            "Démarrage du benchmark: Full Sync (Existing: {Existing}, New: {New}, Changes: {Percent}%)",
+            "Dï¿½marrage du benchmark: Full Sync (Existing: {Existing}, New: {New}, Changes: {Percent}%)",
             existingCount,
             newCount,
             changePercentage * 100);
 
-        // Préparer les données existantes
+        // Prï¿½parer les donnï¿½es existantes
         var existing = GenerateTestMovies(existingCount);
         repository.UpsertBatch(existing);
 
-        // Préparer les nouvelles données
+        // Prï¿½parer les nouvelles donnï¿½es
         var incoming = GenerateTestMovies(newCount, startId: existingCount);
 
-        // Modifier un pourcentage des entités existantes
+        // Modifier un pourcentage des entitï¿½s existantes
         var entitiesToChange = (int)(existingCount * changePercentage);
         for (int i = 0; i < entitiesToChange && i < existing.Count; i++)
         {
-            incoming.Add(existing[i] with { LastModified = DateTime.UtcNow });
+            incoming.Add(existing[i] with { LastModifiedTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds() });
         }
 
-        // Simuler la synchronisation optimisée
+        // Simuler la synchronisation optimisï¿½e
         var sw = Stopwatch.StartNew();
 
         var existingDates = repository.GetLastModifiedMap();
@@ -201,7 +201,7 @@ public sealed class RepositoryBenchmark
         };
 
         _logger.LogInformation(
-            "Full Sync complété en {Time}ms ({Updated} entités mises à jour, {OpsPerSec:F0} ops/s)",
+            "Full Sync complï¿½tï¿½ en {Time}ms ({Updated} entitï¿½s mises ï¿½ jour, {OpsPerSec:F0} ops/s)",
             sw.Elapsed.TotalMilliseconds,
             toUpdate.Count,
             result.BatchOperationsPerSecond);
@@ -216,11 +216,13 @@ public sealed class RepositoryBenchmark
 
         for (int i = 0; i < count; i++)
         {
+            var timestamp = new DateTimeOffset(baseDate.AddMinutes(i)).ToUnixTimeSeconds();
             movies.Add(new XtreamMovie
             {
                 Id = startId + i,
                 Name = $"Test Movie {startId + i}",
-                LastModified = baseDate.AddMinutes(i)
+                LastModifiedTimestamp = timestamp,
+                Added = timestamp
             });
         }
 
