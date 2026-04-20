@@ -1,0 +1,111 @@
+name: Publish Repository Manifest
+
+on:
+  push:
+    branches: [ main ]
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  generate-manifest:
+    name: Generate Repository Manifest
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      commit: ${{ steps.version.outputs.commit }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Extract version and commit
+      id: version
+      run: |
+        if [[ $GITHUB_REF == refs/tags/v* ]]; then
+          VERSION=${GITHUB_REF#refs/tags/v}
+        else
+          VERSION="3.0.0-$(date +%Y%m%d.%H%M%S)"
+        fi
+        COMMIT=$(git rev-parse --short HEAD)
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "commit=$COMMIT" >> $GITHUB_OUTPUT
+        echo "Version: $VERSION"
+        echo "Commit: $COMMIT"
+
+    - name: Setup PowerShell
+      run: |
+        pwsh --version
+
+    - name: Generate repository.json
+      run: |
+        pwsh -Command "
+          . ./.github/scripts/generate-repository.ps1
+          \$params = @{
+            OutputPath = 'repository.json'
+            Version = '${{ steps.version.outputs.version }}'
+            CommitHash = '${{ steps.version.outputs.commit }}'
+            ReleaseUrl = 'https://github.com/Dynamic365Rookie/Jellyfin.Xtream.V3/releases/download/v${{ steps.version.outputs.version }}/Jellyfin.Xtream.V3-v${{ steps.version.outputs.version }}.zip'
+          }
+          & (Resolve-Path './.github/scripts/generate-repository.ps1').Path @params
+        "
+
+    - name: Verify repository.json
+      run: |
+        if [ -f repository.json ]; then
+          echo "? repository.json created successfully"
+          cat repository.json | jq .
+        else
+          echo "? repository.json not found"
+          exit 1
+        fi
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: repository-manifest
+        path: repository.json
+
+    - name: Setup Pages
+      id: pages
+      uses: actions/configure-pages@v3
+
+    - name: Create GitHub Pages content
+      run: |
+        mkdir -p _site
+        cp repository.json _site/repository.json
+        echo "Repository manifest uploaded to GitHub Pages"
+
+    - name: Upload to GitHub Pages
+      uses: actions/upload-pages-artifact@v2
+      with:
+        path: '_site'
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: generate-manifest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v2
+
+    - name: Verify deployment
+      run: |
+        echo "Repository manifest deployed to GitHub Pages"
+        echo "URL: https://dynamic365rookie.github.io/Jellyfin.Xtream.V3/repository.json"
