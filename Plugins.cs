@@ -10,15 +10,15 @@ using MediaBrowser.Model.Serialization;
 namespace Jellyfin.Xtream.V3;
 
 /// <summary>
-/// The main plugin class for Jellyfin Xtream.
+/// The main plugin class.
 /// </summary>
-public sealed class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
+public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="Plugin"/> class.
     /// </summary>
     /// <param name="applicationPaths">Instance of the <see cref="IApplicationPaths"/> interface.</param>
-    /// <param>Instance of the <see cref="IXmlSerializer"/> interface.</param>
+    /// <param name="xmlSerializer">Instance of the <see cref="IXmlSerializer"/> interface.</param>
     public Plugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer)
         : base(applicationPaths, xmlSerializer)
     {
@@ -37,15 +37,18 @@ public sealed class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     public override Guid Id => Guid.Parse("a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d");
 
     /// <inheritdoc />
-    public override string Description => "Performance-optimized IPTV plugin for Xtream Codes API";
+    public override string Description => "IPTV plugin for Xtream Codes API";
 
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()
     {
-        yield return new PluginPageInfo
+        return new[]
         {
-            Name = "Jellyfin Xtream",
-            EmbeddedResourcePath = GetType().Namespace + ".Configuration.configPage.html"
+            new PluginPageInfo
+            {
+                Name = this.Name,
+                EmbeddedResourcePath = string.Format("{0}.Configuration.configPage.html", GetType().Namespace)
+            }
         };
     }
 }
