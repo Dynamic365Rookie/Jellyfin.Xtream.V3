@@ -5,8 +5,8 @@
   "overview": "Stream Live TV, Movies, and Series from an Xtream-compatible server using this optimized plugin.",
   "owner": "Dynamic365Rookie",
   "category": "LiveTV",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "targetAbi": "10.11.0.0",
-  "changelog": "Comprehensive Xtream data loading with validation and tests: expanded domain models, JSON converters, pre-sync validation framework, complete test suite, and detailed documentation",
-  "timestamp": "2026-04-20T19:34:00Z"
+  "changelog": "Enable scheduled Xtream synchronization task: XtreamIncrementalSyncTask now automatically syncs movies, series, and channels every 6 hours",
+  "timestamp": "2026-04-21T00:00:00Z"
 }
