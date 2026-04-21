@@ -25,16 +25,13 @@ if ($match.Success) {
     # Clean up the content
     $versionContent = $versionContent -replace '^\s+', ''
 
-    # Replace newlines with literal \n for JSON compatibility
-    $versionContent = $versionContent -replace "`r`n", "\n"
-
-    # Escape quotes and backslashes for JSON
-    $versionContent = $versionContent -replace '\\', '\\'
-    $versionContent = $versionContent -replace '"', '\"'
-
     # Output to GitHub Actions
     if ($OutputPath -eq "$env:GITHUB_OUTPUT" -and $env:GITHUB_OUTPUT) {
-        "release_notes=$versionContent" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding UTF8 -Append
+        # Use multiline output syntax for GitHub Actions
+        $delimiter = "EOF_$(Get-Random)"
+        "release_notes<<$delimiter" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding UTF8 -Append
+        $versionContent | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding UTF8 -Append
+        $delimiter | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding UTF8 -Append
         Write-Host "Release notes exported to GITHUB_OUTPUT"
     } else {
         Write-Host "Release Notes for v$Version:"

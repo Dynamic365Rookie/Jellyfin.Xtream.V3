@@ -7,6 +7,17 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [3.2.5] - 2026-04-21
+
+### Fixed
+- **Release Notes Extraction**: Fixed GitHub Actions multiline output syntax for release descriptions in repository.json
+- **Repository Manifest**: Ensured release descriptions are properly extracted and included in plugin repository
+
+### Commits
+- Corrected release notes output handling
+
+---
+
 ## [3.2.4] - 2026-04-21
 
 ### Fixed
