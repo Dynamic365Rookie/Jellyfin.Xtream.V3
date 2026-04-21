@@ -7,6 +7,17 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [3.3.1] - 2026-04-21
+
+### Fixed
+- **Critical: TypeLoadException on plugin load** — `Method 'RegisterServices' does not have an implementation`
+  - Root cause: Plugin shipped its own `Microsoft.Extensions.*.dll` (v9.0.10) which conflicted with Jellyfin's runtime versions
+  - The CLR saw two different `IServiceCollection` types (plugin vs host) and couldn't match the `RegisterServices` method signature
+  - Fix: Added `ExcludeAssets=runtime` to `Microsoft.Extensions.Caching.Memory` and `Microsoft.Extensions.Logging.Abstractions`
+  - Published DLLs reduced from 9 to 2: `Jellyfin.Xtream.V3.dll` + `LiteDB.dll`
+
+---
+
 ## [3.3.0] - 2026-04-21
 
 ### Added

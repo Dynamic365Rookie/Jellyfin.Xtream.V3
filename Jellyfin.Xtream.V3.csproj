@@ -45,9 +45,14 @@
     <PackageReference Include="Jellyfin.Model" Version="10.11.3">
       <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
-    <!-- 9.0.0 corrige la vulnérabilité GHSA-qj66-m88j-hmgj -->
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.10" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.10" />
+    <!-- These are provided by Jellyfin at runtime — ExcludeAssets prevents
+         shipping duplicate DLLs that cause TypeLoadException on version mismatch -->
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.10">
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.10">
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
   </ItemGroup>
 
 </Project>
