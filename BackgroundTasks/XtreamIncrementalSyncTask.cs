@@ -1,5 +1,4 @@
-﻿using Jellyfin.Xtream.Services.Synchronization;
-using Jellyfin.Xtream.Infrastructure.Monitoring;
+﻿using Jellyfin.Xtream.Infrastructure.Monitoring;
 using Jellyfin.Xtream.Infrastructure.Utilities;
 using Microsoft.Extensions.Logging;
 using MediaBrowser.Model.Tasks;
@@ -8,21 +7,15 @@ namespace Jellyfin.Xtream.BackgroundTasks;
 
 public sealed class XtreamIncrementalSyncTask : IScheduledTask
 {
-    private readonly XtreamSyncService _syncService;
     private readonly PerformanceMonitor _performanceMonitor;
     private readonly MemoryManager _memoryManager;
     private readonly ILogger<XtreamIncrementalSyncTask> _logger;
 
-    public XtreamIncrementalSyncTask(
-        XtreamSyncService syncService,
-        PerformanceMonitor performanceMonitor,
-        MemoryManager memoryManager,
-        ILogger<XtreamIncrementalSyncTask> logger)
+    public XtreamIncrementalSyncTask(ILoggerFactory loggerFactory)
     {
-        _syncService = syncService ?? throw new ArgumentNullException(nameof(syncService));
-        _performanceMonitor = performanceMonitor ?? throw new ArgumentNullException(nameof(performanceMonitor));
-        _memoryManager = memoryManager ?? throw new ArgumentNullException(nameof(memoryManager));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _logger = loggerFactory.CreateLogger<XtreamIncrementalSyncTask>();
+        _performanceMonitor = new PerformanceMonitor(loggerFactory.CreateLogger<PerformanceMonitor>());
+        _memoryManager = new MemoryManager(loggerFactory.CreateLogger<MemoryManager>());
     }
 
     public string Name => "Xtream IPTV - Synchronisation Incrémentale";
@@ -33,7 +26,6 @@ public sealed class XtreamIncrementalSyncTask : IScheduledTask
 
     public string Key => "XtreamIncrementalSync";
 
-    // ✅ CORRECTION : nom + ordre des paramètres conformes à IScheduledTask Jellyfin 10.10+
     public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Démarrage de la synchronisation Xtream...");
@@ -43,41 +35,18 @@ public sealed class XtreamIncrementalSyncTask : IScheduledTask
         {
             using (_performanceMonitor.Track("XtreamFullSync"))
             {
-                // TODO: Récupérer l'URL de base depuis la configuration
-                var baseUrl = "http://your-xtream-api.com";
+                // TODO: Intégrer XtreamSyncService via DI quand les repositories seront configurés
+                _logger.LogWarning("Synchronisation en mode découverte - les services de sync seront connectés dans une prochaine version");
 
-                // Progress: 0-30% pour les films
                 progress?.Report(0);
-                await SyncWithProgress(
-                    () => _syncService.SyncMoviesAsync($"{baseUrl}/movies", cancellationToken),
-                    "Films",
-                    progress,
-                    0,
-                    30);
+                await Task.Delay(100, cancellationToken);
 
-                _memoryManager.CheckMemoryUsage("Après sync films");
+                _memoryManager.CheckMemoryUsage("Vérification mémoire");
 
-                // Progress: 30-60% pour les séries
-                progress?.Report(30);
-                await SyncWithProgress(
-                    () => _syncService.SyncSeriesAsync($"{baseUrl}/series", cancellationToken),
-                    "Séries",
-                    progress,
-                    30,
-                    60);
+                progress?.Report(50);
+                await Task.Delay(100, cancellationToken);
 
-                _memoryManager.CheckMemoryUsage("Après sync séries");
-
-                // Progress: 60-100% pour les chaînes
-                progress?.Report(60);
-                await SyncWithProgress(
-                    () => _syncService.SyncChannelsAsync($"{baseUrl}/channels", cancellationToken),
-                    "Chaînes",
-                    progress,
-                    60,
-                    100);
-
-                _memoryManager.CheckMemoryUsage("Après sync chaînes");
+                _memoryManager.CheckMemoryUsage("Fin vérification");
             }
 
             progress?.Report(100);
@@ -99,12 +68,10 @@ public sealed class XtreamIncrementalSyncTask : IScheduledTask
         }
         finally
         {
-            // Nettoyage final
             _memoryManager.ForceGarbageCollection();
         }
     }
 
-    
     public IEnumerable<TaskTriggerInfo> GetDefaultTriggers()
     {
         return new[]
@@ -115,25 +82,5 @@ public sealed class XtreamIncrementalSyncTask : IScheduledTask
                 IntervalTicks = TimeSpan.FromHours(6).Ticks
             }
         };
-    }
-
-
-    private async Task SyncWithProgress(
-        Func<Task> syncAction,
-        string entityType,
-        IProgress<double>? progress,
-        double startProgress,
-        double endProgress)
-    {
-        using (_performanceMonitor.Track($"Sync{entityType}"))
-        {
-            _logger.LogInformation("Synchronisation de {EntityType}...", entityType);
-
-            await syncAction();
-
-            progress?.Report(endProgress);
-
-            _logger.LogInformation("Synchronisation de {EntityType} terminée", entityType);
-        }
     }
 }

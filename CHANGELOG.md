@@ -10,12 +10,19 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [3.2.7] - 2026-04-21
 
 ### Fixed
-- **Compilation Error**: Removed incompatible `IPluginServiceRegistrator` class
-  - Type not available in Jellyfin 10.11.3 packages
-  - Service registration handled by plugin framework automatically
+- **Compilation Error**: Removed incompatible `IPluginServiceRegistrator` class (type unavailable in Jellyfin 10.11.3)
+- **DI Resolution Error**: Simplified `XtreamIncrementalSyncTask` constructor to avoid unresolvable service dependencies
+  - Replaced 4 injected services by a single `ILoggerFactory` (provided natively by Jellyfin)
+  - `PerformanceMonitor` and `MemoryManager` are now instantiated locally with dedicated loggers
+  - Removed deep dependency on `XtreamSyncService` (requires ApiClient, Validator, Repositories not yet registered)
+
+### Changed
+- Background task now registers and executes correctly in Jellyfin Dashboard > Scheduled Tasks
+- Synchronization logic is in discovery mode; full sync pipeline will be connected when repositories are configured
 
 ### Commits
-- Fixed build compatibility with Jellyfin 10.11.3
+- Removed `PluginServiceRegistrar.cs` (incompatible with Jellyfin 10.11.3)
+- Simplified `XtreamIncrementalSyncTask` DI to `ILoggerFactory` only
 
 ---
 
