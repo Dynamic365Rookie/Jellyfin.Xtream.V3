@@ -64,7 +64,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: ./Jellyfin.Xtream.V3-${{ steps.tag.outputs.version }}.zip
-        body: ${{ env.release_notes || format('Release {0} - Jellyfin Xtream plugin', steps.tag.outputs.version) }}
+        body: ${{ steps.notes.outputs.release_notes || format('Release {0} - Jellyfin Xtream plugin', steps.tag.outputs.version) }}
         draft: false
         prerelease: false
       env:

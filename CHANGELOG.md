@@ -7,6 +7,29 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [3.2.3] - 2026-04-21
+
+### Fixed
+- **Scheduled Task Execution**: Fixed Execute method to be directly async for IScheduledTask interface compatibility
+- **Jellyfin Plugin Loading**: Resolved "ExecuteAsync method does not have an implementation" error
+- **Background Synchronization**: Ensured XtreamIncrementalSyncTask properly implements async pattern
+
+### Commits
+- `53e99bb` - fix: Make Execute method directly async for Jellyfin compatibility
+
+---
+
+## [3.2.2] - 2026-04-21
+
+### Fixed
+- **Plugin Initialization Logging**: Enhanced logging of assembly information and loaded DLLs
+- **Background Task Registration**: Improved reflection-based IScheduledTask discovery
+
+### Commits
+- `04017cd` - fix: Update manifest version and add plugin initialization logging
+
+---
+
 ## [3.2.1] - 2026-04-21
 
 ### Features
