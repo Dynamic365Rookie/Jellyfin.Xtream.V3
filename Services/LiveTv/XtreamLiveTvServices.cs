@@ -23,6 +23,7 @@ public sealed class XtreamLiveTvService : ILiveTvService
     {
         _channelRepo = channelRepo;
         _logger = logger;
+        _logger.LogWarning("[Xtream] XtreamLiveTvService created — Name='{Name}', will provide channels from LiteDB", Name);
     }
 
     /// <inheritdoc />

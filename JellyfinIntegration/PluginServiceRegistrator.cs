@@ -57,6 +57,9 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         serviceCollection.AddSingleton<XtreamSyncService>();
 
         // Live TV — exposes channels to Jellyfin's Live TV system
-        serviceCollection.AddSingleton<ILiveTvService, XtreamLiveTvService>();
+        // Register as concrete type first, then forward to interface
+        // This pattern ensures the service is discoverable both via DI and assembly scanning
+        serviceCollection.AddSingleton<XtreamLiveTvService>();
+        serviceCollection.AddSingleton<ILiveTvService>(sp => sp.GetRequiredService<XtreamLiveTvService>());
     }
 }

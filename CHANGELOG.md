@@ -7,6 +7,16 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [3.4.1] - 2026-04-21
+
+### Fixed
+- **Live TV playback: "Sequence contains no matching element"** — Channel playback failed because `LiveTvMediaSourceProvider` could not find our `ILiveTvService` by name
+  - Changed DI registration from simple `AddSingleton<ILiveTvService, XtreamLiveTvService>()` to concrete+forward pattern: register concrete type first, then forward interface
+  - This ensures the service is discoverable both via standard DI resolution (`IEnumerable<ILiveTvService>`) and assembly scanning (`GetExports`)
+  - Added diagnostic logging in `XtreamLiveTvService` constructor to confirm service creation
+
+---
+
 ## [3.4.0] - 2026-04-21
 
 ### Added

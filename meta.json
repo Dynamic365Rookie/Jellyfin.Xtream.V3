@@ -5,8 +5,8 @@
   "overview": "Stream Live TV, Movies, and Series from an Xtream-compatible server using this optimized plugin.",
   "owner": "Dynamic365Rookie",
   "category": "LiveTV",
-  "version": "3.4.0",
+  "version": "3.4.1",
   "targetAbi": "10.11.0.0",
-  "changelog": "Live TV integration: implement ILiveTvService to expose IPTV channels in Jellyfin's Live TV section",
-  "timestamp": "2026-04-21T17:00:00Z"
+  "changelog": "Fix Live TV playback: ensure ILiveTvService is discoverable by LiveTvMediaSourceProvider via concrete+forward DI registration",
+  "timestamp": "2026-04-21T20:00:00Z"
 }
