@@ -5,8 +5,8 @@
   "overview": "Stream Live TV, Movies, and Series from an Xtream-compatible server using this optimized plugin.",
   "owner": "Dynamic365Rookie",
   "category": "LiveTV",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "targetAbi": "10.11.0.0",
-  "changelog": "Enable scheduled Xtream synchronization task: XtreamIncrementalSyncTask now automatically syncs movies, series, and channels every 6 hours",
-  "timestamp": "2026-04-21T00:00:00Z"
+  "changelog": "Fix: Make Execute method directly async for Jellyfin compatibility - resolves TypeLoadException on plugin load",
+  "timestamp": "2026-04-21T10:40:00Z"
 }

@@ -103,7 +103,14 @@ foreach ($release in $releases) {
 
     $sourceUrl = $zipAsset.browser_download_url
     $releaseTitle = if ($release.name) { $release.name } else { "Release $tagName" }
-    $changelogRaw = "$releaseTitle - $tagName"
+
+    # Use release body (description) if available, otherwise use title
+    $changelogRaw = if ($release.body -and $release.body.Trim().Length -gt 0) {
+        $release.body
+    } else {
+        "$releaseTitle - $tagName"
+    }
+
     $changelog = Convert-ToSafeText -Text $changelogRaw
     $timestamp = if ($release.published_at) {
         [DateTime]::Parse($release.published_at).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")

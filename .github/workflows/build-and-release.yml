@@ -99,6 +99,12 @@ jobs:
         "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
       shell: pwsh
 
+    - name: Extract release notes from CHANGELOG
+      id: notes
+      run: |
+        pwsh -Command "& './.github/scripts/extract-version-notes.ps1' -Version '${{ steps.tag.outputs.version }}'"
+      continue-on-error: true
+
     - name: Restore dependencies
       run: dotnet restore
 
@@ -119,7 +125,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: ./Jellyfin.Xtream.V3-${{ steps.tag.outputs.version }}.zip
-        body_path: RELEASE_NOTES.md
+        body: ${{ env.release_notes || format('Release {0} - Jellyfin Xtream plugin', steps.tag.outputs.version) }}
         draft: false
         prerelease: false
       env:

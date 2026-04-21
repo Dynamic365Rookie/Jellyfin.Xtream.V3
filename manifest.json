@@ -5,6 +5,14 @@
     "guid": "a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
     "versions": [
       {
+        "changelog": "Fix: Make Execute method directly async for Jellyfin compatibility. Resolves TypeLoadException on plugin load that prevented plugin from being loaded.",
+        "targetAbi": "10.11.0.0",
+        "checksum": "",
+        "timestamp": "2026-04-21T10:40:00Z",
+        "sourceUrl": "https://github.com/Dynamic365Rookie/Jellyfin.Xtream.V3/releases/download/v3.2.2/Jellyfin.Xtream.V3.zip",
+        "version": "3.2.2"
+      },
+      {
         "changelog": "Enable Scheduled Synchronization Task: XtreamIncrementalSyncTask now automatically syncs movies, series, and channels every 6 hours. Includes detailed task logging and improved memory management during scheduled operations.",
         "targetAbi": "10.11.0.0",
         "checksum": "",
