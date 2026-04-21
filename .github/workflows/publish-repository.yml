@@ -1,11 +1,9 @@
 name: Publish Repository Manifest
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
   workflow_run:
-    workflows: ["Build and Release"]
+    workflows: ["Release Tag Build"]
     types:
       - completed
 
