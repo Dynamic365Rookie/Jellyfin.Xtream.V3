@@ -5,6 +5,7 @@ using MediaBrowser.Controller.LiveTv;
 using MediaBrowser.Model.Dto;
 using MediaBrowser.Model.LiveTv;
 using MediaBrowser.Model.MediaInfo;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Xtream.Services.LiveTv;
@@ -16,13 +17,16 @@ public sealed class XtreamLiveTvService : ILiveTvService
 {
     private readonly IXtreamRepository<XtreamChannel> _channelRepo;
     private readonly ILogger<XtreamLiveTvService> _logger;
+    private readonly IServiceProvider _serviceProvider;
 
     public XtreamLiveTvService(
         IXtreamRepository<XtreamChannel> channelRepo,
-        ILogger<XtreamLiveTvService> logger)
+        ILogger<XtreamLiveTvService> logger,
+        IServiceProvider serviceProvider)
     {
         _channelRepo = channelRepo;
         _logger = logger;
+        _serviceProvider = serviceProvider;
         _logger.LogWarning("[Xtream] XtreamLiveTvService created — Name='{Name}', will provide channels from LiteDB", Name);
     }
 
@@ -35,6 +39,20 @@ public sealed class XtreamLiveTvService : ILiveTvService
     /// <inheritdoc />
     public Task<IEnumerable<ChannelInfo>> GetChannelsAsync(CancellationToken cancellationToken)
     {
+        // Diagnostic: list all ILiveTvService instances visible in DI
+        try
+        {
+            var allServices = _serviceProvider.GetServices<ILiveTvService>().ToList();
+            _logger.LogWarning(
+                "[Xtream] DI contains {Count} ILiveTvService instances: [{Names}]",
+                allServices.Count,
+                string.Join(", ", allServices.Select(s => $"'{s.Name}' ({s.GetType().FullName})")));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[Xtream] Failed to enumerate ILiveTvService instances from DI");
+        }
+
         var config = Plugin.Instance?.Configuration;
         if (config == null || !config.EnableLiveTV)
         {
