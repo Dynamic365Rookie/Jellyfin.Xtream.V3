@@ -5,8 +5,8 @@
   "overview": "Stream Live TV, Movies, and Series from an Xtream-compatible server using this optimized plugin.",
   "owner": "Dynamic365Rookie",
   "category": "LiveTV",
-  "version": "3.2.7",
+  "version": "3.3.0",
   "targetAbi": "10.11.0.0",
-  "changelog": "Fix: Properly implement async Execute method for IScheduledTask interface compatibility",
-  "timestamp": "2026-04-21T11:26:00Z"
+  "changelog": "Fix critical DI error: register all plugin services via IPluginServiceRegistrator. Add unified CI pipeline, xUnit test project, and build tooling.",
+  "timestamp": "2026-04-21T13:30:00Z"
 }

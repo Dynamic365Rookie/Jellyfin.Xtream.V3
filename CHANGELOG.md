@@ -7,6 +7,39 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [3.3.0] - 2026-04-21
+
+### Added
+- **Plugin DI Registration** (`IPluginServiceRegistrator`): All plugin services are now properly registered with the Jellyfin DI container via a standalone `PluginServiceRegistrator` class
+  - LiteDB database (auto-created at `{DataPath}/xtream/xtream.db`)
+  - Typed repositories (`IXtreamRepository<XtreamMovie/Series/Channel>`)
+  - API client with rate limiting (`XtreamApiClient`, `XtreamApiRateLimiter`)
+  - Synchronization services (`XtreamSyncService`, `XtreamSyncValidator`)
+- **Unified CI Pipeline** (`ci.yml`): Build, format check, lint, test with coverage — parallel jobs with NuGet caching
+- **xUnit Test Project**: Separate `Jellyfin.Xtream.V3.Tests` project with coverlet and Moq
+- **Build Tooling**: Makefile with `restore`, `build`, `format`, `test`, `lint`, `ci`, `clean` targets
+- **Code Style**: `.editorconfig` for C# naming, formatting, and analyzer rules
+- **Agent Design**: `CLAUDE.md` with autonomous workflow, safety constraints, and architecture documentation
+
+### Fixed
+- **Critical: Plugin loading error** — `Unable to resolve service for type 'XtreamSyncService' while attempting to activate 'XtreamIncrementalSyncTask'`
+  - Root cause: `IPluginServiceRegistrator` requires a **parameterless constructor on a standalone class**, not on the Plugin class
+  - Previous fix (v3.2.7) incorrectly removed `IPluginServiceRegistrator` thinking it was unavailable in Jellyfin 10.11.3
+- **XtreamApiClient namespace**: Added missing `namespace Jellyfin.Xtream.Api` (was in global namespace)
+- **CI workflows**: Upgraded from .NET 6.0 to 9.0 and actions v3 to v4
+
+### Changed
+- `XtreamIncrementalSyncTask` now performs real synchronization using `XtreamSyncService.SyncAllWithValidationAsync()` instead of being a no-op stub
+- Deleted unused `XtreamTasksServiceCollectionExtensions.cs` (superseded by `PluginServiceRegistrator`)
+- Quality gates (format, lint, coverage) are informational until existing code is cleaned up
+
+### Commits
+- `6930adf` fix(di): register all plugin services via IPluginServiceRegistrator
+- `d3c8f86` chore(ci): scaffold agent design, test project, and quality gates
+- `087a6f5` ci(workflows): make format, lint, and coverage checks non-blocking
+
+---
+
 ## [3.2.7] - 2026-04-21
 
 ### Fixed
