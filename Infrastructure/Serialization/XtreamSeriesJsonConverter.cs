@@ -11,23 +11,25 @@ public sealed class XtreamSeriesJsonConverter : JsonConverter<XtreamSeries>
         using var doc = JsonDocument.ParseValue(ref reader);
         var root = doc.RootElement;
 
+        var seriesId = root.TryGetProperty("series_id", out var sid) ? sid.GetFlexibleInt32() : 0;
+
         return new XtreamSeries
         {
-            Id = root.TryGetProperty("series_id", out var seriesId) ? seriesId.GetInt32() : 0,
-            SeriesId = root.TryGetProperty("series_id", out var sid) ? sid.GetInt32() : 0,
-            Name = root.TryGetProperty("name", out var name) ? name.GetString() ?? string.Empty : string.Empty,
-            Image = root.TryGetProperty("image", out var image) ? image.GetString() : null,
-            Rating = root.TryGetProperty("rating", out var rating) ? double.TryParse(rating.GetString(), out var r) ? r : null : null,
-            Rating5Based = root.TryGetProperty("rating_5based", out var r5) ? double.TryParse(r5.GetString(), out var r5val) ? r5val : null : null,
-            Plot = root.TryGetProperty("plot", out var plot) ? plot.GetString() : null,
-            Year = root.TryGetProperty("year", out var year) ? year.GetInt32() : null,
-            Genre = root.TryGetProperty("genre", out var genre) ? genre.GetString() : null,
-            CategoryId = root.TryGetProperty("category_id", out var catId) ? catId.GetInt32() : null,
-            CategoryName = root.TryGetProperty("category_name", out var catName) ? catName.GetString() : null,
-            EpisodesCount = root.TryGetProperty("episodes_count", out var epCount) ? epCount.GetInt32() : null,
-            SeasonsCount = root.TryGetProperty("seasons_count", out var seCount) ? seCount.GetInt32() : null,
-            Added = root.TryGetProperty("added", out var added) ? added.GetInt64() : 0,
-            LastModifiedTimestamp = root.TryGetProperty("last_modified", out var lastMod) ? lastMod.GetInt64() : 0
+            Id = seriesId,
+            SeriesId = seriesId,
+            Name = root.TryGetProperty("name", out var name) ? name.GetFlexibleString() ?? string.Empty : string.Empty,
+            Image = root.TryGetProperty("image", out var image) ? image.GetFlexibleString() : null,
+            Rating = root.TryGetProperty("rating", out var rating) ? rating.GetFlexibleNullableDouble() : null,
+            Rating5Based = root.TryGetProperty("rating_5based", out var r5) ? r5.GetFlexibleNullableDouble() : null,
+            Plot = root.TryGetProperty("plot", out var plot) ? plot.GetFlexibleString() : null,
+            Year = root.TryGetProperty("year", out var year) ? year.GetFlexibleNullableInt32() : null,
+            Genre = root.TryGetProperty("genre", out var genre) ? genre.GetFlexibleString() : null,
+            CategoryId = root.TryGetProperty("category_id", out var catId) ? catId.GetFlexibleNullableInt32() : null,
+            CategoryName = root.TryGetProperty("category_name", out var catName) ? catName.GetFlexibleString() : null,
+            EpisodesCount = root.TryGetProperty("episodes_count", out var epCount) ? epCount.GetFlexibleNullableInt32() : null,
+            SeasonsCount = root.TryGetProperty("seasons_count", out var seCount) ? seCount.GetFlexibleNullableInt32() : null,
+            Added = root.TryGetProperty("added", out var added) ? added.GetFlexibleInt64() : 0,
+            LastModifiedTimestamp = root.TryGetProperty("last_modified", out var lastMod) ? lastMod.GetFlexibleInt64() : 0
         };
     }
 

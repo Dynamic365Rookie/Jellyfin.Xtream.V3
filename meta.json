@@ -5,8 +5,8 @@
   "overview": "Stream Live TV, Movies, and Series from an Xtream-compatible server using this optimized plugin.",
   "owner": "Dynamic365Rookie",
   "category": "LiveTV",
-  "version": "3.3.6",
+  "version": "3.3.7",
   "targetAbi": "10.11.0.0",
-  "changelog": "Fix sync URLs: use proper Xtream API endpoints with credentials instead of bare paths",
-  "timestamp": "2026-04-21T15:30:00Z"
+  "changelog": "Fix JSON deserialization: handle Xtream API type inconsistencies (number vs string) in all converters",
+  "timestamp": "2026-04-21T16:00:00Z"
 }

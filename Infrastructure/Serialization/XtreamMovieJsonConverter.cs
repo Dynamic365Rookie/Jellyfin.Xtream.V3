@@ -11,26 +11,28 @@ public sealed class XtreamMovieJsonConverter : JsonConverter<XtreamMovie>
         using var doc = JsonDocument.ParseValue(ref reader);
         var root = doc.RootElement;
 
+        var streamId = root.TryGetProperty("stream_id", out var sid) ? sid.GetFlexibleInt32() : 0;
+
         return new XtreamMovie
         {
-            Id = root.TryGetProperty("stream_id", out var streamId) ? streamId.GetInt32() : 0,
-            StreamId = root.TryGetProperty("stream_id", out var sid) ? sid.GetInt32() : 0,
-            Name = root.TryGetProperty("name", out var name) ? name.GetString() ?? string.Empty : string.Empty,
-            Image = root.TryGetProperty("image", out var image) ? image.GetString() : null,
-            Rating = root.TryGetProperty("rating", out var rating) ? double.TryParse(rating.GetString(), out var r) ? r : null : null,
-            Rating5Based = root.TryGetProperty("rating_5based", out var r5) ? double.TryParse(r5.GetString(), out var r5val) ? r5val : null : null,
-            Plot = root.TryGetProperty("plot", out var plot) ? plot.GetString() : null,
-            Duration = root.TryGetProperty("duration", out var duration) ? duration.GetString() : null,
-            Year = root.TryGetProperty("year", out var year) ? year.GetInt32() : null,
-            Genre = root.TryGetProperty("genre", out var genre) ? genre.GetString() : null,
-            Country = root.TryGetProperty("country", out var country) ? country.GetString() : null,
-            Director = root.TryGetProperty("director", out var director) ? director.GetString() : null,
-            Writer = root.TryGetProperty("writer", out var writer) ? writer.GetString() : null,
-            Actor = root.TryGetProperty("actor", out var actor) ? actor.GetString() : null,
-            CategoryId = root.TryGetProperty("category_id", out var catId) ? catId.GetInt32() : null,
-            CategoryName = root.TryGetProperty("category_name", out var catName) ? catName.GetString() : null,
-            Added = root.TryGetProperty("added", out var added) ? added.GetInt64() : 0,
-            LastModifiedTimestamp = root.TryGetProperty("last_modified", out var lastMod) ? lastMod.GetInt64() : 0
+            Id = streamId,
+            StreamId = streamId,
+            Name = root.TryGetProperty("name", out var name) ? name.GetFlexibleString() ?? string.Empty : string.Empty,
+            Image = root.TryGetProperty("image", out var image) ? image.GetFlexibleString() : null,
+            Rating = root.TryGetProperty("rating", out var rating) ? rating.GetFlexibleNullableDouble() : null,
+            Rating5Based = root.TryGetProperty("rating_5based", out var r5) ? r5.GetFlexibleNullableDouble() : null,
+            Plot = root.TryGetProperty("plot", out var plot) ? plot.GetFlexibleString() : null,
+            Duration = root.TryGetProperty("duration", out var duration) ? duration.GetFlexibleString() : null,
+            Year = root.TryGetProperty("year", out var year) ? year.GetFlexibleNullableInt32() : null,
+            Genre = root.TryGetProperty("genre", out var genre) ? genre.GetFlexibleString() : null,
+            Country = root.TryGetProperty("country", out var country) ? country.GetFlexibleString() : null,
+            Director = root.TryGetProperty("director", out var director) ? director.GetFlexibleString() : null,
+            Writer = root.TryGetProperty("writer", out var writer) ? writer.GetFlexibleString() : null,
+            Actor = root.TryGetProperty("actor", out var actor) ? actor.GetFlexibleString() : null,
+            CategoryId = root.TryGetProperty("category_id", out var catId) ? catId.GetFlexibleNullableInt32() : null,
+            CategoryName = root.TryGetProperty("category_name", out var catName) ? catName.GetFlexibleString() : null,
+            Added = root.TryGetProperty("added", out var added) ? added.GetFlexibleInt64() : 0,
+            LastModifiedTimestamp = root.TryGetProperty("last_modified", out var lastMod) ? lastMod.GetFlexibleInt64() : 0
         };
     }
 

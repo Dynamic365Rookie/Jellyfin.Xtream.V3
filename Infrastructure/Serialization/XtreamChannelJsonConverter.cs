@@ -11,18 +11,20 @@ public sealed class XtreamChannelJsonConverter : JsonConverter<XtreamChannel>
         using var doc = JsonDocument.ParseValue(ref reader);
         var root = doc.RootElement;
 
+        var streamId = root.TryGetProperty("stream_id", out var sid) ? sid.GetFlexibleInt32() : 0;
+
         return new XtreamChannel
         {
-            Id = root.TryGetProperty("stream_id", out var streamId) ? streamId.GetInt32() : 0,
-            StreamId = root.TryGetProperty("stream_id", out var sid) ? sid.GetInt32() : 0,
-            Name = root.TryGetProperty("name", out var name) ? name.GetString() ?? string.Empty : string.Empty,
-            Icon = root.TryGetProperty("icon", out var icon) ? icon.GetString() : null,
-            CategoryId = root.TryGetProperty("category_id", out var catId) ? catId.GetInt32() : null,
-            CategoryName = root.TryGetProperty("category_name", out var catName) ? catName.GetString() : null,
-            EpgChannelId = root.TryGetProperty("epg_channel_id", out var epgId) ? epgId.GetInt32() : null,
-            Number = root.TryGetProperty("num", out var num) ? num.GetInt32() : null,
-            Language = root.TryGetProperty("language", out var language) ? language.GetString() : null,
-            Added = root.TryGetProperty("added", out var added) ? added.GetInt64() : 0
+            Id = streamId,
+            StreamId = streamId,
+            Name = root.TryGetProperty("name", out var name) ? name.GetFlexibleString() ?? string.Empty : string.Empty,
+            Icon = root.TryGetProperty("icon", out var icon) ? icon.GetFlexibleString() : null,
+            CategoryId = root.TryGetProperty("category_id", out var catId) ? catId.GetFlexibleNullableInt32() : null,
+            CategoryName = root.TryGetProperty("category_name", out var catName) ? catName.GetFlexibleString() : null,
+            EpgChannelId = root.TryGetProperty("epg_channel_id", out var epgId) ? epgId.GetFlexibleNullableInt32() : null,
+            Number = root.TryGetProperty("num", out var num) ? num.GetFlexibleNullableInt32() : null,
+            Language = root.TryGetProperty("language", out var language) ? language.GetFlexibleString() : null,
+            Added = root.TryGetProperty("added", out var added) ? added.GetFlexibleInt64() : 0
         };
     }
 

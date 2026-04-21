@@ -7,6 +7,16 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [3.3.7] - 2026-04-21
+
+### Fixed
+- **JSON deserialization failure on all 3 entity types** — Xtream API providers return inconsistent JSON types (`stream_id` as `"123"` string or `123` number, same for `category_id`, `year`, `added`, etc.)
+  - Created `JsonElementExtensions` helper with flexible type readers (`GetFlexibleInt32`, `GetFlexibleInt64`, `GetFlexibleNullableDouble`, `GetFlexibleString`)
+  - Updated `XtreamMovieJsonConverter`, `XtreamSeriesJsonConverter`, and `XtreamChannelJsonConverter` to tolerate both string and number representations
+  - Error was: `The requested operation requires an element of type 'Number', but the target element has type 'String'`
+
+---
+
 ## [3.3.6] - 2026-04-21
 
 ### Fixed
