@@ -1,10 +1,12 @@
 using Jellyfin.Xtream.Api;
 using Jellyfin.Xtream.Domain.Models;
 using Jellyfin.Xtream.Infrastructure.Persistence;
+using Jellyfin.Xtream.Services.LiveTv;
 using Jellyfin.Xtream.Services.Synchronization;
 using LiteDB;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller;
+using MediaBrowser.Controller.LiveTv;
 using MediaBrowser.Controller.Plugins;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -53,5 +55,8 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         // Services
         serviceCollection.AddSingleton<XtreamSyncValidator>();
         serviceCollection.AddSingleton<XtreamSyncService>();
+
+        // Live TV — exposes channels to Jellyfin's Live TV system
+        serviceCollection.AddSingleton<ILiveTvService, XtreamLiveTvService>();
     }
 }

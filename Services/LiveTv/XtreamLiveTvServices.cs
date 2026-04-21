@@ -1,87 +1,148 @@
-﻿/* 
- * Ce service nécessite MediaBrowser.Controller qui n'est pas disponible sur NuGet public.
- * Il sera disponible quand le plugin sera compilé dans le contexte de Jellyfin.
- * Pour l'instant, ce fichier est commenté pour permettre la compilation.
- */
-
-/*
-using Jellyfin.Xtream.Api;
 using Jellyfin.Xtream.Domain.Models;
 using Jellyfin.Xtream.Infrastructure.Persistence;
+using Jellyfin.Xtream.V3;
 using MediaBrowser.Controller.LiveTv;
-using MediaBrowser.Model.LiveTv;
 using MediaBrowser.Model.Dto;
-
+using MediaBrowser.Model.LiveTv;
+using MediaBrowser.Model.MediaInfo;
+using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Xtream.Services.LiveTv;
 
+/// <summary>
+/// Exposes Xtream IPTV live channels to Jellyfin's Live TV system.
+/// </summary>
 public sealed class XtreamLiveTvService : ILiveTvService
 {
-    private readonly XtreamApiClient _api;
-    private readonly StreamUrlResolver _resolver;
-    private readonly IXtreamRepository<XtreamChannel> _channels;
+    private readonly IXtreamRepository<XtreamChannel> _channelRepo;
+    private readonly ILogger<XtreamLiveTvService> _logger;
 
     public XtreamLiveTvService(
-        XtreamApiClient api,
-        StreamUrlResolver resolver,
-        IXtreamRepository<XtreamChannel> channels)
+        IXtreamRepository<XtreamChannel> channelRepo,
+        ILogger<XtreamLiveTvService> logger)
     {
-        _api = api;
-        _resolver = resolver;
-        _channels = channels;
+        _channelRepo = channelRepo;
+        _logger = logger;
     }
 
-    public async Task<IEnumerable<ChannelInfo>> GetChannelsAsync(
-        CancellationToken cancellationToken)
+    /// <inheritdoc />
+    public string Name => "Xtream Codes";
+
+    /// <inheritdoc />
+    public string HomePageUrl => string.Empty;
+
+    /// <inheritdoc />
+    public Task<IEnumerable<ChannelInfo>> GetChannelsAsync(CancellationToken cancellationToken)
     {
-        // À remplacer par appel Xtream réel
-        var demoChannels = new[]
+        var config = Plugin.Instance?.Configuration;
+        if (config == null || !config.EnableLiveTV)
         {
-            new XtreamChannel { Id = 1, Name = "Xtream Demo 1", StreamId = 1001 },
-            new XtreamChannel { Id = 2, Name = "Xtream Demo 2", StreamId = 1002 }
-        };
+            _logger.LogDebug("Live TV disabled or plugin not initialized");
+            return Task.FromResult(Enumerable.Empty<ChannelInfo>());
+        }
 
-        foreach (var channel in demoChannels)
-            _channels.Upsert(channel);
+        var channels = _channelRepo.GetAll().ToList();
 
-        return demoChannels.Select(c => new ChannelInfo
+        if (channels.Count == 0)
         {
-            Id = c.Id.ToString(),
+            _logger.LogWarning("[Xtream] No channels in database — run synchronization first");
+            return Task.FromResult(Enumerable.Empty<ChannelInfo>());
+        }
+
+        _logger.LogInformation("[Xtream] Returning {Count} live channels to Jellyfin", channels.Count);
+
+        var result = channels.Select(c => new ChannelInfo
+        {
+            Id = c.StreamId.ToString(),
             Name = c.Name,
-            ChannelType = ChannelType.TV
+            Number = c.Number?.ToString(),
+            ImageUrl = c.Icon,
+            ChannelType = ChannelType.TV,
+            ChannelGroup = c.CategoryName
         });
+
+        return Task.FromResult(result);
     }
 
-    public Task<MediaSourceInfo> GetChannelStreamAsync(
+    /// <inheritdoc />
+    public Task<MediaSourceInfo> GetChannelStream(string channelId, string streamId, CancellationToken cancellationToken)
+    {
+        var url = StreamUrlResolver.ResolveLive(int.Parse(channelId));
+        _logger.LogDebug("[Xtream] Resolving stream for channel {ChannelId}: {Url}", channelId, url);
+
+        return Task.FromResult(BuildMediaSource(channelId, url));
+    }
+
+    /// <inheritdoc />
+    public Task<List<MediaSourceInfo>> GetChannelStreamMediaSources(string channelId, CancellationToken cancellationToken)
+    {
+        var url = StreamUrlResolver.ResolveLive(int.Parse(channelId));
+        return Task.FromResult(new List<MediaSourceInfo> { BuildMediaSource(channelId, url) });
+    }
+
+    /// <inheritdoc />
+    public Task CloseLiveStream(string id, CancellationToken cancellationToken) => Task.CompletedTask;
+
+    /// <inheritdoc />
+    public Task ResetTuner(string id, CancellationToken cancellationToken) => Task.CompletedTask;
+
+    /// <inheritdoc />
+    public Task<IEnumerable<ProgramInfo>> GetProgramsAsync(
         string channelId,
+        DateTime startDateUtc,
+        DateTime endDateUtc,
         CancellationToken cancellationToken)
     {
-        var streamId = int.Parse(channelId);
-
-        var url = _resolver.Resolve(streamId);
-
-        return Task.FromResult(new MediaSourceInfo
-        {
-            Path = url,
-            Protocol = MediaProtocol.Http,
-            IsRemote = true
-        });
+        // EPG not implemented yet — Jellyfin will show channels without program data
+        return Task.FromResult(Enumerable.Empty<ProgramInfo>());
     }
 
-    #region Not implemented yet (required by interface)
+    #region Timer stubs (Xtream does not support recording)
 
-    public Task<IEnumerable<RecordingInfo>> GetRecordingsAsync(CancellationToken cancellationToken)
-        => Task.FromResult(Enumerable.Empty<RecordingInfo>());
-
+    /// <inheritdoc />
     public Task<IEnumerable<TimerInfo>> GetTimersAsync(CancellationToken cancellationToken)
         => Task.FromResult(Enumerable.Empty<TimerInfo>());
 
-    public Task CancelTimerAsync(string timerId, CancellationToken cancellationToken)
-        => Task.CompletedTask;
+    /// <inheritdoc />
+    public Task CreateTimerAsync(TimerInfo info, CancellationToken cancellationToken) => Task.CompletedTask;
 
-    public Task CreateTimerAsync(TimerInfo info, CancellationToken cancellationToken)
-        => Task.CompletedTask;
+    /// <inheritdoc />
+    public Task UpdateTimerAsync(TimerInfo updatedTimer, CancellationToken cancellationToken) => Task.CompletedTask;
+
+    /// <inheritdoc />
+    public Task CancelTimerAsync(string timerId, CancellationToken cancellationToken) => Task.CompletedTask;
+
+    /// <inheritdoc />
+    public Task<SeriesTimerInfo> GetNewTimerDefaultsAsync(CancellationToken cancellationToken, ProgramInfo? program = null)
+        => Task.FromResult(new SeriesTimerInfo());
+
+    /// <inheritdoc />
+    public Task<IEnumerable<SeriesTimerInfo>> GetSeriesTimersAsync(CancellationToken cancellationToken)
+        => Task.FromResult(Enumerable.Empty<SeriesTimerInfo>());
+
+    /// <inheritdoc />
+    public Task CreateSeriesTimerAsync(SeriesTimerInfo info, CancellationToken cancellationToken) => Task.CompletedTask;
+
+    /// <inheritdoc />
+    public Task UpdateSeriesTimerAsync(SeriesTimerInfo info, CancellationToken cancellationToken) => Task.CompletedTask;
+
+    /// <inheritdoc />
+    public Task CancelSeriesTimerAsync(string timerId, CancellationToken cancellationToken) => Task.CompletedTask;
 
     #endregion
+
+    private static MediaSourceInfo BuildMediaSource(string channelId, string url)
+    {
+        return new MediaSourceInfo
+        {
+            Id = channelId,
+            Path = url,
+            Protocol = MediaProtocol.Http,
+            IsRemote = true,
+            SupportsDirectPlay = true,
+            SupportsDirectStream = true,
+            IsInfiniteStream = true,
+            ReadAtNativeFramerate = false
+        };
+    }
 }
-*/

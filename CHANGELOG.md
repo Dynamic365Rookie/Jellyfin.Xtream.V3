@@ -7,6 +7,25 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [3.4.0] - 2026-04-21
+
+### Added
+- **Live TV Integration** — Implemented `ILiveTvService` to expose IPTV channels in Jellyfin's Live TV section
+  - `XtreamLiveTvService`: reads synchronized channels from LiteDB and maps them to Jellyfin's `ChannelInfo`
+  - Channel metadata: name, number, icon, category group
+  - Stream resolution: generates Xtream API live stream URLs (`{BaseUrl}/live/{User}/{Pass}/{StreamId}.ts`)
+  - Registered as singleton via `PluginServiceRegistrator`
+
+### Changed
+- **StreamUrlResolver**: refactored from instance class (with unregistered `XtreamOptions` dependency) to static helper reading config from `Plugin.Instance.Configuration`
+  - Added `ResolveLive()`, `ResolveMovie()`, `ResolveSeries()` methods for all content types
+
+### Note
+- Movies and series (VOD) require `IChannel` implementation to appear in Jellyfin — planned for a future release
+- EPG data not yet provided — channels appear without program guide information
+
+---
+
 ## [3.3.7] - 2026-04-21
 
 ### Fixed
