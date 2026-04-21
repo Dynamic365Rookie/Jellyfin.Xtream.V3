@@ -33,12 +33,7 @@ public sealed class XtreamIncrementalSyncTask : IScheduledTask
 
     public string Key => "XtreamIncrementalSync";
 
-    public Task Execute(CancellationToken cancellationToken, IProgress<double> progress)
-    {
-        return ExecuteInternalAsync(cancellationToken, progress);
-    }
-
-    private async Task ExecuteInternalAsync(CancellationToken cancellationToken, IProgress<double> progress)
+    public async Task Execute(CancellationToken cancellationToken, IProgress<double> progress)
     {
         _logger.LogInformation("Démarrage de la synchronisation Xtream...");
         _memoryManager.LogMemoryUsage("Avant synchronisation");
