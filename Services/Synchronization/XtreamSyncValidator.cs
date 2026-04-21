@@ -120,7 +120,7 @@ public sealed class XtreamSyncValidator
                 _logger.LogDebug("Testing {EndpointName} endpoint", name);
 
                 using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-                cts.CancelAfter(TimeSpan.FromSeconds(5));
+                cts.CancelAfter(TimeSpan.FromSeconds(60));
 
                 await _api.GetAsync<JsonElement>(url, cts.Token);
             }

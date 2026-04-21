@@ -7,6 +7,16 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [3.3.5] - 2026-04-21
+
+### Fixed
+- **Endpoint validation timeout for large IPTV catalogs**: Increased per-endpoint validation timeout from 5 seconds to 60 seconds
+  - Large providers (thousands of movies/series/channels) return massive JSON payloads that cannot be downloaded in 5 seconds
+  - Connectivity test (10s) would pass, but endpoint validation (5s) would fail with timeout errors
+  - Affected endpoints: Movies, Series, LiveStreams
+
+---
+
 ## [3.3.2] - 2026-04-21
 
 ### Fixed
