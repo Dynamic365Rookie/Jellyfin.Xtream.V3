@@ -1,6 +1,7 @@
 ﻿using System;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Jellyfin.Xtream.V3.Configuration;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
@@ -23,6 +24,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         : base(applicationPaths, xmlSerializer)
     {
         Instance = this;
+        LogPluginInitialization();
     }
 
     /// <summary>
@@ -50,5 +52,40 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
                 EmbeddedResourcePath = string.Format("{0}.Configuration.configPage.html", GetType().Namespace)
             }
         };
+    }
+
+    /// <summary>
+    /// Logs plugin initialization details for debugging.
+    /// </summary>
+    private void LogPluginInitialization()
+    {
+        try
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            var version = assembly.GetName().Version;
+            var assemblyName = assembly.GetName().Name;
+
+            System.Diagnostics.Debug.WriteLine($"[Jellyfin.Xtream] Plugin Initializing: {assemblyName} v{version}");
+            System.Diagnostics.Debug.WriteLine($"[Jellyfin.Xtream] Assembly Location: {assembly.Location}");
+
+            // Log loaded assemblies in the plugin directory
+            var pluginPath = Path.GetDirectoryName(assembly.Location);
+            if (!string.IsNullOrEmpty(pluginPath))
+            {
+                var dllFiles = Directory.GetFiles(pluginPath, "*.dll");
+                System.Diagnostics.Debug.WriteLine($"[Jellyfin.Xtream] Plugin directory DLLs ({dllFiles.Length} total):");
+                foreach (var dll in dllFiles.OrderBy(f => f))
+                {
+                    var fileInfo = new FileInfo(dll);
+                    System.Diagnostics.Debug.WriteLine($"  - {fileInfo.Name} ({fileInfo.Length} bytes)");
+                }
+            }
+
+            System.Diagnostics.Debug.WriteLine("[Jellyfin.Xtream] Plugin initialization complete ✓");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Jellyfin.Xtream] Error during plugin initialization logging: {ex.Message}");
+        }
     }
 }
