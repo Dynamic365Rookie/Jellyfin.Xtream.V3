@@ -142,17 +142,19 @@ public sealed class XtreamSyncService
         }
     }
 
-    public async Task SyncAllAsync(string baseUrl, CancellationToken ct)
+    public async Task SyncAllAsync(string baseUrl, string username, string password, CancellationToken ct)
     {
         _logger.LogInformation("Starting full synchronization...");
         var startTime = DateTime.UtcNow;
 
+        var cleanBaseUrl = baseUrl.TrimEnd('/');
+
         // Synchroniser en parallèle pour améliorer les performances
         var tasks = new[]
         {
-            SyncMoviesAsync($"{baseUrl}/movies", ct),
-            SyncSeriesAsync($"{baseUrl}/series", ct),
-            SyncChannelsAsync($"{baseUrl}/channels", ct)
+            SyncMoviesAsync(XtreamApiEndpoints.Movies(cleanBaseUrl, username, password), ct),
+            SyncSeriesAsync(XtreamApiEndpoints.Series(cleanBaseUrl, username, password), ct),
+            SyncChannelsAsync(XtreamApiEndpoints.LiveStreams(cleanBaseUrl, username, password), ct)
         };
 
         await Task.WhenAll(tasks);
@@ -180,7 +182,7 @@ public sealed class XtreamSyncService
 
         try
         {
-            await SyncAllAsync(baseUrl, ct);
+            await SyncAllAsync(baseUrl, username, password, ct);
             var duration = DateTime.UtcNow - startTime;
             _logger.LogInformation("Data synchronization completed successfully in {Duration}ms", duration.TotalMilliseconds);
             return SyncResult.Success();

@@ -5,8 +5,8 @@
   "overview": "Stream Live TV, Movies, and Series from an Xtream-compatible server using this optimized plugin.",
   "owner": "Dynamic365Rookie",
   "category": "LiveTV",
-  "version": "3.3.5",
+  "version": "3.3.6",
   "targetAbi": "10.11.0.0",
-  "changelog": "Fix endpoint validation timeout for large IPTV catalogs: increase per-endpoint timeout from 5s to 60s",
-  "timestamp": "2026-04-21T15:00:00Z"
+  "changelog": "Fix sync URLs: use proper Xtream API endpoints with credentials instead of bare paths",
+  "timestamp": "2026-04-21T15:30:00Z"
 }

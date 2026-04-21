@@ -7,6 +7,16 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [3.3.6] - 2026-04-21
+
+### Fixed
+- **Critical: Sync used wrong API URLs** — `SyncAllAsync` built URLs as `{baseUrl}/movies` instead of using `XtreamApiEndpoints` with `player_api.php?username=X&password=Y&action=get_vod_streams`
+  - Server returned HTML (login page) instead of JSON, causing `JsonException: '<' is an invalid start of a value`
+  - Fixed `SyncAllAsync` to accept credentials and use `XtreamApiEndpoints.Movies/Series/LiveStreams`
+- **Double slash in URLs** — Added `TrimEnd('/')` in `XtreamApiEndpoints` to prevent `https://host//player_api.php` when base URL ends with `/`
+
+---
+
 ## [3.3.5] - 2026-04-21
 
 ### Fixed
