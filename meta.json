@@ -5,8 +5,8 @@
   "overview": "Stream Live TV, Movies, and Series from an Xtream-compatible server using this optimized plugin.",
   "owner": "Dynamic365Rookie",
   "category": "LiveTV",
-  "version": "3.3.3",
+  "version": "3.3.4",
   "targetAbi": "10.11.0.0",
-  "changelog": "Add sync summary logging: movies, series, channels count and duration visible in Jellyfin logs",
-  "timestamp": "2026-04-21T14:15:00Z"
+  "changelog": "Fix RuntimeBinderException in connectivity test: replace dynamic with JsonElement for API response validation",
+  "timestamp": "2026-04-21T14:30:00Z"
 }

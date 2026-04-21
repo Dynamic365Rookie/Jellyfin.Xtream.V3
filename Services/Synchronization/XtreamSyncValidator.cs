@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Jellyfin.Xtream.Api;
 using Microsoft.Extensions.Logging;
 
@@ -65,8 +66,8 @@ public sealed class XtreamSyncValidator
 
             try
             {
-                var result = await _api.GetAsync<dynamic>(testUrl, cts.Token);
-                if (result == null)
+                var result = await _api.GetAsync<JsonElement>(testUrl, cts.Token);
+                if (result.ValueKind == JsonValueKind.Undefined)
                 {
                     errors.Add("API returned null response - credentials may be invalid");
                     _logger.LogWarning("Connectivity test received null response");
@@ -121,7 +122,7 @@ public sealed class XtreamSyncValidator
                 using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
                 cts.CancelAfter(TimeSpan.FromSeconds(5));
 
-                await _api.GetAsync<dynamic>(url, cts.Token);
+                await _api.GetAsync<JsonElement>(url, cts.Token);
             }
             catch (HttpRequestException ex)
             {
