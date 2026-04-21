@@ -7,6 +7,15 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [3.3.2] - 2026-04-21
+
+### Fixed
+- **LiteDB Pragma error**: `Pragma 'CACHE_SIZE' not exist` — removed `CACHE_SIZE` and `ASYNC` pragmas not supported by LiteDB 5.0.21
+  - These pragmas were written for an older/different LiteDB API and crash at database initialization
+  - LiteDB 5.x handles caching and WAL internally via `ConnectionType.Shared`
+
+---
+
 ## [3.3.1] - 2026-04-21
 
 ### Fixed
