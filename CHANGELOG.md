@@ -19,17 +19,6 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
-## [3.2.2] - 2026-04-21
-
-### Fixed
-- **Plugin Initialization Logging**: Enhanced logging of assembly information and loaded DLLs
-- **Background Task Registration**: Improved reflection-based IScheduledTask discovery
-
-### Commits
-- `04017cd` - fix: Update manifest version and add plugin initialization logging
-
----
-
 ## [3.2.1] - 2026-04-21
 
 ### Features
