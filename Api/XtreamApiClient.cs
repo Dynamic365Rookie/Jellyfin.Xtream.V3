@@ -2,6 +2,8 @@
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
+namespace Jellyfin.Xtream.Api;
+
 public sealed class XtreamApiClient
 {
     private readonly HttpClient _http;
