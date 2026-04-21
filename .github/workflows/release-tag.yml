@@ -1,0 +1,76 @@
+name: Release Tag Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  DOTNET_VERSION: '6.0.x'
+  CONFIGURATION: Release
+  ARTIFACT_NAME: Jellyfin.Xtream.V3
+
+jobs:
+  release:
+    name: Create Release for Tag
+    runs-on: windows-latest
+    permissions:
+      contents: write
+      repository-projects: read
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Get tag version
+      id: tag
+      run: |
+        $tagRef = "${{ github.ref }}"
+        $version = $tagRef -replace '^refs/tags/', ''
+        Write-Host "Extracted version: $version"
+        "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+      shell: pwsh
+
+    - name: Extract release notes from CHANGELOG
+      id: notes
+      run: |
+        pwsh -Command "& './.github/scripts/extract-version-notes.ps1' -Version '${{ steps.tag.outputs.version }}'"
+      continue-on-error: true
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build release
+      run: dotnet build --configuration ${{ env.CONFIGURATION }} --no-restore
+
+    - name: Publish release
+      run: dotnet publish -c ${{ env.CONFIGURATION }} -o ./release
+
+    - name: Create archive
+      run: |
+        cd ./release
+        Compress-Archive -Path * -DestinationPath ../Jellyfin.Xtream.V3-${{ steps.tag.outputs.version }}.zip
+        cd ..
+      shell: pwsh
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ./Jellyfin.Xtream.V3-${{ steps.tag.outputs.version }}.zip
+        body: ${{ env.release_notes || format('Release {0} - Jellyfin Xtream plugin', steps.tag.outputs.version) }}
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+
+    - name: Release creation confirmation
+      run: |
+        Write-Host "Release ${{ steps.tag.outputs.version }} created successfully!" -ForegroundColor Green
+      shell: pwsh
