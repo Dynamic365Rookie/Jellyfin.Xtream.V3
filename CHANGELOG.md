@@ -7,6 +7,17 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [3.2.4] - 2026-04-21
+
+### Fixed
+- **Plugin Loading Issue**: Ensured DLL compilation includes async Execute method fix from v3.2.3
+- **Background Task Registration**: Verified IScheduledTask interface implementation is correctly compiled
+
+### Commits
+- Recompile v3.2.3 fix with proper DLL generation
+
+---
+
 ## [3.2.3] - 2026-04-21
 
 ### Fixed
