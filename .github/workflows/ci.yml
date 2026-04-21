@@ -1,0 +1,186 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_VERSION: '9.0.x'
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  CONFIGURATION: Release
+  COVERAGE_THRESHOLD: 80
+
+jobs:
+  build:
+    name: Build
+    runs-on: windows-latest
+    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', '**/Directory.Build.props') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: dotnet restore Jellyfin.Xtream.V3.sln
+
+      - name: Build
+        run: dotnet build Jellyfin.Xtream.V3.sln --configuration ${{ env.CONFIGURATION }} --no-restore
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: ./bin/${{ env.CONFIGURATION }}
+          retention-days: 7
+
+  format:
+    name: Format Check
+    runs-on: windows-latest
+    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', '**/Directory.Build.props') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: dotnet restore Jellyfin.Xtream.V3.sln
+
+      - name: Check formatting
+        run: dotnet format Jellyfin.Xtream.V3.sln --verify-no-changes --verbosity diagnostic
+
+  test:
+    name: Test & Coverage
+    runs-on: windows-latest
+    needs: build
+    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', '**/Directory.Build.props') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: dotnet restore Jellyfin.Xtream.V3.sln
+
+      - name: Run tests with coverage
+        run: >
+          dotnet test Jellyfin.Xtream.V3.sln
+          --configuration ${{ env.CONFIGURATION }}
+          --no-restore
+          --verbosity normal
+          --collect:"XPlat Code Coverage"
+          --results-directory ./coverage
+          --logger "trx;LogFileName=test-results.trx"
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: ./coverage
+          retention-days: 7
+
+      - name: Install ReportGenerator
+        run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+      - name: Generate coverage report
+        run: >
+          reportgenerator
+          -reports:"./coverage/**/coverage.cobertura.xml"
+          -targetdir:"./coverage/report"
+          -reporttypes:"Cobertura;TextSummary"
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: ./coverage/report
+          retention-days: 7
+
+      - name: Check coverage threshold
+        shell: pwsh
+        run: |
+          $coberturaFiles = Get-ChildItem -Path ./coverage -Filter "coverage.cobertura.xml" -Recurse
+          if ($coberturaFiles.Count -eq 0) {
+            Write-Host "WARNING: No coverage files found. Skipping threshold check."
+            exit 0
+          }
+          [xml]$coverage = Get-Content $coberturaFiles[0].FullName
+          $lineRate = [math]::Round([double]$coverage.coverage.'line-rate' * 100, 2)
+          Write-Host "Line coverage: ${lineRate}%"
+          if ($lineRate -lt ${{ env.COVERAGE_THRESHOLD }}) {
+            Write-Error "FAIL: Coverage ${lineRate}% is below the ${env:COVERAGE_THRESHOLD}% threshold"
+            exit 1
+          }
+          Write-Host "PASS: Coverage ${lineRate}% meets the ${{ env.COVERAGE_THRESHOLD }}% threshold"
+
+  lint:
+    name: Lint (Warnings as Errors)
+    runs-on: windows-latest
+    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', '**/Directory.Build.props') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: dotnet restore Jellyfin.Xtream.V3.sln
+
+      - name: Build with warnings as errors
+        run: dotnet build Jellyfin.Xtream.V3.sln --configuration ${{ env.CONFIGURATION }} --no-restore -p:TreatWarningsAsErrors=true

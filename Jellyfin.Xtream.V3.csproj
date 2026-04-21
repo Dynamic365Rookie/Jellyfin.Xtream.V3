@@ -12,6 +12,12 @@
     <Folder Include="Domain\Enums\" />
   </ItemGroup>
 
+  <!-- Exclude the separate test project from this compilation -->
+  <ItemGroup>
+    <Compile Remove="Tests\Jellyfin.Xtream.V3.Tests\**" />
+    <None Remove="Tests\Jellyfin.Xtream.V3.Tests\**" />
+  </ItemGroup>
+
   <ItemGroup>
     <None Include=".github\scripts\generate-repository.ps1" />
     <None Include=".github\workflows\publish-repository.yml" />

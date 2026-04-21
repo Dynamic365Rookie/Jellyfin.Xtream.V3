@@ -362,6 +362,15 @@ Temp/
 Thumbs.db
 Desktop.ini
 
+# Coverage reports
+coverage/
+**/coverage.cobertura.xml
+**/TestResults/
+*.trx
+
+# ReportGenerator output
+coveragereport/
+
 # Custom for this project
 # Keep documentation and scripts
 !*.md
