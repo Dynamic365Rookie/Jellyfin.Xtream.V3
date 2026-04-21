@@ -1,166 +1,78 @@
-# CHANGELOG
+# Jellyfin Xtream V3 - Changelog
 
-Tous les changements notables du projet sont documentés dans ce fichier.
+Tous les changements notables du projet sont documentÃ©s dans ce fichier.
 
-Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [2.0.0] - 2024-XX-XX
-
-### Added (Nouveautés)
-
-#### Infrastructure - Persistence
-- `LiteDbConfiguration.cs` - Configuration optimisée de LiteDB (cache 40MB, async, WAL)
-- Batch operations dans `IXtreamRepository.cs` - UpsertBatch, GetLastModifiedMap, GetByIds, DeleteNotInList
-- Implémentation batch dans `LiteDbXtreamRepository.cs` - 99.9% réduction requêtes DB
-
-#### Infrastructure - Monitoring
-- `PerformanceMonitor.cs` - Système de monitoring des performances (avg/min/max, success rate)
-- `MemoryManager.cs` - Gestion automatique de la mémoire (seuils, GC forcé, snapshots)
-
-#### Infrastructure - Utilities
-- `BatchProcessor.cs` - Utilitaires pour traitement par lots et parallèle
-- `RepositoryBenchmark.cs` - Suite de benchmarks de performance
-
-#### Services - Synchronization
-- `XtreamSyncService.cs` refonte - Synchronisation par lots et parallèle
-- `XtreamIncrementalSyncTask.cs` - Tâche planifiée avec monitoring intégré
-- Détection intelligente des changements - 1 requête au lieu de 30,000
-
-#### Infrastructure - Caching
-- Migration vers `IMemoryCache` dans `MemoryXtreamCache.cs`
-- Limite de taille (10,000 entrées)
-- Expiration automatique (2h + sliding 30min)
-- Compaction périodique (15min)
-
-#### API Client
-- `XtreamApiClient.cs` - Retry automatique avec backoff exponentiel
-- Buffer JSON optimisé (64KB)
-- Gestion avancée des erreurs
-- Logging détaillé
-
-#### Configuration
-- `PerformanceOptions.cs` - Configuration centralisée avec presets (Default, LowVolume, HighVolume)
-- `XtreamOptionsValidator.cs` - Validation des options
-
-#### Documentation
-- `README.md` - Documentation principale
-- `QUICKSTART.md` - Guide de démarrage rapide
-- `PERFORMANCE_GUIDE.md` - Configuration et tuning
-- `PERFORMANCE_OPTIMIZATIONS.md` - Détails techniques
-- `CHANGES_SUMMARY.md` - Résumé des changements
-- `RELEASE_NOTES.md` - Notes de version
-- `CHANGELOG.md` - CE FICHIER
-
-#### Scripts
-- `commit-and-push.ps1` - Automation commit/push
-- `rollback-and-push-github.ps1` - Rollback vers GitHub
-
-#### GitHub Actions
-- `.github/workflows/build-and-release.yml` - Build, test, release
-- `.github/workflows/code-quality.yml` - Analyse de code et sécurité
-- `.github/workflows/documentation.yml` - Validation documentation
-
-### Changed (Modifications)
-
-#### Domain Models
-- `XtreamMovie.cs` - `class` ? `record`
-- `XtreamSeries.cs` - `class` ? `record`
-- `XtreamChannel.cs` - `class` ? `record`
-- `XtreamEpisode.cs` - `class` ? `record`
-
-#### Infrastructure - Caching
-- `IXtreamCache.cs` - Ajout Store() avec expiration personnalisée, Clear(), Remove()
-
-#### Services
-- `XtreamSyncService.cs` - Refonte complète
-- `LiteDbXtreamRepository.cs` - Ajout batch operations
-- `MemoryXtreamCache.cs` - Migration IMemoryCache
-- `XtreamApiClient.cs` - Ajout retry et logging
-- `XtreamIncrementalSyncTask.cs` - Monitoring intégré
-
-#### Plugin
-- `Plugins.cs` - Constructeur mis à jour pour MediaBrowser.Common 4.9.1.90
-
-#### Project File
-- `Jellyfin.Xtream.V2.csproj` - Mise à jour packages
-
-### Fixed (Corrections)
-
-- CVE-2024-XXXX: Vulnérabilité dans `Microsoft.Extensions.Caching.Memory` 6.0.1
-  - Mise à jour vers 6.0.2
-- `XtreamLiveTvServices.cs` - Commenté (nécessite MediaBrowser.Controller non disponible publiquement)
-
-### Removed (Suppressions)
-
-- Aucune suppression de fonctionnalités existantes
-
-### Performance
-
-- Sync initiale: 60-90 min ? 15 min (**75-83%** ??)
-- Sync incrémentale: 30 min ? 2 min (**93%** ??)
-- Requêtes base de données: 30,000+ ? 10-20 (**99.9%** ??)
-- Mémoire: Non contrôlée ? < 1.5 GB (stable)
-
-### Technical Details
-
-#### Patterns Implémentés
-- Repository Pattern
-- Factory Pattern
-- Monitor Pattern
-- Strategy Pattern
-- Batch Processing
-
-#### Principes SOLID
-- Single Responsibility
-- Open/Closed
-- Liskov Substitution
-- Interface Segregation
-- Dependency Inversion
+Le format est basÃ© sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+et ce projet adhÃ¨re Ã  [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
-## [1.0.0] - 2024-01-01
+## [3.2.1] - 2026-04-21
 
-### Initial Release
+### Features
+- **Enabled Scheduled Synchronization Task**: XtreamIncrementalSyncTask now automatically available in Jellyfin Dashboard
+- **Background Sync**: Automatic synchronization of movies, series, and channels every 6 hours
+- **Task Discovery**: Plugin properly registers with Jellyfin's IScheduledTask interface
 
-- Première version du plugin Jellyfin.Xtream.V2
-- Support base pour Xtream IPTV
-- API client minimal
-- Synchronisation simple
+### Improvements
+- Added detailed task logging for synchronization debugging
+- Improved memory management during scheduled operations
+- Better visibility in Jellyfin Scheduled Tasks dashboard
 
----
-
-## Types de Changements
-
-- **Added**: Pour nouvelles fonctionnalités
-- **Changed**: Pour changements aux fonctionnalités existantes
-- **Deprecated**: Pour fonctionnalités bientôt supprimées
-- **Removed**: Pour fonctionnalités supprimées
-- **Fixed**: Pour corrections de bugs
-- **Security**: Pour vulnérabilités de sécurité
+### Commits
+- `fb2d7d5` - fix: Bump version to 3.2.1 for scheduled task feature
+- `3ef3147` - feat: Enable scheduled Xtream synchronization task
 
 ---
 
-## Versionning
+## [3.2.0] - 2026-04-20
+
+### Features
+- **Expanded Domain Models**: Complete Xtream API field support
+  - Ratings, plot, episodes, genres, duration, release date
+  - Automatic stream_id/series_id to Id mapping via JSON converters
+  - Unix timestamp conversion to DateTime with proper timezone handling
+
+- **Pre-Sync Validation Framework**: Comprehensive validation before synchronization
+  - Configuration validation (URL format, credentials)
+  - Server connectivity testing
+  - API endpoint availability verification
+  - Detailed error reporting and logging
+
+- **Comprehensive Test Suite**: Full unit test coverage
+  - XtreamDataLoadingTests: Deserialization, validation, timestamp conversion tests
+  - XtreamDataLoadingIntegrationExample: Integration examples and best practices
+  - TESTING_GUIDE.md: Complete documentation with examples
+
+### Improvements
+- Added SyncResult class for sync operation results tracking
+- Enhanced benchmark suite with proper timestamp handling
+- Detailed documentation in TESTING_GUIDE.md
+- Better error handling and validation messages
+- Improved code organization
+
+### Commits
+- `e1877fe` - feat: Add comprehensive Xtream data loading with validation and tests
+- `04017cd` - fix: Update manifest version and add plugin initialization logging
+
+---
+
+## [3.1.6] - 2026-04-10
+
+### Fixed
+- Stabilized manifest encoding for compatibility
+- Improved plugin loading process with Jellyfin 10.11
+
+---
+
+## Versionning Semantique
 
 Ce projet suit [Semantic Versioning](https://semver.org/):
 
-- **MAJOR** (X.0.0): Changements incompatibles
-- **MINOR** (0.X.0): Nouvelles fonctionnalités compatibles
-- **PATCH** (0.0.X): Corrections de bugs
+- **MAJOR** (3.0.0): Changements incompatibles
+- **MINOR** (3.2.0): Nouvelles fonctionnalitÃ©s compatibles
+- **PATCH** (3.2.1): Corrections de bugs
 
 ---
 
-## Guides de Lecture
-
-Pour plus d'informations:
-- Installation: Voir `README.md`
-- Démarrage rapide: Voir `QUICKSTART.md`
-- Configuration: Voir `PERFORMANCE_GUIDE.md`
-- Détails techniques: Voir `PERFORMANCE_OPTIMIZATIONS.md`
-- Release notes: Voir `RELEASE_NOTES.md`
-
----
-
-**Date de dernière mise à jour**: 2024
+**Date de derniÃ¨re mise Ã  jour**: 2026-04-21

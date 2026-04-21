@@ -1,0 +1,36 @@
+[
+  {
+    "overview": "Stream Live TV, Movies, and Series from an Xtream-compatible server using this optimized plugin.",
+    "name": "Jellyfin Xtream",
+    "guid": "a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+    "versions": [
+      {
+        "changelog": "Enable Scheduled Synchronization Task: XtreamIncrementalSyncTask now automatically syncs movies, series, and channels every 6 hours. Includes detailed task logging and improved memory management during scheduled operations.",
+        "targetAbi": "10.11.0.0",
+        "checksum": "",
+        "timestamp": "2026-04-21T00:00:00Z",
+        "sourceUrl": "https://github.com/Dynamic365Rookie/Jellyfin.Xtream.V3/releases/download/v3.2.1/Jellyfin.Xtream.V3.zip",
+        "version": "3.2.1"
+      },
+      {
+        "changelog": "Major Release: Expanded domain models with complete Xtream API field support (ratings, plot, episodes, genres, etc.). Comprehensive validation framework for pre-sync configuration checks. Complete test suite with integration examples. JSON converters for automatic stream_id/series_id mapping. Unix timestamp conversion to DateTime.",
+        "targetAbi": "10.11.0.0",
+        "checksum": "",
+        "timestamp": "2026-04-20T19:34:00Z",
+        "sourceUrl": "https://github.com/Dynamic365Rookie/Jellyfin.Xtream.V3/releases/download/v3.2.0/Jellyfin.Xtream.V3.zip",
+        "version": "3.2.0"
+      },
+      {
+        "changelog": "Stabilized manifest encoding and improved plugin loading compatibility with Jellyfin 10.11",
+        "targetAbi": "10.11.0.0",
+        "checksum": "512e3d33c86c62b5401a3612886e683a",
+        "timestamp": "2026-04-10T16:44:43Z",
+        "sourceUrl": "https://github.com/Dynamic365Rookie/Jellyfin.Xtream.V3/releases/download/v3.1.6/Jellyfin.Xtream.V3.zip",
+        "version": "3.1.6"
+      }
+    ],
+    "description": "Performance-optimized IPTV plugin for Xtream Codes API. Support for large catalogs with advanced caching and memory management.",
+    "owner": "Dynamic365Rookie",
+    "category": "LiveTV"
+  }
+]
