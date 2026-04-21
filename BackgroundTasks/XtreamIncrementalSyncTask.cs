@@ -1,5 +1,4 @@
-﻿/* 
-using Jellyfin.Xtream.Services.Synchronization;
+﻿using Jellyfin.Xtream.Services.Synchronization;
 using Jellyfin.Xtream.Infrastructure.Monitoring;
 using Jellyfin.Xtream.Infrastructure.Utilities;
 using Microsoft.Extensions.Logging;
@@ -34,7 +33,12 @@ public sealed class XtreamIncrementalSyncTask : IScheduledTask
 
     public string Key => "XtreamIncrementalSync";
 
-    public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
+    public Task Execute(CancellationToken cancellationToken, IProgress<double> progress)
+    {
+        return ExecuteInternalAsync(cancellationToken, progress);
+    }
+
+    private async Task ExecuteInternalAsync(CancellationToken cancellationToken, IProgress<double> progress)
     {
         _logger.LogInformation("Démarrage de la synchronisation Xtream...");
         _memoryManager.LogMemoryUsage("Avant synchronisation");
@@ -81,10 +85,10 @@ public sealed class XtreamIncrementalSyncTask : IScheduledTask
             }
 
             progress?.Report(100);
-            
+
             _performanceMonitor.LogStatistics();
             _memoryManager.LogMemoryUsage("Fin de synchronisation");
-            
+
             _logger.LogInformation("Synchronisation Xtream terminée avec succès");
         }
         catch (OperationCanceledException)
@@ -127,12 +131,12 @@ public sealed class XtreamIncrementalSyncTask : IScheduledTask
         using (_performanceMonitor.Track($"Sync{entityType}"))
         {
             _logger.LogInformation("Synchronisation de {EntityType}...", entityType);
-            
+
             await syncAction();
-            
+
             progress?.Report(endProgress);
-            
+
             _logger.LogInformation("Synchronisation de {EntityType} terminée", entityType);
         }
     }
-}*/
+}

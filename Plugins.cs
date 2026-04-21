@@ -1,8 +1,8 @@
-﻿using System;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Jellyfin.Xtream.V3.Configuration;
+using Jellyfin.Xtream.BackgroundTasks;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
@@ -67,6 +67,17 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 
             System.Diagnostics.Debug.WriteLine($"[Jellyfin.Xtream] Plugin Initializing: {assemblyName} v{version}");
             System.Diagnostics.Debug.WriteLine($"[Jellyfin.Xtream] Assembly Location: {assembly.Location}");
+            System.Diagnostics.Debug.WriteLine($"[Jellyfin.Xtream] IScheduledTask implementations found:");
+
+            // Log IScheduledTask implementations
+            var scheduledTaskType = typeof(MediaBrowser.Model.Tasks.IScheduledTask);
+            var tasks = assembly.GetTypes()
+                .Where(t => !t.IsInterface && scheduledTaskType.IsAssignableFrom(t));
+
+            foreach (var task in tasks)
+            {
+                System.Diagnostics.Debug.WriteLine($"  - {task.Name}");
+            }
 
             // Log loaded assemblies in the plugin directory
             var pluginPath = Path.GetDirectoryName(assembly.Location);

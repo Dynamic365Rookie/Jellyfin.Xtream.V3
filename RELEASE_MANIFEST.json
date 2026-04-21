@@ -1,0 +1,53 @@
+{
+  "version": "3.2.0",
+  "changelog": "Comprehensive Xtream data loading with validation and tests",
+  "targetAbi": "10.11.0.0",
+  "features": [
+    "Expanded domain models with all Xtream API fields (ratings, plot, episodes, genres, etc.)",
+    "JSON converters for automatic stream_id/series_id to Id mapping",
+    "Unix timestamp conversion to DateTime",
+    "XtreamSyncValidator for pre-sync configuration and connectivity checks",
+    "SyncResult class for sync operation results",
+    "Complete test suite (XtreamDataLoadingTests)",
+    "Integration example and configuration guide",
+    "Detailed TESTING_GUIDE.md documentation",
+    "Plugin initialization logging for debugging"
+  ],
+  "bugFixes": [
+    "Fixed benchmark to use LastModifiedTimestamp",
+    "Updated meta.json version to match code version",
+    "Added assembly logging for troubleshooting"
+  ],
+  "dependencies": [
+    {
+      "name": "Microsoft.Extensions.Caching.Memory",
+      "version": "6.0.0.0"
+    },
+    {
+      "name": "Microsoft.Extensions.Caching.Abstractions",
+      "version": "6.0.0.0"
+    },
+    {
+      "name": "LiteDB",
+      "version": "5.0.21.0"
+    },
+    {
+      "name": "Microsoft.Extensions.Logging.Abstractions",
+      "version": "6.0.0.0"
+    },
+    {
+      "name": "Microsoft.Extensions.Options",
+      "version": "6.0.0.0"
+    },
+    {
+      "name": "Microsoft.Extensions.DependencyInjection.Abstractions",
+      "version": "6.0.0.0"
+    },
+    {
+      "name": "Microsoft.Extensions.Primitives",
+      "version": "6.0.0.0"
+    }
+  ],
+  "buildDate": "2026-04-21T00:00:00Z",
+  "downloadUrl": "https://github.com/Dynamic365Rookie/Jellyfin.Xtream.V3/releases/download/v3.2.0/Jellyfin.Xtream.V3.zip"
+}
