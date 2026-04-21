@@ -7,6 +7,30 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [3.2.6] - 2026-04-21
+
+### Changed
+- **Framework Update**: Upgraded from .NET 6.0 to .NET 9.0 for better performance and security
+- **Jellyfin Compatibility**: Updated to Jellyfin 10.11.3 packages (Controller, Common, Model)
+- **IScheduledTask Interface**: Adapted method signature to Jellyfin 10.11+ requirements
+  - Renamed Execute to ExecuteAsync
+  - Reordered parameters to (IProgress<double>, CancellationToken) per latest interface specification
+
+### Security
+- **Vulnerability Fixes**: Updated dependencies to resolve GHSA-qj66-m88j-hmgj
+  - Microsoft.Extensions.Caching.Memory: 6.0.2 → 9.0.10
+  - Microsoft.Extensions.Logging.Abstractions: 6.0.4 → 9.0.10
+
+### Technical Details
+- Updated TaskTriggerInfo enum usage for compatibility with Jellyfin 10.11 API
+- Full recompilation with .NET 9.0 toolchain
+- All dependencies verified against Jellyfin 10.11.3 specifications
+
+### Commits
+- Framework and dependency upgrades with interface adaptations
+
+---
+
 ## [3.2.5] - 2026-04-21
 
 ### Fixed

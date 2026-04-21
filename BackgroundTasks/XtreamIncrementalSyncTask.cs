@@ -33,7 +33,8 @@ public sealed class XtreamIncrementalSyncTask : IScheduledTask
 
     public string Key => "XtreamIncrementalSync";
 
-    public async Task Execute(CancellationToken cancellationToken, IProgress<double> progress)
+    // ✅ CORRECTION : nom + ordre des paramètres conformes à IScheduledTask Jellyfin 10.10+
+    public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Démarrage de la synchronisation Xtream...");
         _memoryManager.LogMemoryUsage("Avant synchronisation");
@@ -103,18 +104,19 @@ public sealed class XtreamIncrementalSyncTask : IScheduledTask
         }
     }
 
+    
     public IEnumerable<TaskTriggerInfo> GetDefaultTriggers()
     {
-        // Synchronisation toutes les 6 heures
         return new[]
         {
             new TaskTriggerInfo
             {
-                Type = TaskTriggerInfo.TriggerInterval,
+                Type = TaskTriggerInfoType.IntervalTrigger,
                 IntervalTicks = TimeSpan.FromHours(6).Ticks
             }
         };
     }
+
 
     private async Task SyncWithProgress(
         Func<Task> syncAction,
