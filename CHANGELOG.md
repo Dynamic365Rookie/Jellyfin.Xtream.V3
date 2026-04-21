@@ -7,6 +7,18 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [3.2.7] - 2026-04-21
+
+### Fixed
+- **Compilation Error**: Removed incompatible `IPluginServiceRegistrator` class
+  - Type not available in Jellyfin 10.11.3 packages
+  - Service registration handled by plugin framework automatically
+
+### Commits
+- Fixed build compatibility with Jellyfin 10.11.3
+
+---
+
 ## [3.2.6] - 2026-04-21
 
 ### Changed
