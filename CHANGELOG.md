@@ -10,31 +10,44 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [3.2.5] - 2026-04-21
 
 ### Fixed
-- **Release Notes Extraction**: Fixed GitHub Actions multiline output syntax for release descriptions in repository.json
-- **Repository Manifest**: Ensured release descriptions are properly extracted and included in plugin repository
+- **Release Notes Extraction**: Fixed GitHub Actions workflow to properly extract release descriptions from CHANGELOG.md
+  - Corrected PowerShell multiline output syntax for GitHub Actions environment
+  - Release descriptions now properly appear in repository.json plugin manifest
+- **Plugin Loading**: Ensured IScheduledTask.Execute method is correctly implemented with async/await pattern
+- **Workflow Pipeline**: Fixed publish-repository workflow to wait for tag-triggered releases before generating manifest
+
+### Technical Details
+- Updated extract-version-notes.ps1 to use GitHub Actions multiline output format (<<EOF syntax)
+- Removed JSON escaping that was corrupting multiline release descriptions
+- Repository manifest now dynamically includes release notes from all published versions
 
 ### Commits
-- Corrected release notes output handling
+- `9cadfda` - fix: Correct ExecuteAsync naming and release notes extraction
 
 ---
 
 ## [3.2.4] - 2026-04-21
 
 ### Fixed
-- **Plugin Loading Issue**: Ensured DLL compilation includes async Execute method fix from v3.2.3
-- **Background Task Registration**: Verified IScheduledTask interface implementation is correctly compiled
+- **DLL Compilation**: Forced recompilation of plugin to ensure async Execute method is included in compiled assembly
+- **Background Task Registration**: Verified XtreamIncrementalSyncTask properly implements IScheduledTask interface
+- **Plugin Dependencies**: Ensured all referenced assemblies are correctly bundled with plugin DLL
+
+### Why v3.2.4?
+The v3.2.3 DLL appeared to have been compiled from source before the async Execute fix was applied.
+Version bump forces GitHub Actions to rebuild with current source code containing all corrections.
 
 ### Commits
-- Recompile v3.2.3 fix with proper DLL generation
+- `4cec6af` - chore: Bump version to 3.2.4 to ensure proper DLL compilation
 
 ---
 
 ## [3.2.3] - 2026-04-21
 
 ### Fixed
-- **Scheduled Task Execution**: Fixed Execute method to be directly async for IScheduledTask interface compatibility
-- **Jellyfin Plugin Loading**: Resolved "ExecuteAsync method does not have an implementation" error
-- **Background Synchronization**: Ensured XtreamIncrementalSyncTask properly implements async pattern
+- **Scheduled Task Execution**: Corrected Execute method signature to properly implement async/await pattern
+- **Jellyfin Plugin Loading**: Resolved assembly type loading exception in Jellyfin plugin manager
+- **Background Synchronization Task**: Ensured XtreamIncrementalSyncTask properly registers as scheduled task with Jellyfin 10.11
 
 ### Commits
 - `53e99bb` - fix: Make Execute method directly async for Jellyfin compatibility
