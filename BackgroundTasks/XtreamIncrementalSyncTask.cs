@@ -1,4 +1,6 @@
+using Jellyfin.Xtream.Domain.Models;
 using Jellyfin.Xtream.Infrastructure.Monitoring;
+using Jellyfin.Xtream.Infrastructure.Persistence;
 using Jellyfin.Xtream.Infrastructure.Utilities;
 using Jellyfin.Xtream.Services.Synchronization;
 using Jellyfin.Xtream.V3;
@@ -10,15 +12,24 @@ namespace Jellyfin.Xtream.BackgroundTasks;
 public sealed class XtreamIncrementalSyncTask : IScheduledTask
 {
     private readonly XtreamSyncService _syncService;
+    private readonly IXtreamRepository<XtreamMovie> _movies;
+    private readonly IXtreamRepository<XtreamSeries> _series;
+    private readonly IXtreamRepository<XtreamChannel> _channels;
     private readonly PerformanceMonitor _performanceMonitor;
     private readonly MemoryManager _memoryManager;
     private readonly ILogger<XtreamIncrementalSyncTask> _logger;
 
     public XtreamIncrementalSyncTask(
         XtreamSyncService syncService,
+        IXtreamRepository<XtreamMovie> movies,
+        IXtreamRepository<XtreamSeries> series,
+        IXtreamRepository<XtreamChannel> channels,
         ILoggerFactory loggerFactory)
     {
         _syncService = syncService;
+        _movies = movies;
+        _series = series;
+        _channels = channels;
         _logger = loggerFactory.CreateLogger<XtreamIncrementalSyncTask>();
         _performanceMonitor = new PerformanceMonitor(loggerFactory.CreateLogger<PerformanceMonitor>());
         _memoryManager = new MemoryManager(loggerFactory.CreateLogger<MemoryManager>());
@@ -34,21 +45,22 @@ public sealed class XtreamIncrementalSyncTask : IScheduledTask
 
     public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Démarrage de la synchronisation Xtream...");
-        _memoryManager.LogMemoryUsage("Avant synchronisation");
+        _logger.LogWarning("[Xtream] Démarrage de la synchronisation...");
 
         var config = Plugin.Instance?.Configuration;
         if (config == null)
         {
-            _logger.LogError("Configuration du plugin introuvable. Synchronisation annulée.");
+            _logger.LogError("[Xtream] Configuration du plugin introuvable. Synchronisation annulée.");
             return;
         }
 
         if (string.IsNullOrWhiteSpace(config.ServerUrl))
         {
-            _logger.LogWarning("URL du serveur Xtream non configurée. Synchronisation ignorée.");
+            _logger.LogWarning("[Xtream] URL du serveur Xtream non configurée. Synchronisation ignorée.");
             return;
         }
+
+        var startTime = DateTime.UtcNow;
 
         try
         {
@@ -64,26 +76,33 @@ public sealed class XtreamIncrementalSyncTask : IScheduledTask
 
                 if (!result.IsSuccess)
                 {
-                    _logger.LogError("Synchronisation échouée: {Errors}", string.Join("; ", result.Errors));
+                    _logger.LogError("[Xtream] Synchronisation échouée: {Errors}", string.Join("; ", result.Errors));
                     return;
                 }
 
                 progress?.Report(100);
             }
 
-            _performanceMonitor.LogStatistics();
-            _memoryManager.LogMemoryUsage("Fin de synchronisation");
+            var duration = DateTime.UtcNow - startTime;
+            var movieCount = _movies.Count();
+            var seriesCount = _series.Count();
+            var channelCount = _channels.Count();
 
-            _logger.LogInformation("Synchronisation Xtream terminée avec succès");
+            _logger.LogWarning(
+                "[Xtream] Synchronisation terminée en {Duration:F1}s — {Movies} films, {Series} séries, {Channels} chaînes en base",
+                duration.TotalSeconds,
+                movieCount,
+                seriesCount,
+                channelCount);
         }
         catch (OperationCanceledException)
         {
-            _logger.LogWarning("Synchronisation Xtream annulée par l'utilisateur");
+            _logger.LogWarning("[Xtream] Synchronisation annulée par l'utilisateur");
             throw;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erreur lors de la synchronisation Xtream");
+            _logger.LogError(ex, "[Xtream] Erreur lors de la synchronisation");
             throw;
         }
         finally

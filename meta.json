@@ -5,8 +5,8 @@
   "overview": "Stream Live TV, Movies, and Series from an Xtream-compatible server using this optimized plugin.",
   "owner": "Dynamic365Rookie",
   "category": "LiveTV",
-  "version": "3.3.2",
+  "version": "3.3.3",
   "targetAbi": "10.11.0.0",
-  "changelog": "Fix LiteDB Pragma error: remove invalid CACHE_SIZE and ASYNC pragmas not supported by LiteDB 5.0.21",
-  "timestamp": "2026-04-21T14:00:00Z"
+  "changelog": "Add sync summary logging: movies, series, channels count and duration visible in Jellyfin logs",
+  "timestamp": "2026-04-21T14:15:00Z"
 }
