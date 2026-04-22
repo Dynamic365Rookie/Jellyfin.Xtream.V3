@@ -7,6 +7,16 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [3.5.1] - 2026-04-23
+
+### Fixed
+- **Critical: XML serialization error at startup** — `StreamOptions.CustomHttpHeaders` dictionary cannot be serialized by Jellyfin's XML configuration system
+  - Added `[XmlIgnore]` attribute to prevent serialization
+  - Error was: `System.NotSupportedException: Cannot serialize member... because it implements IDictionary`
+  - Plugin now loads successfully without startup errors
+
+---
+
 ## [3.5.0] - 2026-04-23
 
 ### Added
