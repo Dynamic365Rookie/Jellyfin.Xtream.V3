@@ -1,3 +1,5 @@
+using System.Xml.Serialization;
+
 namespace Jellyfin.Xtream.V3.Configuration;
 
 /// <summary>
@@ -38,5 +40,6 @@ public class StreamOptions
     /// Custom HTTP headers for stream requests.
     /// Example: { "User-Agent", "Jellyfin-Xtream/1.0" }
     /// </summary>
+    [XmlIgnore]
     public Dictionary<string, string> CustomHttpHeaders { get; set; } = new();
 }
