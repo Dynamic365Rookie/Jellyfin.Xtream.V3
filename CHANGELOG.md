@@ -7,6 +7,22 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [3.4.3] - 2026-04-22
+
+### Added
+- **Comprehensive diagnostic logging** for LiveTV service discovery issues
+  - `PluginServiceRegistrator`: Console/debug logging when `RegisterServices()` is called and when LiveTV service registration completes
+  - `XtreamLiveTvService` constructor: Diagnostics to verify service can resolve itself via DI and enumerate all registered `ILiveTvService` instances
+  - `XtreamLiveTvService.GetChannelsAsync()`: Prominent logging when method is invoked to confirm Jellyfin is calling it
+  - New tool: `Tools/ClearLiveTvData.ps1` PowerShell script for clearing stale LiveTV channel data from Jellyfin's database
+
+### Fixed
+- **Enhanced troubleshooting** for "Sequence contains no matching element" errors when `LiveTvMediaSourceProvider.GetService()` fails to find the service
+  - Diagnostics will reveal where in the plugin/service lifecycle the discovery is failing
+  - Helps identify if the issue is registration timing, DI resolution, or Jellyfin LiveTV manager integration
+
+---
+
 ## [3.4.1] - 2026-04-21
 
 ### Fixed
