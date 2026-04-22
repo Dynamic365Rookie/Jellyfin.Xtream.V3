@@ -7,6 +7,35 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [3.5.0] - 2026-04-23
+
+### Added
+- **FFmpeg Stream Options**: Comprehensive configuration for IPTV playback tuning
+  - AnalyzeDurationMs - Control stream analysis time
+  - GenPtsInput - Generate missing PTS timestamps (fixes H.264 PPS errors)
+  - IgnoreDts - Advanced DTS handling option
+  - CustomHttpHeaders - Inject custom HTTP headers for stream requests
+  - New StreamOptions configuration class
+- **Enhanced Channel Metadata**: Display language information
+  - Language tags in Jellyfin UI (e.g., "Lang: FR")
+  - Optional language code append to channel names (e.g., "TF1 (FR)")
+  - Both options configurable independently
+- **Debug Logging Mode**: Toggle debug logs on/off
+  - Reduces log file size in production
+  - EnableDebugLogging configuration flag
+  - LogDebugIfEnabled extension method for conditional logging
+
+### Changed
+- BuildMediaSource applies configurable FFmpeg parameters from StreamOptions
+- GetChannelsAsync includes language metadata (tags and optional name modification)
+- All LogDebug calls replaced with LogDebugIfEnabled for conditional logging
+
+### Fixed
+- H.264 PPS errors on mid-stream connections (via GenPtsInput flag)
+- Excessive debug logging in production environments
+
+---
+
 ## [3.4.4] - 2026-04-22
 
 ### Fixed

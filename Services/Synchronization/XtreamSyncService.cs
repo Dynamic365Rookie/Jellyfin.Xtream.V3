@@ -1,6 +1,7 @@
 ﻿using Jellyfin.Xtream.Api;
 using Jellyfin.Xtream.Domain.Models;
 using Jellyfin.Xtream.Infrastructure.Persistence;
+using Jellyfin.Xtream.V3.Observability;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Xtream.Services.Synchronization;
@@ -96,7 +97,7 @@ public sealed class XtreamSyncService
 
         // Récupérer toutes les dates de modification existantes en une seule requête
         var existingLastModified = repository.GetLastModifiedMap();
-        _logger.LogDebug("Loaded {Count} existing entities from database", existingLastModified.Count);
+        _logger.LogDebugIfEnabled("Loaded {Count} existing entities from database", existingLastModified.Count);
 
         // Déterminer quelles entités doivent être mises à jour
         var entitiesToUpdate = new List<T>();

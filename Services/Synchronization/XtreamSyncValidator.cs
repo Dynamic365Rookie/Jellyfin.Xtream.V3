@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Jellyfin.Xtream.Api;
+using Jellyfin.Xtream.V3.Observability;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Xtream.Services.Synchronization;
@@ -117,7 +118,7 @@ public sealed class XtreamSyncValidator
         {
             try
             {
-                _logger.LogDebug("Testing {EndpointName} endpoint", name);
+                _logger.LogDebugIfEnabled("Testing {EndpointName} endpoint", name);
 
                 using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
                 cts.CancelAfter(TimeSpan.FromSeconds(60));

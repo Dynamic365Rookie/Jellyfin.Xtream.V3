@@ -95,6 +95,22 @@
                             </label>
                             <div class="fieldDescription checkboxFieldDescription">Download and display TV guide information</div>
                         </div>
+
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input type="checkbox" is="emby-checkbox" id="chkShowChannelLanguageTags" />
+                                <span>Show Language Tags</span>
+                            </label>
+                            <div class="fieldDescription checkboxFieldDescription">Display language info as tags in Jellyfin UI (e.g., "Lang: FR")</div>
+                        </div>
+
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input type="checkbox" is="emby-checkbox" id="chkAppendLanguageToName" />
+                                <span>Append Language to Channel Name</span>
+                            </label>
+                            <div class="fieldDescription checkboxFieldDescription">Add language code to channel names (e.g., "TF1" → "TF1 (FR)")</div>
+                        </div>
                     </div>
 
                     <div class="verticalSection">
@@ -112,6 +128,55 @@
                                 <span>Enable Auto-Sync</span>
                             </label>
                             <div class="fieldDescription checkboxFieldDescription">Automatically sync on schedule</div>
+                        </div>
+                    </div>
+
+                    <div class="verticalSection">
+                        <h2>Stream Options (Advanced)</h2>
+
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input type="checkbox" is="emby-checkbox" id="chkEnableStreamOptions" />
+                                <span>Enable Stream Options</span>
+                            </label>
+                            <div class="fieldDescription checkboxFieldDescription">Apply FFmpeg tuning parameters for better IPTV playback (recommended)</div>
+                        </div>
+
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="txtAnalyzeDuration">FFmpeg Analyze Duration (ms)</label>
+                            <input id="txtAnalyzeDuration" name="txtAnalyzeDuration" type="number" is="emby-input" class="emby-input" min="1000" max="30000" value="5000" />
+                            <div class="fieldDescription">How long FFmpeg analyzes the stream (default: 5000ms). Lower = faster startup.</div>
+                        </div>
+
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input type="checkbox" is="emby-checkbox" id="chkGenPtsInput" />
+                                <span>Generate PTS from DTS</span>
+                            </label>
+                            <div class="fieldDescription checkboxFieldDescription">Generate missing timestamps (fixes H.264 PPS errors). Recommended for problem streams.</div>
+                        </div>
+
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input type="checkbox" is="emby-checkbox" id="chkIgnoreDts" />
+                                <span>Ignore Decode Timestamps</span>
+                            </label>
+                            <div class="fieldDescription checkboxFieldDescription">Advanced option - may cause sync issues. Only enable if needed.</div>
+                        </div>
+                    </div>
+
+                    <div class="verticalSection">
+                        <h2>Developer Options</h2>
+
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input type="checkbox" is="emby-checkbox" id="chkEnableDebugLogging" />
+                                <span>Enable Debug Logging</span>
+                            </label>
+                            <div class="fieldDescription checkboxFieldDescription">
+                                Show detailed diagnostic logs for troubleshooting.
+                                ⚠️ Warning: Increases log file size. Disable in production.
+                            </div>
                         </div>
                     </div>
 
@@ -153,9 +218,22 @@
                     document.getElementById('chkEnableSeries').checked = config.EnableSeries !== false;
                     document.getElementById('chkEnableEPG').checked = config.EnableEPG !== false;
 
+                    // Metadata options
+                    document.getElementById('chkShowChannelLanguageTags').checked = config.ShowChannelLanguageTags !== false;
+                    document.getElementById('chkAppendLanguageToName').checked = config.AppendLanguageToChannelName === true;
+
                     // Sync options
                     document.getElementById('txtSyncInterval').value = config.SyncIntervalHours || 6;
                     document.getElementById('chkAutoSync').checked = config.AutoSync !== false;
+
+                    // Stream Options
+                    document.getElementById('chkEnableStreamOptions').checked = config.StreamOptions?.EnableStreamOptions !== false;
+                    document.getElementById('txtAnalyzeDuration').value = config.StreamOptions?.AnalyzeDurationMs || 5000;
+                    document.getElementById('chkGenPtsInput').checked = config.StreamOptions?.GenPtsInput !== false;
+                    document.getElementById('chkIgnoreDts').checked = config.StreamOptions?.IgnoreDts === true;
+
+                    // Debug mode
+                    document.getElementById('chkEnableDebugLogging').checked = config.EnableDebugLogging === true;
 
                     Dashboard.hideLoadingMsg();
                 });
@@ -183,9 +261,25 @@
                     config.EnableSeries = document.getElementById('chkEnableSeries').checked;
                     config.EnableEPG = document.getElementById('chkEnableEPG').checked;
 
+                    // Metadata options
+                    config.ShowChannelLanguageTags = document.getElementById('chkShowChannelLanguageTags').checked;
+                    config.AppendLanguageToChannelName = document.getElementById('chkAppendLanguageToName').checked;
+
                     // Sync options
                     config.SyncIntervalHours = parseInt(document.getElementById('txtSyncInterval').value);
                     config.AutoSync = document.getElementById('chkAutoSync').checked;
+
+                    // Stream Options
+                    config.StreamOptions = {
+                        EnableStreamOptions: document.getElementById('chkEnableStreamOptions').checked,
+                        AnalyzeDurationMs: parseInt(document.getElementById('txtAnalyzeDuration').value),
+                        GenPtsInput: document.getElementById('chkGenPtsInput').checked,
+                        IgnoreDts: document.getElementById('chkIgnoreDts').checked,
+                        CustomHttpHeaders: {}
+                    };
+
+                    // Debug mode
+                    config.EnableDebugLogging = document.getElementById('chkEnableDebugLogging').checked;
 
                     ApiClient.updatePluginConfiguration(XtreamConfigPage.pluginUniqueId, config).then(function (result) {
                         Dashboard.processPluginConfigurationUpdateResult(result);

@@ -1,5 +1,6 @@
 ﻿using System.Net.Http;
 using System.Text.Json;
+using Jellyfin.Xtream.V3.Observability;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Xtream.Api;
@@ -57,7 +58,7 @@ public sealed class XtreamApiClient
             }
 
             var duration = DateTime.UtcNow - requestStart;
-            _logger.LogDebug("API call to {Url} completed in {Duration}ms", url, duration.TotalMilliseconds);
+            _logger.LogDebugIfEnabled("API call to {Url} completed in {Duration}ms", url, duration.TotalMilliseconds);
 
             return result;
         }

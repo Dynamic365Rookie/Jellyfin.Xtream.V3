@@ -1,6 +1,8 @@
 using Jellyfin.Xtream.Domain.Models;
 using Jellyfin.Xtream.Infrastructure.Persistence;
 using Jellyfin.Xtream.V3;
+using Jellyfin.Xtream.V3.Configuration;
+using Jellyfin.Xtream.V3.Observability;
 using MediaBrowser.Controller.LiveTv;
 using MediaBrowser.Model.Dto;
 using MediaBrowser.Model.LiveTv;
@@ -37,6 +39,21 @@ public sealed class XtreamLiveTvService : ILiveTvService
 
     /// <inheritdoc />
     public string HomePageUrl => string.Empty;
+
+    /// <summary>
+    /// Builds the channel name with optional language code suffix.
+    /// </summary>
+    private static string BuildChannelName(XtreamChannel channel, PluginConfiguration? config)
+    {
+        var name = channel.Name;
+
+        if (config?.AppendLanguageToChannelName == true && !string.IsNullOrWhiteSpace(channel.Language))
+        {
+            name = $"{name} ({channel.Language.ToUpperInvariant()})";
+        }
+
+        return name;
+    }
 
     /// <inheritdoc />
     public Task<IEnumerable<ChannelInfo>> GetChannelsAsync(CancellationToken cancellationToken)
@@ -76,14 +93,25 @@ public sealed class XtreamLiveTvService : ILiveTvService
 
         _logger.LogInformation("[Xtream] Returning {Count} live channels to Jellyfin", channels.Count);
 
-        var result = channels.Select(c => new ChannelInfo
+        var result = channels.Select(c =>
         {
-            Id = c.StreamId.ToString(),
-            Name = c.Name,
-            Number = c.Number?.ToString(),
-            ImageUrl = c.Icon,
-            ChannelType = ChannelType.TV,
-            ChannelGroup = c.CategoryName
+            var channelInfo = new ChannelInfo
+            {
+                Id = c.StreamId.ToString(),
+                Name = BuildChannelName(c, config),
+                Number = c.Number?.ToString(),
+                ImageUrl = c.Icon,
+                ChannelType = ChannelType.TV,
+                ChannelGroup = c.CategoryName
+            };
+
+            // Add language as tag if enabled and available
+            if (config?.ShowChannelLanguageTags == true && !string.IsNullOrWhiteSpace(c.Language))
+            {
+                channelInfo.Tags = new[] { $"Lang: {c.Language.ToUpperInvariant()}" };
+            }
+
+            return channelInfo;
         });
 
         return Task.FromResult(result);
@@ -93,7 +121,7 @@ public sealed class XtreamLiveTvService : ILiveTvService
     public Task<MediaSourceInfo> GetChannelStream(string channelId, string streamId, CancellationToken cancellationToken)
     {
         var url = StreamUrlResolver.ResolveLive(int.Parse(channelId));
-        _logger.LogDebug("[Xtream] Resolving stream for channel {ChannelId}: {Url}", channelId, url);
+        _logger.LogDebugIfEnabled("[Xtream] Resolving stream for channel {ChannelId}: {Url}", channelId, url);
 
         return Task.FromResult(BuildMediaSource(channelId, url));
     }
@@ -158,16 +186,61 @@ public sealed class XtreamLiveTvService : ILiveTvService
 
     private static MediaSourceInfo BuildMediaSource(string channelId, string url)
     {
-        return new MediaSourceInfo
+        var config = Plugin.Instance?.Configuration;
+        var streamOptions = config?.StreamOptions;
+
+        var mediaSource = new MediaSourceInfo
         {
             Id = channelId,
             Path = url,
             Protocol = MediaProtocol.Http,
             IsRemote = true,
+
+            // Stream capabilities
             SupportsDirectPlay = true,
             SupportsDirectStream = true,
+            SupportsTranscoding = true,
+
+            // Live TV flags
             IsInfiniteStream = true,
-            ReadAtNativeFramerate = false
+            ReadAtNativeFramerate = false,
+
+            // Specify container format to help Jellyfin decision
+            Container = "mpegts",
+
+            // Add media streams info to avoid probing (which can fail with live streams)
+            MediaStreams = new List<MediaBrowser.Model.Entities.MediaStream>
+            {
+                new MediaBrowser.Model.Entities.MediaStream
+                {
+                    Type = MediaBrowser.Model.Entities.MediaStreamType.Video,
+                    Codec = "h264",
+                    IsInterlaced = true
+                },
+                new MediaBrowser.Model.Entities.MediaStream
+                {
+                    Type = MediaBrowser.Model.Entities.MediaStreamType.Audio,
+                    Codec = "aac"
+                }
+            }
         };
+
+        // Apply FFmpeg stream options if enabled
+        if (streamOptions?.EnableStreamOptions == true)
+        {
+            if (streamOptions.AnalyzeDurationMs.HasValue)
+                mediaSource.AnalyzeDurationMs = streamOptions.AnalyzeDurationMs.Value;
+
+            if (streamOptions.GenPtsInput.HasValue)
+                mediaSource.GenPtsInput = streamOptions.GenPtsInput.Value;
+
+            if (streamOptions.IgnoreDts.HasValue)
+                mediaSource.IgnoreDts = streamOptions.IgnoreDts.Value;
+
+            if (streamOptions.CustomHttpHeaders?.Any() == true)
+                mediaSource.RequiredHttpHeaders = streamOptions.CustomHttpHeaders;
+        }
+
+        return mediaSource;
     }
 }

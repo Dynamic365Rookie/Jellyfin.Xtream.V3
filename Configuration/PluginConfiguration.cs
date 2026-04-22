@@ -71,4 +71,24 @@ public class PluginConfiguration : BasePluginConfiguration
     /// Gets or sets a value indicating whether auto-sync is enabled.
     /// </summary>
     public bool AutoSync { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets FFmpeg stream tuning options.
+    /// </summary>
+    public StreamOptions StreamOptions { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to show channel language as tags.
+    /// </summary>
+    public bool ShowChannelLanguageTags { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to append language code to channel names.
+    /// </summary>
+    public bool AppendLanguageToChannelName { get; set; } = false;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether debug logging is enabled.
+    /// </summary>
+    public bool EnableDebugLogging { get; set; } = false;
 }
