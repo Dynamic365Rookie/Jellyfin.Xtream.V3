@@ -5,8 +5,8 @@
   "overview": "Stream Live TV, Movies, and Series from an Xtream-compatible server using this optimized plugin.",
   "owner": "Dynamic365Rookie",
   "category": "LiveTV",
-  "version": "3.4.2",
+  "version": "3.5.0",
   "targetAbi": "10.11.0.0",
-  "changelog": "Fix Live TV playback: ensure ILiveTvService is discoverable by LiveTvMediaSourceProvider via concrete+forward DI registration",
-  "timestamp": "2026-04-21T20:00:00Z"
+  "changelog": "Add FFmpeg stream options (fixes H.264 PPS errors), enhanced channel metadata with language tags, and debug logging toggle",
+  "timestamp": "2026-04-23T00:00:00Z"
 }
