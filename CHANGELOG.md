@@ -7,7 +7,18 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
-## [3.4.3] - 2026-04-22
+## [3.4.4] - 2026-04-22
+
+### Fixed
+- **CRITICAL: Jellyfin startup deadlock** — v3.4.3 caused Jellyfin to hang at startup ("Server is still starting up" loop)
+  - Removed `GetServices<ILiveTvService>()` call from `XtreamLiveTvService` constructor
+  - This call created a circular dependency during DI service construction, blocking the startup thread
+  - Diagnostics in `GetChannelsAsync()` are sufficient for troubleshooting
+  - **Workaround for v3.4.3**: Rename plugin folder to `.disabled` to allow Jellyfin to start
+
+---
+
+## [3.4.3] - 2026-04-22 [YANKED - Causes startup deadlock]
 
 ### Added
 - **Comprehensive diagnostic logging** for LiveTV service discovery issues
@@ -16,10 +27,8 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - `XtreamLiveTvService.GetChannelsAsync()`: Prominent logging when method is invoked to confirm Jellyfin is calling it
   - New tool: `Tools/ClearLiveTvData.ps1` PowerShell script for clearing stale LiveTV channel data from Jellyfin's database
 
-### Fixed
-- **Enhanced troubleshooting** for "Sequence contains no matching element" errors when `LiveTvMediaSourceProvider.GetService()` fails to find the service
-  - Diagnostics will reveal where in the plugin/service lifecycle the discovery is failing
-  - Helps identify if the issue is registration timing, DI resolution, or Jellyfin LiveTV manager integration
+### Known Issues
+- ⚠️ **CRITICAL**: Causes Jellyfin to hang at startup due to circular DI dependency in constructor. Fixed in v3.4.4.
 
 ---
 
