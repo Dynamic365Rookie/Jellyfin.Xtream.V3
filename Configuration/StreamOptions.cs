@@ -13,10 +13,10 @@ public class StreamOptions
     public bool EnableStreamOptions { get; set; } = true;
 
     /// <summary>
-    /// FFmpeg analyze duration in milliseconds (default: 5000 = 5 seconds).
-    /// Reduces startup time for problematic streams.
+    /// FFmpeg analyze duration in milliseconds (default: 15000 = 15 seconds).
+    /// Increased to allow FFmpeg time to find valid H.264 parameters in streams with PPS errors.
     /// </summary>
-    public int? AnalyzeDurationMs { get; set; } = 5000;
+    public int? AnalyzeDurationMs { get; set; } = 15000;
 
     /// <summary>
     /// Generate PTS from DTS if missing (FFmpeg: -fflags +genpts).

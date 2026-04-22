@@ -144,8 +144,8 @@
 
                         <div class="inputContainer">
                             <label class="inputLabel inputLabelUnfocused" for="txtAnalyzeDuration">FFmpeg Analyze Duration (ms)</label>
-                            <input id="txtAnalyzeDuration" name="txtAnalyzeDuration" type="number" is="emby-input" class="emby-input" min="1000" max="30000" value="5000" />
-                            <div class="fieldDescription">How long FFmpeg analyzes the stream (default: 5000ms). Lower = faster startup.</div>
+                            <input id="txtAnalyzeDuration" name="txtAnalyzeDuration" type="number" is="emby-input" class="emby-input" min="1000" max="30000" value="15000" />
+                            <div class="fieldDescription">How long FFmpeg analyzes the stream (default: 15000ms). Increased for streams with H.264 PPS errors.</div>
                         </div>
 
                         <div class="checkboxContainer checkboxContainer-withDescription">
@@ -228,7 +228,7 @@
 
                     // Stream Options
                     document.getElementById('chkEnableStreamOptions').checked = config.StreamOptions?.EnableStreamOptions !== false;
-                    document.getElementById('txtAnalyzeDuration').value = config.StreamOptions?.AnalyzeDurationMs || 5000;
+                    document.getElementById('txtAnalyzeDuration').value = config.StreamOptions?.AnalyzeDurationMs || 15000;
                     document.getElementById('chkGenPtsInput').checked = config.StreamOptions?.GenPtsInput !== false;
                     document.getElementById('chkIgnoreDts').checked = config.StreamOptions?.IgnoreDts === true;
 
