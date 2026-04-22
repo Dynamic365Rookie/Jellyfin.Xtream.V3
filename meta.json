@@ -5,8 +5,8 @@
   "overview": "Stream Live TV, Movies, and Series from an Xtream-compatible server using this optimized plugin.",
   "owner": "Dynamic365Rookie",
   "category": "LiveTV",
-  "version": "3.5.1",
+  "version": "3.5.2",
   "targetAbi": "10.11.0.0",
-  "changelog": "Fix XML serialization error with CustomHttpHeaders dictionary in StreamOptions",
-  "timestamp": "2026-04-23T00:30:00Z"
+  "changelog": "Increase default AnalyzeDurationMs to 15s to fix player timeout with streams having H.264 PPS errors at start",
+  "timestamp": "2026-04-23T01:00:00Z"
 }

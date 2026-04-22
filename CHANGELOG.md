@@ -7,6 +7,17 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [3.5.2] - 2026-04-23
+
+### Fixed
+- **Player timeout before FFmpeg succeeds** — Player was displaying error before FFmpeg could find valid H.264 parameters
+  - Increased default `AnalyzeDurationMs` from 5000ms to 15000ms (15 seconds)
+  - Streams with PPS errors at the start need 10-15 seconds to find an IDR frame with SPS/PPS
+  - FFmpeg now has enough time to reach successful decoding before player timeout
+  - Based on actual log analysis showing ~180 PPS errors before successful decode at ~7-10 seconds
+
+---
+
 ## [3.5.1] - 2026-04-23
 
 ### Fixed
