@@ -28,24 +28,8 @@ public sealed class XtreamLiveTvService : ILiveTvService
         _logger = logger;
         _serviceProvider = serviceProvider;
 
+        // Simple, non-blocking log - do NOT enumerate services here (causes deadlock during DI construction)
         _logger.LogWarning("[Xtream] XtreamLiveTvService constructor called — Name={Name}, HomePageUrl={HomePageUrl}", Name, HomePageUrl);
-
-        // Diagnostic: verify this instance is resolvable via DI
-        try
-        {
-            var allServices = serviceProvider.GetServices<ILiveTvService>().ToList();
-            _logger.LogWarning(
-                "[Xtream] AT CONSTRUCTION TIME: DI contains {Count} ILiveTvService instances: [{Names}]",
-                allServices.Count,
-                string.Join(", ", allServices.Select(s => $"'{s.Name}' ({s.GetType().Name})")));
-
-            var thisServiceInDI = allServices.Any(s => s.GetType() == typeof(XtreamLiveTvService));
-            _logger.LogWarning("[Xtream] This XtreamLiveTvService instance is {Status} in DI", thisServiceInDI ? "FOUND" : "NOT FOUND");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "[Xtream] Failed to enumerate ILiveTvService instances during construction");
-        }
     }
 
     /// <inheritdoc />
