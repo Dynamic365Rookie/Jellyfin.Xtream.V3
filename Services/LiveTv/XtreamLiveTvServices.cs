@@ -27,7 +27,25 @@ public sealed class XtreamLiveTvService : ILiveTvService
         _channelRepo = channelRepo;
         _logger = logger;
         _serviceProvider = serviceProvider;
-        _logger.LogWarning("[Xtream] XtreamLiveTvService created — Name='{Name}', will provide channels from LiteDB", Name);
+
+        _logger.LogWarning("[Xtream] XtreamLiveTvService constructor called — Name={Name}, HomePageUrl={HomePageUrl}", Name, HomePageUrl);
+
+        // Diagnostic: verify this instance is resolvable via DI
+        try
+        {
+            var allServices = serviceProvider.GetServices<ILiveTvService>().ToList();
+            _logger.LogWarning(
+                "[Xtream] AT CONSTRUCTION TIME: DI contains {Count} ILiveTvService instances: [{Names}]",
+                allServices.Count,
+                string.Join(", ", allServices.Select(s => $"'{s.Name}' ({s.GetType().Name})")));
+
+            var thisServiceInDI = allServices.Any(s => s.GetType() == typeof(XtreamLiveTvService));
+            _logger.LogWarning("[Xtream] This XtreamLiveTvService instance is {Status} in DI", thisServiceInDI ? "FOUND" : "NOT FOUND");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[Xtream] Failed to enumerate ILiveTvService instances during construction");
+        }
     }
 
     /// <inheritdoc />
@@ -39,6 +57,10 @@ public sealed class XtreamLiveTvService : ILiveTvService
     /// <inheritdoc />
     public Task<IEnumerable<ChannelInfo>> GetChannelsAsync(CancellationToken cancellationToken)
     {
+        _logger.LogWarning("[Xtream] ============================================");
+        _logger.LogWarning("[Xtream] GetChannelsAsync() CALLED");
+        _logger.LogWarning("[Xtream] ============================================");
+
         // Diagnostic: list all ILiveTvService instances visible in DI
         try
         {

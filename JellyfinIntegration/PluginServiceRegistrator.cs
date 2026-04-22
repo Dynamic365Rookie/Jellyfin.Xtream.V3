@@ -22,6 +22,9 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
     /// <inheritdoc />
     public void RegisterServices(IServiceCollection serviceCollection, IServerApplicationHost applicationHost)
     {
+        System.Diagnostics.Debug.WriteLine("[Jellyfin.Xtream] PluginServiceRegistrator.RegisterServices CALLED");
+        Console.WriteLine("[Jellyfin.Xtream] PluginServiceRegistrator.RegisterServices CALLED");
+
         // Infrastructure — rate limiter (singleton, stateful semaphore)
         serviceCollection.AddSingleton<XtreamApiRateLimiter>();
 
@@ -59,7 +62,13 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         // Live TV — exposes channels to Jellyfin's Live TV system
         // Register as concrete type first, then forward to interface
         // This pattern ensures the service is discoverable both via DI and assembly scanning
+        System.Diagnostics.Debug.WriteLine("[Jellyfin.Xtream] Registering XtreamLiveTvService...");
+        Console.WriteLine("[Jellyfin.Xtream] Registering XtreamLiveTvService...");
+
         serviceCollection.AddSingleton<XtreamLiveTvService>();
         serviceCollection.AddSingleton<ILiveTvService>(sp => sp.GetRequiredService<XtreamLiveTvService>());
+
+        System.Diagnostics.Debug.WriteLine("[Jellyfin.Xtream] PluginServiceRegistrator.RegisterServices COMPLETED");
+        Console.WriteLine("[Jellyfin.Xtream] PluginServiceRegistrator.RegisterServices COMPLETED");
     }
 }
