@@ -320,10 +320,20 @@
             document.getElementById('btnRefreshStats').addEventListener('click', function () {
                 Dashboard.showLoadingMsg();
 
-                ApiClient.fetch({
-                    type: 'GET',
-                    url: ApiClient.getUrl('Xtream/Developer/Stats')
-                }).then(function (stats) {
+                fetch(ApiClient.getUrl('Xtream/Developer/Stats'), {
+                    method: 'GET',
+                    headers: {
+                        'X-Emby-Token': ApiClient.accessToken()
+                    }
+                })
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(function (stats) {
+                    console.log('[Xtream] Received stats:', stats);
                     var html = '<table style="width: 100%; color: #ccc;">';
                     html += '<tr><td><strong>Movies:</strong></td><td>' + stats.MovieCount + '</td></tr>';
                     html += '<tr><td><strong>Series:</strong></td><td>' + stats.SeriesCount + '</td></tr>';
@@ -332,8 +342,9 @@
                     document.getElementById('dbStatsContainer').innerHTML = html;
                     Dashboard.hideLoadingMsg();
                 }).catch(function (err) {
+                    console.error('[Xtream] Stats error:', err);
                     Dashboard.hideLoadingMsg();
-                    Dashboard.alert('Failed to load database statistics: ' + (err.message || 'Unknown error'));
+                    Dashboard.alert('Failed to load database statistics: ' + err.message);
                 });
             });
 
@@ -345,10 +356,20 @@
                 ).then(function () {
                     Dashboard.showLoadingMsg();
 
-                    ApiClient.fetch({
-                        type: 'POST',
-                        url: ApiClient.getUrl('Xtream/Developer/ClearDatabase')
-                    }).then(function (result) {
+                    fetch(ApiClient.getUrl('Xtream/Developer/ClearDatabase'), {
+                        method: 'POST',
+                        headers: {
+                            'X-Emby-Token': ApiClient.accessToken()
+                        }
+                    })
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+                        }
+                        return response.json();
+                    })
+                    .then(function (result) {
+                        console.log('[Xtream] Clear result:', result);
                         Dashboard.hideLoadingMsg();
 
                         var resultDiv = document.getElementById('clearDbResult');
@@ -359,7 +380,9 @@
                             resultDiv.innerHTML = '<strong>✓ Success:</strong> ' + result.Message;
 
                             // Refresh stats to show zeros
-                            document.getElementById('btnRefreshStats').click();
+                            setTimeout(function () {
+                                document.getElementById('btnRefreshStats').click();
+                            }, 500);
                         } else {
                             resultDiv.style.color = '#ff4444';
                             resultDiv.innerHTML = '<strong>✗ Error:</strong> ' + result.Message;
@@ -370,8 +393,9 @@
                             resultDiv.style.display = 'none';
                         }, 5000);
                     }).catch(function (err) {
+                        console.error('[Xtream] Clear error:', err);
                         Dashboard.hideLoadingMsg();
-                        Dashboard.alert('Failed to clear database: ' + (err.message || 'Unknown error'));
+                        Dashboard.alert('Failed to clear database: ' + err.message);
                     });
                 });
             });

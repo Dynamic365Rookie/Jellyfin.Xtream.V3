@@ -7,6 +7,19 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [3.5.4] - 2026-04-23
+
+### Fixed
+- **Developer Tools UI not displaying data** — Fixed JavaScript API calls in configuration page
+  - Replaced `ApiClient.fetch()` with native `fetch()` for better compatibility
+  - Added explicit JSON parsing with `response.json()`
+  - Added authentication headers (`X-Emby-Token`)
+  - Added console logging for debugging
+  - Added better error handling with HTTP status checks
+- **Missing stats values in logs** — Added detailed logging in GetStats endpoint showing actual counts returned
+
+---
+
 ## [3.5.3] - 2026-04-23
 
 ### Added

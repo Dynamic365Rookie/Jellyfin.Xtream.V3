@@ -50,6 +50,10 @@ public class XtreamDeveloperController : ControllerBase
             ChannelCount = _channelRepo.Count()
         };
 
+        _logger.LogInformation(
+            "[Xtream] Developer: Returning stats - Movies: {Movies}, Series: {Series}, Channels: {Channels}",
+            stats.MovieCount, stats.SeriesCount, stats.ChannelCount);
+
         return Ok(stats);
     }
 

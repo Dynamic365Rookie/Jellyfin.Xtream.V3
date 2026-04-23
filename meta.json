@@ -5,8 +5,8 @@
   "overview": "Stream Live TV, Movies, and Series from an Xtream-compatible server using this optimized plugin.",
   "owner": "Dynamic365Rookie",
   "category": "LiveTV",
-  "version": "3.5.3",
+  "version": "3.5.4",
   "targetAbi": "10.11.0.0",
-  "changelog": "Add developer tools menu with database stats and clear data functionality",
-  "timestamp": "2026-04-23T02:00:00Z"
+  "changelog": "Fix developer tools UI - stats now display correctly and clear database button works",
+  "timestamp": "2026-04-23T03:00:00Z"
 }
