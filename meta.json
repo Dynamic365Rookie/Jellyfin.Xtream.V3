@@ -5,8 +5,8 @@
   "overview": "Stream Live TV, Movies, and Series from an Xtream-compatible server using this optimized plugin.",
   "owner": "Dynamic365Rookie",
   "category": "LiveTV",
-  "version": "3.5.6",
+  "version": "3.5.7",
   "targetAbi": "10.11.0.0",
-  "changelog": "Fix GitHub release workflow to include HTML and config files in deployment package",
-  "timestamp": "2026-04-23T05:00:00Z"
+  "changelog": "Fix Clear Database button - replaced Dashboard.confirm with native confirm dialog",
+  "timestamp": "2026-04-23T06:00:00Z"
 }

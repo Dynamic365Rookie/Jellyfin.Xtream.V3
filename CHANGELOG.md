@@ -7,6 +7,18 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [3.5.7] - 2026-04-23
+
+### Fixed
+- **Clear Database button not working** — Fixed confirmation dialog preventing API call
+  - Replaced `Dashboard.confirm()` with native browser `confirm()` for better compatibility
+  - Added extensive console logging for debugging (`[Xtream] Clear Database button clicked`, etc.)
+  - Added support for both PascalCase and camelCase JSON response
+  - Increased stats refresh delay after clear from 500ms to 1000ms
+  - Increased success message display time from 5s to 10s
+
+---
+
 ## [3.5.6] - 2026-04-23
 
 ### Fixed

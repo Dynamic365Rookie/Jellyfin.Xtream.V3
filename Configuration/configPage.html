@@ -382,53 +382,64 @@
 
             // Developer Tools - Clear Database
             document.getElementById('btnClearDatabase').addEventListener('click', function () {
-                Dashboard.confirm(
-                    'This will delete ALL synchronized data (movies, series, channels) from the database. You will need to run synchronization again to restore them. This action cannot be undone.\n\nAre you sure you want to continue?',
-                    'Clear Database - Confirm'
-                ).then(function () {
-                    Dashboard.showLoadingMsg();
+                console.log('[Xtream] Clear Database button clicked');
 
-                    fetch(ApiClient.getUrl('Xtream/Developer/ClearDatabase'), {
-                        method: 'POST',
-                        headers: {
-                            'X-Emby-Token': ApiClient.accessToken()
-                        }
-                    })
-                    .then(function (response) {
-                        if (!response.ok) {
-                            throw new Error('HTTP ' + response.status + ': ' + response.statusText);
-                        }
-                        return response.json();
-                    })
-                    .then(function (result) {
-                        console.log('[Xtream] Clear result:', result);
-                        Dashboard.hideLoadingMsg();
+                var confirmed = confirm('⚠️ WARNING: This will delete ALL synchronized data!\n\nAll movies, series, and channels will be removed from the database.\nYou will need to run synchronization again to restore them.\n\nThis action cannot be undone.\n\nClick OK to continue, or Cancel to abort.');
 
-                        var resultDiv = document.getElementById('clearDbResult');
-                        resultDiv.style.display = 'block';
+                if (!confirmed) {
+                    console.log('[Xtream] Clear cancelled by user');
+                    return;
+                }
 
-                        if (result.Success) {
-                            resultDiv.style.color = '#00ff00';
-                            resultDiv.innerHTML = '<strong>✓ Success:</strong> ' + result.Message;
+                console.log('[Xtream] Clear confirmed, calling API...');
+                Dashboard.showLoadingMsg();
 
-                            // Refresh stats to show zeros
-                            setTimeout(function () {
-                                document.getElementById('btnRefreshStats').click();
-                            }, 500);
-                        } else {
-                            resultDiv.style.color = '#ff4444';
-                            resultDiv.innerHTML = '<strong>✗ Error:</strong> ' + result.Message;
-                        }
+                fetch(ApiClient.getUrl('Xtream/Developer/ClearDatabase'), {
+                    method: 'POST',
+                    headers: {
+                        'X-Emby-Token': ApiClient.accessToken()
+                    }
+                })
+                .then(function (response) {
+                    console.log('[Xtream] Clear response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(function (result) {
+                    console.log('[Xtream] Clear result:', result);
+                    Dashboard.hideLoadingMsg();
 
-                        // Hide result message after 5 seconds
+                    var resultDiv = document.getElementById('clearDbResult');
+                    resultDiv.style.display = 'block';
+
+                    // Support both PascalCase and camelCase
+                    var success = result.Success || result.success;
+                    var message = result.Message || result.message;
+
+                    if (success) {
+                        resultDiv.style.color = '#00ff00';
+                        resultDiv.innerHTML = '<strong>✓ Success:</strong> ' + message;
+
+                        // Refresh stats to show zeros
                         setTimeout(function () {
-                            resultDiv.style.display = 'none';
-                        }, 5000);
-                    }).catch(function (err) {
-                        console.error('[Xtream] Clear error:', err);
-                        Dashboard.hideLoadingMsg();
-                        Dashboard.alert('Failed to clear database: ' + err.message);
-                    });
+                            console.log('[Xtream] Refreshing stats after clear...');
+                            document.getElementById('btnRefreshStats').click();
+                        }, 1000);
+                    } else {
+                        resultDiv.style.color = '#ff4444';
+                        resultDiv.innerHTML = '<strong>✗ Error:</strong> ' + message;
+                    }
+
+                    // Hide result message after 10 seconds
+                    setTimeout(function () {
+                        resultDiv.style.display = 'none';
+                    }, 10000);
+                }).catch(function (err) {
+                    console.error('[Xtream] Clear error:', err);
+                    Dashboard.hideLoadingMsg();
+                    alert('Failed to clear database: ' + err.message);
                 });
             });
 
