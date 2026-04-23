@@ -5,8 +5,8 @@
   "overview": "Stream Live TV, Movies, and Series from an Xtream-compatible server using this optimized plugin.",
   "owner": "Dynamic365Rookie",
   "category": "LiveTV",
-  "version": "3.5.5",
+  "version": "3.5.6",
   "targetAbi": "10.11.0.0",
-  "changelog": "Add database content viewer with buttons to browse movies, series, and channels. Fix stats display.",
-  "timestamp": "2026-04-23T04:00:00Z"
+  "changelog": "Fix GitHub release workflow to include HTML and config files in deployment package",
+  "timestamp": "2026-04-23T05:00:00Z"
 }

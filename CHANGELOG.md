@@ -7,6 +7,17 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [3.5.6] - 2026-04-23
+
+### Fixed
+- **GitHub release workflow** — Fixed automatic deployment to include all necessary files
+  - Release ZIP now includes `Configuration/configPage.html`
+  - Release ZIP now includes `meta.json`
+  - Added "Copy plugin files" step before archive creation
+  - Users can now install directly from GitHub releases without manual file copying
+
+---
+
 ## [3.5.5] - 2026-04-23
 
 ### Added

@@ -66,6 +66,18 @@ jobs:
     - name: Publish release
       run: dotnet publish Jellyfin.Xtream.V3.csproj -c ${{ env.CONFIGURATION }} -o ./release
 
+    - name: Copy plugin files
+      run: |
+        # Copy configuration HTML files
+        New-Item -ItemType Directory -Force -Path ./release/Configuration
+        Copy-Item -Path ./Configuration/configPage.html -Destination ./release/Configuration/
+
+        # Copy meta.json
+        Copy-Item -Path ./meta.json -Destination ./release/
+
+        Write-Host "Plugin files copied successfully" -ForegroundColor Green
+      shell: pwsh
+
     - name: Create archive
       run: |
         cd ./release
