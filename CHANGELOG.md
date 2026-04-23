@@ -7,6 +7,29 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [3.5.5] - 2026-04-23
+
+### Added
+- **Database Content Viewer** — New UI to browse synchronized entities
+  - "View Movies" button to display first 50 movies in database
+  - "View Series" button to display first 50 series in database
+  - "View Channels" button to display first 50 channels in database
+  - JSON formatted view in scrollable container
+  - Real-time data fetching with loading indicators
+- **REST API for Data Viewing** — New GET endpoints for browsing entities
+  - `GET /Xtream/Developer/Movies?limit=50` — Returns movies (max 500)
+  - `GET /Xtream/Developer/Series?limit=50` — Returns series (max 500)
+  - `GET /Xtream/Developer/Channels?limit=50` — Returns channels (max 500)
+
+### Fixed
+- **Stats display issue** — Enhanced JavaScript to support both PascalCase and camelCase JSON
+  - Added fallback for `MovieCount`/`movieCount`, `SeriesCount`/`seriesCount`, `ChannelCount`/`channelCount`
+  - Added extensive console logging for debugging
+  - Added null checks for DOM elements
+  - Fixed stats container not updating
+
+---
+
 ## [3.5.4] - 2026-04-23
 
 ### Fixed

@@ -97,6 +97,54 @@ public class XtreamDeveloperController : ControllerBase
             });
         }
     }
+
+    /// <summary>
+    /// Get all movies from the database.
+    /// </summary>
+    /// <param name="limit">Maximum number of results (default: 50, max: 500).</param>
+    /// <returns>List of movies.</returns>
+    [HttpGet("Movies")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public ActionResult<IEnumerable<XtreamMovie>> GetMovies([FromQuery] int limit = 50)
+    {
+        limit = Math.Min(Math.Max(limit, 1), 500);
+        _logger.LogInformation("[Xtream] Developer: Getting {Limit} movies", limit);
+
+        var movies = _movieRepo.GetAll().Take(limit);
+        return Ok(movies);
+    }
+
+    /// <summary>
+    /// Get all series from the database.
+    /// </summary>
+    /// <param name="limit">Maximum number of results (default: 50, max: 500).</param>
+    /// <returns>List of series.</returns>
+    [HttpGet("Series")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public ActionResult<IEnumerable<XtreamSeries>> GetSeries([FromQuery] int limit = 50)
+    {
+        limit = Math.Min(Math.Max(limit, 1), 500);
+        _logger.LogInformation("[Xtream] Developer: Getting {Limit} series", limit);
+
+        var series = _seriesRepo.GetAll().Take(limit);
+        return Ok(series);
+    }
+
+    /// <summary>
+    /// Get all channels from the database.
+    /// </summary>
+    /// <param name="limit">Maximum number of results (default: 50, max: 500).</param>
+    /// <returns>List of channels.</returns>
+    [HttpGet("Channels")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public ActionResult<IEnumerable<XtreamChannel>> GetChannels([FromQuery] int limit = 50)
+    {
+        limit = Math.Min(Math.Max(limit, 1), 500);
+        _logger.LogInformation("[Xtream] Developer: Getting {Limit} channels", limit);
+
+        var channels = _channelRepo.GetAll().Take(limit);
+        return Ok(channels);
+    }
 }
 
 /// <summary>

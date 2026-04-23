@@ -193,6 +193,25 @@
                             </button>
                         </div>
 
+                        <div style="background: #1c1c1c; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
+                            <h3 style="margin-top: 0;">View Database Content</h3>
+                            <p style="color: #999;">Browse synchronized entities (limited to 50 items per type).</p>
+                            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                <button is="emby-button" type="button" class="raised" id="btnViewMovies">
+                                    <span>View Movies</span>
+                                </button>
+                                <button is="emby-button" type="button" class="raised" id="btnViewSeries">
+                                    <span>View Series</span>
+                                </button>
+                                <button is="emby-button" type="button" class="raised" id="btnViewChannels">
+                                    <span>View Channels</span>
+                                </button>
+                            </div>
+                            <div id="dataViewContainer" style="margin-top: 15px; display: none; max-height: 400px; overflow-y: auto; background: #0a0a0a; padding: 10px; border-radius: 4px;">
+                                <pre id="dataViewContent" style="color: #ccc; font-size: 12px; margin: 0; white-space: pre-wrap;"></pre>
+                            </div>
+                        </div>
+
                         <div style="background: #2c1c1c; padding: 15px; border-radius: 4px; border: 1px solid #cc0000;">
                             <h3 style="margin-top: 0; color: #ff4444;">⚠️ Danger Zone</h3>
                             <p style="color: #ccc;">Clear all synchronized data from the database. This action will remove all movies, series, and channels. You will need to run synchronization again to restore them.</p>
@@ -334,12 +353,25 @@
                 })
                 .then(function (stats) {
                     console.log('[Xtream] Received stats:', stats);
+                    console.log('[Xtream] Stats keys:', Object.keys(stats));
+
+                    // Support both PascalCase and camelCase
+                    var movieCount = stats.MovieCount || stats.movieCount || 0;
+                    var seriesCount = stats.SeriesCount || stats.seriesCount || 0;
+                    var channelCount = stats.ChannelCount || stats.channelCount || 0;
+
                     var html = '<table style="width: 100%; color: #ccc;">';
-                    html += '<tr><td><strong>Movies:</strong></td><td>' + stats.MovieCount + '</td></tr>';
-                    html += '<tr><td><strong>Series:</strong></td><td>' + stats.SeriesCount + '</td></tr>';
-                    html += '<tr><td><strong>Channels:</strong></td><td>' + stats.ChannelCount + '</td></tr>';
+                    html += '<tr><td><strong>Movies:</strong></td><td>' + movieCount + '</td></tr>';
+                    html += '<tr><td><strong>Series:</strong></td><td>' + seriesCount + '</td></tr>';
+                    html += '<tr><td><strong>Channels:</strong></td><td>' + channelCount + '</td></tr>';
                     html += '</table>';
-                    document.getElementById('dbStatsContainer').innerHTML = html;
+
+                    var container = document.getElementById('dbStatsContainer');
+                    console.log('[Xtream] Container found:', !!container);
+                    if (container) {
+                        container.innerHTML = html;
+                        console.log('[Xtream] Stats HTML updated');
+                    }
                     Dashboard.hideLoadingMsg();
                 }).catch(function (err) {
                     console.error('[Xtream] Stats error:', err);
@@ -398,6 +430,57 @@
                         Dashboard.alert('Failed to clear database: ' + err.message);
                     });
                 });
+            });
+
+            // Helper function to view data
+            function viewData(type, endpoint) {
+                Dashboard.showLoadingMsg();
+
+                fetch(ApiClient.getUrl(endpoint + '?limit=50'), {
+                    method: 'GET',
+                    headers: {
+                        'X-Emby-Token': ApiClient.accessToken()
+                    }
+                })
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(function (data) {
+                    console.log('[Xtream] Received ' + type + ':', data);
+                    Dashboard.hideLoadingMsg();
+
+                    var container = document.getElementById('dataViewContainer');
+                    var content = document.getElementById('dataViewContent');
+
+                    if (Array.isArray(data) && data.length > 0) {
+                        content.textContent = JSON.stringify(data, null, 2);
+                        container.style.display = 'block';
+                    } else {
+                        content.textContent = 'No ' + type.toLowerCase() + ' found in database.';
+                        container.style.display = 'block';
+                    }
+                })
+                .catch(function (err) {
+                    console.error('[Xtream] View ' + type + ' error:', err);
+                    Dashboard.hideLoadingMsg();
+                    Dashboard.alert('Failed to load ' + type.toLowerCase() + ': ' + err.message);
+                });
+            }
+
+            // Developer Tools - View buttons
+            document.getElementById('btnViewMovies').addEventListener('click', function () {
+                viewData('Movies', 'Xtream/Developer/Movies');
+            });
+
+            document.getElementById('btnViewSeries').addEventListener('click', function () {
+                viewData('Series', 'Xtream/Developer/Series');
+            });
+
+            document.getElementById('btnViewChannels').addEventListener('click', function () {
+                viewData('Channels', 'Xtream/Developer/Channels');
             });
         </script>
     </div>
