@@ -180,6 +180,29 @@
                         </div>
                     </div>
 
+                    <div class="verticalSection">
+                        <h2>Developer Tools</h2>
+
+                        <div style="background: #1c1c1c; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
+                            <h3 style="margin-top: 0;">Database Statistics</h3>
+                            <div id="dbStatsContainer">
+                                <p style="color: #999;">Click "Refresh Stats" to load current database counts.</p>
+                            </div>
+                            <button is="emby-button" type="button" class="raised block" id="btnRefreshStats" style="margin-top: 10px;">
+                                <span>Refresh Stats</span>
+                            </button>
+                        </div>
+
+                        <div style="background: #2c1c1c; padding: 15px; border-radius: 4px; border: 1px solid #cc0000;">
+                            <h3 style="margin-top: 0; color: #ff4444;">⚠️ Danger Zone</h3>
+                            <p style="color: #ccc;">Clear all synchronized data from the database. This action will remove all movies, series, and channels. You will need to run synchronization again to restore them.</p>
+                            <button is="emby-button" type="button" class="raised button-delete block" id="btnClearDatabase" style="background: #cc0000;">
+                                <span>Clear Database</span>
+                            </button>
+                            <div id="clearDbResult" style="margin-top: 10px; display: none;"></div>
+                        </div>
+                    </div>
+
                     <div>
                         <button is="emby-button" type="submit" class="raised button-submit block">
                             <span>Save</span>
@@ -291,6 +314,66 @@
 
             document.querySelector('.btnCancel').addEventListener('click', function () {
                 Dashboard.navigate('configurationpage?name=plugins');
+            });
+
+            // Developer Tools - Refresh Stats
+            document.getElementById('btnRefreshStats').addEventListener('click', function () {
+                Dashboard.showLoadingMsg();
+
+                ApiClient.fetch({
+                    type: 'GET',
+                    url: ApiClient.getUrl('Xtream/Developer/Stats')
+                }).then(function (stats) {
+                    var html = '<table style="width: 100%; color: #ccc;">';
+                    html += '<tr><td><strong>Movies:</strong></td><td>' + stats.MovieCount + '</td></tr>';
+                    html += '<tr><td><strong>Series:</strong></td><td>' + stats.SeriesCount + '</td></tr>';
+                    html += '<tr><td><strong>Channels:</strong></td><td>' + stats.ChannelCount + '</td></tr>';
+                    html += '</table>';
+                    document.getElementById('dbStatsContainer').innerHTML = html;
+                    Dashboard.hideLoadingMsg();
+                }).catch(function (err) {
+                    Dashboard.hideLoadingMsg();
+                    Dashboard.alert('Failed to load database statistics: ' + (err.message || 'Unknown error'));
+                });
+            });
+
+            // Developer Tools - Clear Database
+            document.getElementById('btnClearDatabase').addEventListener('click', function () {
+                Dashboard.confirm(
+                    'This will delete ALL synchronized data (movies, series, channels) from the database. You will need to run synchronization again to restore them. This action cannot be undone.\n\nAre you sure you want to continue?',
+                    'Clear Database - Confirm'
+                ).then(function () {
+                    Dashboard.showLoadingMsg();
+
+                    ApiClient.fetch({
+                        type: 'POST',
+                        url: ApiClient.getUrl('Xtream/Developer/ClearDatabase')
+                    }).then(function (result) {
+                        Dashboard.hideLoadingMsg();
+
+                        var resultDiv = document.getElementById('clearDbResult');
+                        resultDiv.style.display = 'block';
+
+                        if (result.Success) {
+                            resultDiv.style.color = '#00ff00';
+                            resultDiv.innerHTML = '<strong>✓ Success:</strong> ' + result.Message;
+
+                            // Refresh stats to show zeros
+                            document.getElementById('btnRefreshStats').click();
+                        } else {
+                            resultDiv.style.color = '#ff4444';
+                            resultDiv.innerHTML = '<strong>✗ Error:</strong> ' + result.Message;
+                        }
+
+                        // Hide result message after 5 seconds
+                        setTimeout(function () {
+                            resultDiv.style.display = 'none';
+                        }, 5000);
+                    }).catch(function (err) {
+                        Dashboard.hideLoadingMsg();
+                        Dashboard.alert('Failed to clear database: ' + (err.message || 'Unknown error'));
+                    });
+                });
             });
         </script>
     </div>

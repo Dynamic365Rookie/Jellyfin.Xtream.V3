@@ -99,5 +99,10 @@ public sealed class LiteDbXtreamRepository<T> : IXtreamRepository<T>
     {
         return _collection.Count();
     }
+
+    public int DeleteAll()
+    {
+        return _collection.DeleteAll();
+    }
 }
 

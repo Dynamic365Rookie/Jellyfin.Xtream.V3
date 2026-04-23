@@ -4,7 +4,7 @@ public interface IXtreamRepository<T> where T : IEntity
 {
     bool HasChanged(T entity);
     void Upsert(T entity);
-    
+
     // Batch operations pour améliorer les performances
     void UpsertBatch(IEnumerable<T> entities);
     IEnumerable<T> GetAll();
@@ -13,4 +13,5 @@ public interface IXtreamRepository<T> where T : IEntity
     Dictionary<int, DateTime> GetLastModifiedMap();
     void DeleteNotInList(IEnumerable<int> validIds);
     int Count();
+    int DeleteAll();
 }

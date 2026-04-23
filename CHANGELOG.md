@@ -7,6 +7,30 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [3.5.3] - 2026-04-23
+
+### Added
+- **Developer Tools Menu** — New admin interface for managing plugin data
+  - Database statistics display showing entity counts (movies, series, channels)
+  - "Clear Database" action to remove all synchronized data
+  - Real-time refresh of stats via API endpoint
+  - Danger zone UI with confirmation dialog for destructive operations
+- **REST API for Developer Operations** — New `/Xtream/Developer` endpoints
+  - `GET /Stats` — Returns current database entity counts
+  - `POST /ClearDatabase` — Deletes all data from LiteDB (movies, series, channels)
+  - Requires elevated permissions (admin-only via `RequiresElevation` policy)
+  - Comprehensive logging for all operations
+- **Repository Enhancement** — Added `DeleteAll()` method to `IXtreamRepository<T>` interface
+
+### Changed
+- `IXtreamRepository<T>` interface now includes `DeleteAll()` method returning deleted count
+- `LiteDbXtreamRepository<T>` implements `DeleteAll()` using LiteDB's native bulk delete
+
+### Fixed
+- Provides manual workaround for stale channel data in Jellyfin when sync shows entities but channels not visible
+
+---
+
 ## [3.5.2] - 2026-04-23
 
 ### Fixed
