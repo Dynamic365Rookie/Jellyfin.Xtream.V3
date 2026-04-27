@@ -9,8 +9,9 @@ public class StreamOptions
 {
     /// <summary>
     /// Enable/disable stream options globally.
+    /// DISABLED by default - use Jellyfin's native FFmpeg handling. Only enable if experiencing issues.
     /// </summary>
-    public bool EnableStreamOptions { get; set; } = true;
+    public bool EnableStreamOptions { get; set; } = false;
 
     /// <summary>
     /// FFmpeg analyze duration in milliseconds (default: 15000 = 15 seconds).
@@ -20,9 +21,9 @@ public class StreamOptions
 
     /// <summary>
     /// Generate PTS from DTS if missing (FFmpeg: -fflags +genpts).
-    /// Critical for streams with H.264 PPS errors.
+    /// DISABLED by default - causes conflicts with Jellyfin remux. Only enable if experiencing frame-skipping.
     /// </summary>
-    public bool? GenPtsInput { get; set; } = true;
+    public bool? GenPtsInput { get; set; } = false;
 
     /// <summary>
     /// Ignore Decode Time Stamps (FFmpeg: -fflags +igndts).
