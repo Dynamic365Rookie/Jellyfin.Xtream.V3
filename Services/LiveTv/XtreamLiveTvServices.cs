@@ -189,12 +189,21 @@ public sealed class XtreamLiveTvService : ILiveTvService
         var config = Plugin.Instance?.Configuration;
         var streamOptions = config?.StreamOptions;
 
+        // Always set a reasonable analyze duration to prevent Jellyfin's
+        // default of 200M (200s) which causes infinite buffering on live streams.
+        var analyzeDurationMs = streamOptions?.EnableStreamOptions == true && streamOptions.AnalyzeDurationMs.HasValue
+            ? streamOptions.AnalyzeDurationMs.Value
+            : 5000; // 5 seconds — fast enough for live TV startup
+
         var mediaSource = new MediaSourceInfo
         {
             Id = channelId,
             Path = url,
             Protocol = MediaProtocol.Http,
             IsRemote = true,
+
+            // Override Jellyfin's excessive defaults for live streams
+            AnalyzeDurationMs = analyzeDurationMs,
 
             // Stream capabilities
             SupportsDirectPlay = true,
@@ -225,12 +234,9 @@ public sealed class XtreamLiveTvService : ILiveTvService
             }
         };
 
-        // Apply FFmpeg stream options if enabled
+        // Apply additional FFmpeg stream options if enabled
         if (streamOptions?.EnableStreamOptions == true)
         {
-            if (streamOptions.AnalyzeDurationMs.HasValue)
-                mediaSource.AnalyzeDurationMs = streamOptions.AnalyzeDurationMs.Value;
-
             if (streamOptions.GenPtsInput.HasValue)
                 mediaSource.GenPtsInput = streamOptions.GenPtsInput.Value;
 
