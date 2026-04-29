@@ -1,5 +1,6 @@
 using Jellyfin.Xtream.Domain.Models;
 using Jellyfin.Xtream.Infrastructure.Persistence;
+using Jellyfin.Xtream.Services.Mapping;
 using Jellyfin.Xtream.V3;
 using Jellyfin.Xtream.V3.Configuration;
 using Jellyfin.Xtream.V3.Observability;
@@ -46,6 +47,11 @@ public sealed class XtreamLiveTvService : ILiveTvService
     private static string BuildChannelName(XtreamChannel channel, PluginConfiguration? config)
     {
         var name = channel.Name;
+
+        if (config?.EnableChannelNameCleaning == true)
+        {
+            name = ChannelNameCleaner.Clean(name);
+        }
 
         if (config?.AppendLanguageToChannelName == true && !string.IsNullOrWhiteSpace(channel.Language))
         {
@@ -101,14 +107,27 @@ public sealed class XtreamLiveTvService : ILiveTvService
                 Name = BuildChannelName(c, config),
                 Number = c.Number?.ToString(),
                 ImageUrl = c.Icon,
+                HasImage = !string.IsNullOrWhiteSpace(c.Icon),
                 ChannelType = ChannelType.TV,
                 ChannelGroup = c.CategoryName
             };
 
-            // Add language as tag if enabled and available
+            // Build tags list (HD badge + language)
+            var tags = new List<string>();
+            if (System.Text.RegularExpressions.Regex.IsMatch(
+                c.Name, @"\b(HD|FHD|4K|UHD)\b", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+            {
+                tags.Add("HD");
+            }
+
             if (config?.ShowChannelLanguageTags == true && !string.IsNullOrWhiteSpace(c.Language))
             {
-                channelInfo.Tags = new[] { $"Lang: {c.Language.ToUpperInvariant()}" };
+                tags.Add($"Lang: {c.Language.ToUpperInvariant()}");
+            }
+
+            if (tags.Count > 0)
+            {
+                channelInfo.Tags = tags.ToArray();
             }
 
             return channelInfo;

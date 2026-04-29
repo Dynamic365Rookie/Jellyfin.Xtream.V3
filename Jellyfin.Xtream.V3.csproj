@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Configuration\configPage.html" />
+    <EmbeddedResource Include="Resources\thumb.png" />
   </ItemGroup>
 
   <ItemGroup>

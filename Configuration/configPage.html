@@ -111,6 +111,14 @@
                             </label>
                             <div class="fieldDescription checkboxFieldDescription">Add language code to channel names (e.g., "TF1" → "TF1 (FR)")</div>
                         </div>
+
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input type="checkbox" is="emby-checkbox" id="chkEnableChannelNameCleaning" />
+                                <span>Clean Channel Names</span>
+                            </label>
+                            <div class="fieldDescription checkboxFieldDescription">Remove country prefixes (FR:, |US|), quality suffixes (HD, FHD, 4K), and tags like (BACKUP) or [Multi-Sub] from channel names</div>
+                        </div>
                     </div>
 
                     <div class="verticalSection">
@@ -263,6 +271,7 @@
                     // Metadata options
                     document.getElementById('chkShowChannelLanguageTags').checked = config.ShowChannelLanguageTags !== false;
                     document.getElementById('chkAppendLanguageToName').checked = config.AppendLanguageToChannelName === true;
+                    document.getElementById('chkEnableChannelNameCleaning').checked = config.EnableChannelNameCleaning === true;
 
                     // Sync options
                     document.getElementById('txtSyncInterval').value = config.SyncIntervalHours || 6;
@@ -306,6 +315,7 @@
                     // Metadata options
                     config.ShowChannelLanguageTags = document.getElementById('chkShowChannelLanguageTags').checked;
                     config.AppendLanguageToChannelName = document.getElementById('chkAppendLanguageToName').checked;
+                    config.EnableChannelNameCleaning = document.getElementById('chkEnableChannelNameCleaning').checked;
 
                     // Sync options
                     config.SyncIntervalHours = parseInt(document.getElementById('txtSyncInterval').value);

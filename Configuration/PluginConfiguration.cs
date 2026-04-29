@@ -88,6 +88,12 @@ public class PluginConfiguration : BasePluginConfiguration
     public bool AppendLanguageToChannelName { get; set; } = false;
 
     /// <summary>
+    /// Gets or sets a value indicating whether to clean channel names by removing
+    /// country prefixes, quality suffixes, and bracketed tags.
+    /// </summary>
+    public bool EnableChannelNameCleaning { get; set; } = false;
+
+    /// <summary>
     /// Gets or sets a value indicating whether debug logging is enabled.
     /// </summary>
     public bool EnableDebugLogging { get; set; } = false;

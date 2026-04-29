@@ -44,12 +44,18 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()
     {
+        var ns = GetType().Namespace;
         return new[]
         {
             new PluginPageInfo
             {
                 Name = this.Name,
-                EmbeddedResourcePath = string.Format("{0}.Configuration.configPage.html", GetType().Namespace)
+                EmbeddedResourcePath = $"{ns}.Configuration.configPage.html"
+            },
+            new PluginPageInfo
+            {
+                Name = "thumb",
+                EmbeddedResourcePath = $"{ns}.Resources.thumb.png"
             }
         };
     }

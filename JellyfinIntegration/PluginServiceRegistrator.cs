@@ -2,10 +2,12 @@ using Jellyfin.Xtream.Api;
 using Jellyfin.Xtream.Domain.Models;
 using Jellyfin.Xtream.Infrastructure.Persistence;
 using Jellyfin.Xtream.Services.LiveTv;
+using Jellyfin.Xtream.Services.Media;
 using Jellyfin.Xtream.Services.Synchronization;
 using LiteDB;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller;
+using MediaBrowser.Controller.Channels;
 using MediaBrowser.Controller.LiveTv;
 using MediaBrowser.Controller.Plugins;
 using Microsoft.Extensions.DependencyInjection;
@@ -67,6 +69,14 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
 
         serviceCollection.AddSingleton<XtreamLiveTvService>();
         serviceCollection.AddSingleton<ILiveTvService>(sp => sp.GetRequiredService<XtreamLiveTvService>());
+
+        // Movies channel — exposes movies to Jellyfin's channel browser
+        serviceCollection.AddSingleton<XtreamMovieChannel>();
+        serviceCollection.AddSingleton<IChannel>(sp => sp.GetRequiredService<XtreamMovieChannel>());
+
+        // Series channel — exposes series to Jellyfin's channel browser
+        serviceCollection.AddSingleton<XtreamSeriesChannel>();
+        serviceCollection.AddSingleton<IChannel>(sp => sp.GetRequiredService<XtreamSeriesChannel>());
 
         System.Diagnostics.Debug.WriteLine("[Jellyfin.Xtream] PluginServiceRegistrator.RegisterServices COMPLETED");
         Console.WriteLine("[Jellyfin.Xtream] PluginServiceRegistrator.RegisterServices COMPLETED");
