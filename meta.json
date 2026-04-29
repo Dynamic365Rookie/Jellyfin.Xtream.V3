@@ -5,8 +5,8 @@
   "overview": "Stream Live TV, Movies, and Series from an Xtream-compatible server using this optimized plugin.",
   "owner": "Dynamic365Rookie",
   "category": "LiveTV",
-  "version": "3.5.10",
+  "version": "3.6.0",
   "targetAbi": "10.11.0.0",
-  "changelog": "Fix infinite buffering - override Jellyfin default analyzeduration (200s) with 5s for fast live TV startup",
-  "timestamp": "2026-04-29T17:00:00Z"
+  "changelog": "Add channel name cleaning, plugin thumbnail, movies and series browsing via IChannel",
+  "timestamp": "2026-04-29T20:00:00Z"
 }
