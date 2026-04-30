@@ -49,18 +49,16 @@ public sealed class XtreamIncrementalSyncTask : IScheduledTask
 
     public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
-        _logger.LogWarning("[Xtream] Démarrage de la synchronisation...");
-
         var config = Plugin.Instance?.Configuration;
         if (config == null)
         {
-            _logger.LogError("[Xtream] Configuration du plugin introuvable. Synchronisation annulée.");
+            _logger.LogError("[Xtream] Plugin configuration not found. Sync aborted.");
             return;
         }
 
         if (string.IsNullOrWhiteSpace(config.ServerUrl))
         {
-            _logger.LogWarning("[Xtream] URL du serveur Xtream non configurée. Synchronisation ignorée.");
+            _logger.LogWarning("[Xtream] Server URL not configured. Sync skipped.");
             return;
         }
 
@@ -80,23 +78,25 @@ public sealed class XtreamIncrementalSyncTask : IScheduledTask
 
                 if (!result.IsSuccess)
                 {
-                    _logger.LogError("[Xtream] Synchronisation échouée: {Errors}", string.Join("; ", result.Errors));
+                    _logger.LogError("[Xtream] Sync failed: {Errors}", string.Join("; ", result.Errors));
                     return;
                 }
 
-                progress?.Report(100);
+                progress?.Report(70);
             }
 
             // Generate STRM files for standard library integration
             await _strmGenerator.GenerateAllAsync(cancellationToken).ConfigureAwait(false);
+
+            progress?.Report(100);
 
             var duration = DateTime.UtcNow - startTime;
             var movieCount = _movies.Count();
             var seriesCount = _series.Count();
             var channelCount = _channels.Count();
 
-            _logger.LogWarning(
-                "[Xtream] Synchronisation terminée en {Duration:F1}s — {Movies} films, {Series} séries, {Channels} chaînes en base",
+            _logger.LogInformation(
+                "[Xtream] Sync complete in {Duration:F1}s — {Movies} movies, {Series} series, {Channels} channels",
                 duration.TotalSeconds,
                 movieCount,
                 seriesCount,
@@ -104,12 +104,12 @@ public sealed class XtreamIncrementalSyncTask : IScheduledTask
         }
         catch (OperationCanceledException)
         {
-            _logger.LogWarning("[Xtream] Synchronisation annulée par l'utilisateur");
+            _logger.LogWarning("[Xtream] Sync cancelled by user");
             throw;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[Xtream] Erreur lors de la synchronisation");
+            _logger.LogError(ex, "[Xtream] Sync error");
             throw;
         }
         finally

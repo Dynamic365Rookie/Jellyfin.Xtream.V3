@@ -5,8 +5,8 @@
   "overview": "Stream Live TV, Movies, and Series from an Xtream-compatible server using this optimized plugin.",
   "owner": "Dynamic365Rookie",
   "category": "LiveTV",
-  "version": "3.7.3",
+  "version": "3.7.4",
   "targetAbi": "10.11.0.0",
-  "changelog": "Fix playback: append container extension to stream URLs (.mp4/.mkv). Parallelize movie STRM writes. Increase default series concurrency to 20.",
+  "changelog": "Fix plugin thumbnail display. Clean up logging: use LogDebug for verbose output, LogInformation for summary with timing. Remove noisy diagnostic logs.",
   "timestamp": "2026-04-30T12:00:00Z"
 }

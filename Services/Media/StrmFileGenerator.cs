@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Jellyfin.Xtream.Api;
 using Jellyfin.Xtream.Domain.Models;
 using Jellyfin.Xtream.Infrastructure.Persistence;
@@ -19,7 +20,6 @@ public sealed class StrmFileGenerator
     private readonly ILogger<StrmFileGenerator> _logger;
 
     private static readonly char[] InvalidFileChars = Path.GetInvalidFileNameChars();
-    private static readonly char[] InvalidPathChars = Path.GetInvalidPathChars();
 
     public StrmFileGenerator(
         IXtreamRepository<XtreamMovie> movieRepo,
@@ -41,29 +41,37 @@ public sealed class StrmFileGenerator
             return;
         }
 
-        _logger.LogInformation("[Xtream STRM] Starting STRM file generation...");
+        var totalSw = Stopwatch.StartNew();
 
-        var movieCount = GenerateMovieStrms(config);
-        var seriesCount = await GenerateSeriesStrmsAsync(config, ct).ConfigureAwait(false);
+        var movieSw = Stopwatch.StartNew();
+        var (movieCount, movieErrors) = GenerateMovieStrms(config);
+        movieSw.Stop();
 
-        _logger.LogWarning(
-            "[Xtream STRM] STRM generation complete — {Movies} movies, {Series} series processed",
-            movieCount, seriesCount);
+        var seriesSw = Stopwatch.StartNew();
+        var (seriesCount, seriesErrors) = await GenerateSeriesStrmsAsync(config, ct).ConfigureAwait(false);
+        seriesSw.Stop();
+
+        totalSw.Stop();
+
+        // Always log the summary at Information level
+        _logger.LogInformation(
+            "[Xtream STRM] Generation complete in {Total:F1}s — Movies: {Movies} ({MovieTime:F1}s, {MovieErrors} errors) | Series: {Series} ({SeriesTime:F1}s, {SeriesErrors} errors)",
+            totalSw.Elapsed.TotalSeconds,
+            movieCount, movieSw.Elapsed.TotalSeconds, movieErrors,
+            seriesCount, seriesSw.Elapsed.TotalSeconds, seriesErrors);
     }
 
-    private int GenerateMovieStrms(PluginConfiguration config)
+    private (int count, int errors) GenerateMovieStrms(PluginConfiguration config)
     {
         var moviesPath = config.StrmMoviesPath;
         if (string.IsNullOrWhiteSpace(moviesPath))
         {
-            _logger.LogWarning("[Xtream STRM] StrmMoviesPath is empty, skipping movies");
-            return 0;
+            _logger.LogDebug("[Xtream STRM] StrmMoviesPath is empty, skipping movies");
+            return (0, 0);
         }
 
-        _logger.LogWarning("[Xtream STRM] Generating movie STRMs to: {Path}", moviesPath);
-
         var movies = _movieRepo.GetAll().ToList();
-        _logger.LogWarning("[Xtream STRM] Found {Count} movies in database", movies.Count);
+        _logger.LogDebug("[Xtream STRM] Generating {Count} movie STRMs to: {Path}", movies.Count, moviesPath);
 
         var count = 0;
         var errors = 0;
@@ -85,36 +93,30 @@ public sealed class StrmFileGenerator
             catch (Exception ex)
             {
                 var currentErrors = Interlocked.Increment(ref errors);
-                if (currentErrors <= 5)
+                if (currentErrors <= 3)
                 {
-                    _logger.LogWarning(ex, "[Xtream STRM] Failed to write STRM for movie {Name}", movie.Name);
+                    _logger.LogDebug(ex, "[Xtream STRM] Failed to write STRM for movie {Name}", movie.Name);
                 }
             }
         });
 
-        if (errors > 5)
-        {
-            _logger.LogWarning("[Xtream STRM] {Errors} total movie STRM write errors (suppressed after 5)", errors);
-        }
-
-        return count;
+        return (count, errors);
     }
 
-    private async Task<int> GenerateSeriesStrmsAsync(PluginConfiguration config, CancellationToken ct)
+    private async Task<(int count, int errors)> GenerateSeriesStrmsAsync(PluginConfiguration config, CancellationToken ct)
     {
         var seriesPath = config.StrmSeriesPath;
         if (string.IsNullOrWhiteSpace(seriesPath))
         {
-            _logger.LogWarning("[Xtream STRM] StrmSeriesPath is empty, skipping series");
-            return 0;
+            _logger.LogDebug("[Xtream STRM] StrmSeriesPath is empty, skipping series");
+            return (0, 0);
         }
 
-        _logger.LogWarning("[Xtream STRM] Generating series STRMs to: {Path}", seriesPath);
-
         var allSeries = _seriesRepo.GetAll().ToList();
-        _logger.LogWarning("[Xtream STRM] Found {Count} series in database", allSeries.Count);
+        _logger.LogDebug("[Xtream STRM] Generating STRMs for {Count} series to: {Path}", allSeries.Count, seriesPath);
 
         var count = 0;
+        var errors = 0;
         var maxConcurrency = config.MaxConcurrentRequests > 0 ? config.MaxConcurrentRequests : 20;
 
         await Parallel.ForEachAsync(
@@ -163,11 +165,12 @@ public sealed class StrmFileGenerator
                 }
                 catch (Exception ex)
                 {
+                    Interlocked.Increment(ref errors);
                     _logger.LogDebug(ex, "[Xtream STRM] Failed to process series {Name}", series.Name);
                 }
             }).ConfigureAwait(false);
 
-        return count;
+        return (count, errors);
     }
 
     private async Task<XtreamSeriesInfo?> FetchSeriesInfo(int seriesId, CancellationToken ct)
@@ -216,7 +219,6 @@ public sealed class StrmFileGenerator
             sanitized = sanitized.Replace(c, '_');
         }
 
-        // Also replace common problematic characters
         sanitized = sanitized.Replace(':', '-').Replace('/', '_').Replace('\\', '_');
 
         return sanitized.Trim().TrimEnd('.');

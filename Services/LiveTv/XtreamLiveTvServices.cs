@@ -32,7 +32,7 @@ public sealed class XtreamLiveTvService : ILiveTvService
         _serviceProvider = serviceProvider;
 
         // Simple, non-blocking log - do NOT enumerate services here (causes deadlock during DI construction)
-        _logger.LogWarning("[Xtream] XtreamLiveTvService constructor called — Name={Name}, HomePageUrl={HomePageUrl}", Name, HomePageUrl);
+        _logger.LogDebug("[Xtream] XtreamLiveTvService constructor called — Name={Name}, HomePageUrl={HomePageUrl}", Name, HomePageUrl);
     }
 
     /// <inheritdoc />
@@ -64,22 +64,20 @@ public sealed class XtreamLiveTvService : ILiveTvService
     /// <inheritdoc />
     public Task<IEnumerable<ChannelInfo>> GetChannelsAsync(CancellationToken cancellationToken)
     {
-        _logger.LogWarning("[Xtream] ============================================");
-        _logger.LogWarning("[Xtream] GetChannelsAsync() CALLED");
-        _logger.LogWarning("[Xtream] ============================================");
+        _logger.LogDebug("[Xtream] GetChannelsAsync() called");
 
         // Diagnostic: list all ILiveTvService instances visible in DI
         try
         {
             var allServices = _serviceProvider.GetServices<ILiveTvService>().ToList();
-            _logger.LogWarning(
+            _logger.LogDebug(
                 "[Xtream] DI contains {Count} ILiveTvService instances: [{Names}]",
                 allServices.Count,
                 string.Join(", ", allServices.Select(s => $"'{s.Name}' ({s.GetType().FullName})")));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[Xtream] Failed to enumerate ILiveTvService instances from DI");
+            _logger.LogDebug(ex, "[Xtream] Failed to enumerate ILiveTvService instances from DI");
         }
 
         var config = Plugin.Instance?.Configuration;
