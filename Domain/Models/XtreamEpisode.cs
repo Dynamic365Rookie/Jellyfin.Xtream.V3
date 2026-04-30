@@ -6,7 +6,7 @@ namespace Jellyfin.Xtream.Domain.Models;
 /// <summary>
 /// Converts JSON values that may be either a string or a number into a string.
 /// </summary>
-internal sealed class StringOrNumberConverter : JsonConverter<string?>
+public sealed class StringOrNumberConverter : JsonConverter<string?>
 {
     public override string? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
