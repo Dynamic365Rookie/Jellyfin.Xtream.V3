@@ -94,6 +94,22 @@ public class PluginConfiguration : BasePluginConfiguration
     public bool EnableChannelNameCleaning { get; set; } = false;
 
     /// <summary>
+    /// Gets or sets a value indicating whether STRM file generation is enabled.
+    /// When enabled, .strm files are written to disk so movies and series appear in the standard Jellyfin library.
+    /// </summary>
+    public bool EnableStrmGeneration { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets the output path for movie STRM files.
+    /// </summary>
+    public string StrmMoviesPath { get; set; } = "/media/xtream/movies";
+
+    /// <summary>
+    /// Gets or sets the output path for series STRM files.
+    /// </summary>
+    public string StrmSeriesPath { get; set; } = "/media/xtream/series";
+
+    /// <summary>
     /// Gets or sets a value indicating whether debug logging is enabled.
     /// </summary>
     public bool EnableDebugLogging { get; set; } = false;

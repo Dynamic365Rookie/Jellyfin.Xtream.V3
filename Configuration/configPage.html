@@ -119,6 +119,26 @@
                             </label>
                             <div class="fieldDescription checkboxFieldDescription">Remove country prefixes (FR:, |US|), quality suffixes (HD, FHD, 4K), and tags like (BACKUP) or [Multi-Sub] from channel names</div>
                         </div>
+
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input type="checkbox" is="emby-checkbox" id="chkEnableStrmGeneration" />
+                                <span>Generate STRM Files</span>
+                            </label>
+                            <div class="fieldDescription checkboxFieldDescription">Generate .strm files so movies and series appear in the standard Jellyfin library (requires adding the output paths as library sources)</div>
+                        </div>
+
+                        <div class="inputContainer">
+                            <label class="inputLabel" for="txtStrmMoviesPath">STRM Movies Path</label>
+                            <input id="txtStrmMoviesPath" type="text" is="emby-input" />
+                            <div class="fieldDescription">Output folder for movie .strm files (add this as a Movies library source in Jellyfin)</div>
+                        </div>
+
+                        <div class="inputContainer">
+                            <label class="inputLabel" for="txtStrmSeriesPath">STRM Series Path</label>
+                            <input id="txtStrmSeriesPath" type="text" is="emby-input" />
+                            <div class="fieldDescription">Output folder for series .strm files (add this as a TV Shows library source in Jellyfin)</div>
+                        </div>
                     </div>
 
                     <div class="verticalSection">
@@ -272,6 +292,9 @@
                     document.getElementById('chkShowChannelLanguageTags').checked = config.ShowChannelLanguageTags !== false;
                     document.getElementById('chkAppendLanguageToName').checked = config.AppendLanguageToChannelName === true;
                     document.getElementById('chkEnableChannelNameCleaning').checked = config.EnableChannelNameCleaning === true;
+                    document.getElementById('chkEnableStrmGeneration').checked = config.EnableStrmGeneration !== false;
+                    document.getElementById('txtStrmMoviesPath').value = config.StrmMoviesPath || '/media/xtream/movies';
+                    document.getElementById('txtStrmSeriesPath').value = config.StrmSeriesPath || '/media/xtream/series';
 
                     // Sync options
                     document.getElementById('txtSyncInterval').value = config.SyncIntervalHours || 6;
@@ -316,6 +339,9 @@
                     config.ShowChannelLanguageTags = document.getElementById('chkShowChannelLanguageTags').checked;
                     config.AppendLanguageToChannelName = document.getElementById('chkAppendLanguageToName').checked;
                     config.EnableChannelNameCleaning = document.getElementById('chkEnableChannelNameCleaning').checked;
+                    config.EnableStrmGeneration = document.getElementById('chkEnableStrmGeneration').checked;
+                    config.StrmMoviesPath = document.getElementById('txtStrmMoviesPath').value;
+                    config.StrmSeriesPath = document.getElementById('txtStrmSeriesPath').value;
 
                     // Sync options
                     config.SyncIntervalHours = parseInt(document.getElementById('txtSyncInterval').value);

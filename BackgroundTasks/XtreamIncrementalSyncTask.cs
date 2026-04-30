@@ -2,6 +2,7 @@ using Jellyfin.Xtream.Domain.Models;
 using Jellyfin.Xtream.Infrastructure.Monitoring;
 using Jellyfin.Xtream.Infrastructure.Persistence;
 using Jellyfin.Xtream.Infrastructure.Utilities;
+using Jellyfin.Xtream.Services.Media;
 using Jellyfin.Xtream.Services.Synchronization;
 using Jellyfin.Xtream.V3;
 using Microsoft.Extensions.Logging;
@@ -12,6 +13,7 @@ namespace Jellyfin.Xtream.BackgroundTasks;
 public sealed class XtreamIncrementalSyncTask : IScheduledTask
 {
     private readonly XtreamSyncService _syncService;
+    private readonly StrmFileGenerator _strmGenerator;
     private readonly IXtreamRepository<XtreamMovie> _movies;
     private readonly IXtreamRepository<XtreamSeries> _series;
     private readonly IXtreamRepository<XtreamChannel> _channels;
@@ -21,12 +23,14 @@ public sealed class XtreamIncrementalSyncTask : IScheduledTask
 
     public XtreamIncrementalSyncTask(
         XtreamSyncService syncService,
+        StrmFileGenerator strmGenerator,
         IXtreamRepository<XtreamMovie> movies,
         IXtreamRepository<XtreamSeries> series,
         IXtreamRepository<XtreamChannel> channels,
         ILoggerFactory loggerFactory)
     {
         _syncService = syncService;
+        _strmGenerator = strmGenerator;
         _movies = movies;
         _series = series;
         _channels = channels;
@@ -82,6 +86,9 @@ public sealed class XtreamIncrementalSyncTask : IScheduledTask
 
                 progress?.Report(100);
             }
+
+            // Generate STRM files for standard library integration
+            await _strmGenerator.GenerateAllAsync(cancellationToken).ConfigureAwait(false);
 
             var duration = DateTime.UtcNow - startTime;
             var movieCount = _movies.Count();
