@@ -29,6 +29,7 @@ public class XtreamSeriesChannel : IChannel, IRequiresMediaInfoCallback
         _seriesRepo = seriesRepo;
         _apiClient = apiClient;
         _logger = logger;
+        _logger.LogWarning("[Xtream Series] XtreamSeriesChannel constructed — channel registered");
     }
 
     public string Name => "Xtream Series";

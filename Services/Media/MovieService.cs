@@ -24,6 +24,7 @@ public class XtreamMovieChannel : IChannel, IRequiresMediaInfoCallback
     {
         _movieRepo = movieRepo;
         _logger = logger;
+        _logger.LogWarning("[Xtream Movies] XtreamMovieChannel constructed — channel registered");
     }
 
     public string Name => "Xtream Movies";
