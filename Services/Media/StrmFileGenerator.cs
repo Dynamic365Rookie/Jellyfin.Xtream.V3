@@ -121,69 +121,68 @@ public sealed class StrmFileGenerator
         _logger.LogWarning("[Xtream STRM] Found {Count} series in database", allSeries.Count);
 
         var count = 0;
+        var maxConcurrency = config.MaxConcurrentRequests > 0 ? config.MaxConcurrentRequests : 10;
 
-        foreach (var series in allSeries)
-        {
-            if (ct.IsCancellationRequested)
+        await Parallel.ForEachAsync(
+            allSeries,
+            new ParallelOptions { MaxDegreeOfParallelism = maxConcurrency, CancellationToken = ct },
+            async (series, token) =>
             {
-                break;
-            }
-
-            try
-            {
-                var seriesFolderName = series.Year.HasValue && series.Year > 0
-                    ? $"{SanitizeFileName(series.Name)} ({series.Year})"
-                    : SanitizeFileName(series.Name);
-
-                var seriesDirPath = Path.Combine(seriesPath, seriesFolderName);
-
-                // Skip if series folder already has STRM files (incremental)
-                if (Directory.Exists(seriesDirPath) && Directory.GetFiles(seriesDirPath, "*.strm", SearchOption.AllDirectories).Length > 0)
+                try
                 {
-                    count++;
-                    continue;
-                }
+                    var seriesFolderName = series.Year.HasValue && series.Year > 0
+                        ? $"{SanitizeFileName(series.Name)} ({series.Year})"
+                        : SanitizeFileName(series.Name);
 
-                var seriesInfo = await FetchSeriesInfo(series.SeriesId, ct).ConfigureAwait(false);
-                if (seriesInfo?.Episodes == null || seriesInfo.Episodes.Count == 0)
-                {
-                    continue;
-                }
+                    var seriesDirPath = Path.Combine(seriesPath, seriesFolderName);
 
-                foreach (var (seasonKey, episodes) in seriesInfo.Episodes)
-                {
-                    var seasonNum = int.TryParse(seasonKey, out var sn) ? sn : 0;
-                    var seasonFolder = $"Season {seasonNum:D2}";
-                    var seasonDir = Path.Combine(seriesDirPath, seasonFolder);
-                    Directory.CreateDirectory(seasonDir);
-
-                    foreach (var ep in episodes)
+                    // Skip if series folder already has STRM files (incremental)
+                    if (Directory.Exists(seriesDirPath) && Directory.GetFiles(seriesDirPath, "*.strm", SearchOption.AllDirectories).Length > 0)
                     {
-                        var epName = string.IsNullOrWhiteSpace(ep.Name)
-                            ? $"S{seasonNum:D2}E{ep.EpisodeNumber:D2}"
-                            : $"S{seasonNum:D2}E{ep.EpisodeNumber:D2} - {SanitizeFileName(ep.Name)}";
+                        Interlocked.Increment(ref count);
+                        return;
+                    }
 
-                        var filePath = Path.Combine(seasonDir, epName + ".strm");
-                        if (File.Exists(filePath))
-                        {
-                            continue;
-                        }
+                    var seriesInfo = await FetchSeriesInfo(series.SeriesId, token).ConfigureAwait(false);
+                    if (seriesInfo?.Episodes == null || seriesInfo.Episodes.Count == 0)
+                    {
+                        return;
+                    }
 
-                        if (int.TryParse(ep.StreamId, out var streamId))
+                    foreach (var (seasonKey, episodes) in seriesInfo.Episodes)
+                    {
+                        var seasonNum = int.TryParse(seasonKey, out var sn) ? sn : 0;
+                        var seasonFolder = $"Season {seasonNum:D2}";
+                        var seasonDir = Path.Combine(seriesDirPath, seasonFolder);
+                        Directory.CreateDirectory(seasonDir);
+
+                        foreach (var ep in episodes)
                         {
-                            var url = StreamUrlResolver.ResolveSeries(streamId);
-                            File.WriteAllText(filePath, url);
+                            var epName = string.IsNullOrWhiteSpace(ep.Name)
+                                ? $"S{seasonNum:D2}E{ep.EpisodeNumber:D2}"
+                                : $"S{seasonNum:D2}E{ep.EpisodeNumber:D2} - {SanitizeFileName(ep.Name)}";
+
+                            var filePath = Path.Combine(seasonDir, epName + ".strm");
+                            if (File.Exists(filePath))
+                            {
+                                continue;
+                            }
+
+                            if (int.TryParse(ep.StreamId, out var streamId))
+                            {
+                                var url = StreamUrlResolver.ResolveSeries(streamId);
+                                File.WriteAllText(filePath, url);
+                            }
                         }
                     }
-                }
 
-                count++;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogDebug(ex, "[Xtream STRM] Failed to process series {Name}", series.Name);
-            }
-        }
+                    Interlocked.Increment(ref count);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "[Xtream STRM] Failed to process series {Name}", series.Name);
+                }
+            }).ConfigureAwait(false);
 
         return count;
     }
