@@ -56,11 +56,17 @@ public sealed class StrmFileGenerator
         var moviesPath = config.StrmMoviesPath;
         if (string.IsNullOrWhiteSpace(moviesPath))
         {
+            _logger.LogWarning("[Xtream STRM] StrmMoviesPath is empty, skipping movies");
             return 0;
         }
 
+        _logger.LogWarning("[Xtream STRM] Generating movie STRMs to: {Path}", moviesPath);
+
         var movies = _movieRepo.GetAll().ToList();
+        _logger.LogWarning("[Xtream STRM] Found {Count} movies in database", movies.Count);
+
         var count = 0;
+        var errors = 0;
 
         foreach (var movie in movies)
         {
@@ -84,8 +90,17 @@ public sealed class StrmFileGenerator
             }
             catch (Exception ex)
             {
-                _logger.LogDebug(ex, "[Xtream STRM] Failed to write STRM for movie {Name}", movie.Name);
+                errors++;
+                if (errors <= 5)
+                {
+                    _logger.LogWarning(ex, "[Xtream STRM] Failed to write STRM for movie {Name}", movie.Name);
+                }
             }
+        }
+
+        if (errors > 5)
+        {
+            _logger.LogWarning("[Xtream STRM] {Errors} total movie STRM write errors (suppressed after 5)", errors);
         }
 
         return count;
@@ -96,10 +111,15 @@ public sealed class StrmFileGenerator
         var seriesPath = config.StrmSeriesPath;
         if (string.IsNullOrWhiteSpace(seriesPath))
         {
+            _logger.LogWarning("[Xtream STRM] StrmSeriesPath is empty, skipping series");
             return 0;
         }
 
+        _logger.LogWarning("[Xtream STRM] Generating series STRMs to: {Path}", seriesPath);
+
         var allSeries = _seriesRepo.GetAll().ToList();
+        _logger.LogWarning("[Xtream STRM] Found {Count} series in database", allSeries.Count);
+
         var count = 0;
 
         foreach (var series in allSeries)
