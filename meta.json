@@ -5,8 +5,8 @@
   "overview": "Stream Live TV, Movies, and Series from an Xtream-compatible server using this optimized plugin.",
   "owner": "Dynamic365Rookie",
   "category": "LiveTV",
-  "version": "3.7.2",
+  "version": "3.7.3",
   "targetAbi": "10.11.0.0",
-  "changelog": "Replace IChannel with STRM file generation for standard library integration (movies and series appear in regular Jellyfin libraries)",
+  "changelog": "Fix playback: append container extension to stream URLs (.mp4/.mkv). Parallelize movie STRM writes. Increase default series concurrency to 20.",
   "timestamp": "2026-04-30T12:00:00Z"
 }

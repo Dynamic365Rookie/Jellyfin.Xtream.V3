@@ -7,13 +7,15 @@ namespace Jellyfin.Xtream.Services.LiveTv;
 /// </summary>
 public static class StreamUrlResolver
 {
-    public static string ResolveLive(int streamId) => BuildUrl(null, streamId);
+    public static string ResolveLive(int streamId) => BuildUrl(null, streamId, null);
 
-    public static string ResolveMovie(int streamId) => BuildUrl("movie", streamId);
+    public static string ResolveMovie(int streamId, string? containerExtension = null)
+        => BuildUrl("movie", streamId, containerExtension);
 
-    public static string ResolveSeries(int streamId) => BuildUrl("series", streamId);
+    public static string ResolveSeries(int streamId, string? containerExtension = null)
+        => BuildUrl("series", streamId, containerExtension);
 
-    private static string BuildUrl(string? type, int streamId)
+    private static string BuildUrl(string? type, int streamId, string? containerExtension)
     {
         var config = Plugin.Instance?.Configuration
             ?? throw new InvalidOperationException("Plugin not initialized");
@@ -24,6 +26,13 @@ public static class StreamUrlResolver
         var path = type == null
             ? $"{baseUrl}/{config.Username}/{config.Password}/{streamId}"
             : $"{baseUrl}/{type}/{config.Username}/{config.Password}/{streamId}";
+
+        // Xtream API requires the container extension for playback
+        if (!string.IsNullOrWhiteSpace(containerExtension))
+        {
+            var ext = containerExtension.TrimStart('.');
+            path = $"{path}.{ext}";
+        }
 
         return path;
     }

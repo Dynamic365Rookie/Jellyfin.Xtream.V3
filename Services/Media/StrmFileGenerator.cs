@@ -68,7 +68,7 @@ public sealed class StrmFileGenerator
         var count = 0;
         var errors = 0;
 
-        foreach (var movie in movies)
+        Parallel.ForEach(movies, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, movie =>
         {
             try
             {
@@ -77,26 +77,20 @@ public sealed class StrmFileGenerator
                 var dirPath = Path.Combine(moviesPath, categoryFolder);
                 var filePath = Path.Combine(dirPath, movieName + ".strm");
 
-                if (File.Exists(filePath))
-                {
-                    count++;
-                    continue;
-                }
-
                 Directory.CreateDirectory(dirPath);
-                var url = StreamUrlResolver.ResolveMovie(movie.StreamId);
+                var url = StreamUrlResolver.ResolveMovie(movie.StreamId, movie.ContainerExtension);
                 File.WriteAllText(filePath, url);
-                count++;
+                Interlocked.Increment(ref count);
             }
             catch (Exception ex)
             {
-                errors++;
-                if (errors <= 5)
+                var currentErrors = Interlocked.Increment(ref errors);
+                if (currentErrors <= 5)
                 {
                     _logger.LogWarning(ex, "[Xtream STRM] Failed to write STRM for movie {Name}", movie.Name);
                 }
             }
-        }
+        });
 
         if (errors > 5)
         {
@@ -121,7 +115,7 @@ public sealed class StrmFileGenerator
         _logger.LogWarning("[Xtream STRM] Found {Count} series in database", allSeries.Count);
 
         var count = 0;
-        var maxConcurrency = config.MaxConcurrentRequests > 0 ? config.MaxConcurrentRequests : 10;
+        var maxConcurrency = config.MaxConcurrentRequests > 0 ? config.MaxConcurrentRequests : 20;
 
         await Parallel.ForEachAsync(
             allSeries,
@@ -135,13 +129,6 @@ public sealed class StrmFileGenerator
                         : SanitizeFileName(series.Name);
 
                     var seriesDirPath = Path.Combine(seriesPath, seriesFolderName);
-
-                    // Skip if series folder already has STRM files (incremental)
-                    if (Directory.Exists(seriesDirPath) && Directory.GetFiles(seriesDirPath, "*.strm", SearchOption.AllDirectories).Length > 0)
-                    {
-                        Interlocked.Increment(ref count);
-                        return;
-                    }
 
                     var seriesInfo = await FetchSeriesInfo(series.SeriesId, token).ConfigureAwait(false);
                     if (seriesInfo?.Episodes == null || seriesInfo.Episodes.Count == 0)
@@ -163,14 +150,10 @@ public sealed class StrmFileGenerator
                                 : $"S{seasonNum:D2}E{ep.EpisodeNumber:D2} - {SanitizeFileName(ep.Name)}";
 
                             var filePath = Path.Combine(seasonDir, epName + ".strm");
-                            if (File.Exists(filePath))
-                            {
-                                continue;
-                            }
 
                             if (int.TryParse(ep.StreamId, out var streamId))
                             {
-                                var url = StreamUrlResolver.ResolveSeries(streamId);
+                                var url = StreamUrlResolver.ResolveSeries(streamId, ep.ContainerExtension);
                                 File.WriteAllText(filePath, url);
                             }
                         }

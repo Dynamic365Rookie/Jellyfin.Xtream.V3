@@ -50,6 +50,9 @@ public sealed record XtreamMovie : Jellyfin.Xtream.Infrastructure.Persistence.IE
     [System.Text.Json.Serialization.JsonPropertyName("category_name")]
     public string? CategoryName { get; init; }
 
+    [System.Text.Json.Serialization.JsonPropertyName("container_extension")]
+    public string? ContainerExtension { get; init; }
+
     [System.Text.Json.Serialization.JsonPropertyName("added")]
     public long Added { get; init; }
 

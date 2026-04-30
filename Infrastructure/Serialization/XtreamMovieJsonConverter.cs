@@ -31,6 +31,7 @@ public sealed class XtreamMovieJsonConverter : JsonConverter<XtreamMovie>
             Actor = root.TryGetProperty("actor", out var actor) ? actor.GetFlexibleString() : null,
             CategoryId = root.TryGetProperty("category_id", out var catId) ? catId.GetFlexibleNullableInt32() : null,
             CategoryName = root.TryGetProperty("category_name", out var catName) ? catName.GetFlexibleString() : null,
+            ContainerExtension = root.TryGetProperty("container_extension", out var ext) ? ext.GetFlexibleString() : null,
             Added = root.TryGetProperty("added", out var added) ? added.GetFlexibleInt64() : 0,
             LastModifiedTimestamp = root.TryGetProperty("last_modified", out var lastMod) ? lastMod.GetFlexibleInt64() : 0
         };
@@ -54,6 +55,7 @@ public sealed class XtreamMovieJsonConverter : JsonConverter<XtreamMovie>
         if (value.Actor != null) writer.WriteString("actor", value.Actor);
         if (value.CategoryId.HasValue) writer.WriteNumber("category_id", value.CategoryId.Value);
         if (value.CategoryName != null) writer.WriteString("category_name", value.CategoryName);
+        if (value.ContainerExtension != null) writer.WriteString("container_extension", value.ContainerExtension);
         writer.WriteNumber("added", value.Added);
         writer.WriteNumber("last_modified", value.LastModifiedTimestamp);
         writer.WriteEndObject();
