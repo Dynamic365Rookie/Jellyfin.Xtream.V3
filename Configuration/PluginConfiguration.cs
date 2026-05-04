@@ -113,4 +113,11 @@ public class PluginConfiguration : BasePluginConfiguration
     /// Gets or sets a value indicating whether debug logging is enabled.
     /// </summary>
     public bool EnableDebugLogging { get; set; } = false;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether title cleaning is enabled for STRM files.
+    /// Removes language tags, quality suffixes (4K, HD), and bracketed metadata from movie/series names
+    /// to improve matching with metadata scrapers (TMDb).
+    /// </summary>
+    public bool EnableTitleCleaning { get; set; } = true;
 }

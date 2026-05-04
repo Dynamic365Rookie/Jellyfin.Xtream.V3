@@ -3,6 +3,7 @@ using Jellyfin.Xtream.Api;
 using Jellyfin.Xtream.Domain.Models;
 using Jellyfin.Xtream.Infrastructure.Persistence;
 using Jellyfin.Xtream.Services.LiveTv;
+using Jellyfin.Xtream.Services.Mapping;
 using Jellyfin.Xtream.V3;
 using Jellyfin.Xtream.V3.Configuration;
 using Microsoft.Extensions.Logging;
@@ -81,7 +82,7 @@ public sealed class StrmFileGenerator
             try
             {
                 var categoryFolder = SanitizeFileName(movie.CategoryName ?? "Uncategorized");
-                var movieName = BuildMovieFileName(movie);
+                var movieName = BuildMovieFileName(movie, config.EnableTitleCleaning);
                 var dirPath = Path.Combine(moviesPath, categoryFolder);
                 var filePath = Path.Combine(dirPath, movieName + ".strm");
 
@@ -126,9 +127,12 @@ public sealed class StrmFileGenerator
             {
                 try
                 {
+                    var rawName = config.EnableTitleCleaning
+                        ? ChannelNameCleaner.Clean(series.Name)
+                        : series.Name;
                     var seriesFolderName = series.Year.HasValue && series.Year > 0
-                        ? $"{SanitizeFileName(series.Name)} ({series.Year})"
-                        : SanitizeFileName(series.Name);
+                        ? $"{SanitizeFileName(rawName)} ({series.Year})"
+                        : SanitizeFileName(rawName);
 
                     var seriesDirPath = Path.Combine(seriesPath, seriesFolderName);
 
@@ -195,9 +199,10 @@ public sealed class StrmFileGenerator
         }
     }
 
-    private static string BuildMovieFileName(XtreamMovie movie)
+    private static string BuildMovieFileName(XtreamMovie movie, bool cleanTitle)
     {
-        var name = SanitizeFileName(movie.Name);
+        var rawName = cleanTitle ? ChannelNameCleaner.Clean(movie.Name) : movie.Name;
+        var name = SanitizeFileName(rawName);
         if (movie.Year.HasValue && movie.Year > 0)
         {
             name = $"{name} ({movie.Year})";

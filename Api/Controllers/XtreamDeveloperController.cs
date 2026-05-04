@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using Jellyfin.Xtream.Domain.Models;
 using Jellyfin.Xtream.Infrastructure.Persistence;
+using Jellyfin.Xtream.Services.Media;
+using Jellyfin.Xtream.V3;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -19,54 +21,40 @@ public class XtreamDeveloperController : ControllerBase
     private readonly IXtreamRepository<XtreamMovie> _movieRepo;
     private readonly IXtreamRepository<XtreamSeries> _seriesRepo;
     private readonly IXtreamRepository<XtreamChannel> _channelRepo;
+    private readonly StrmFileGenerator _strmGenerator;
     private readonly ILogger<XtreamDeveloperController> _logger;
 
     public XtreamDeveloperController(
         IXtreamRepository<XtreamMovie> movieRepo,
         IXtreamRepository<XtreamSeries> seriesRepo,
         IXtreamRepository<XtreamChannel> channelRepo,
+        StrmFileGenerator strmGenerator,
         ILogger<XtreamDeveloperController> logger)
     {
         _movieRepo = movieRepo;
         _seriesRepo = seriesRepo;
         _channelRepo = channelRepo;
+        _strmGenerator = strmGenerator;
         _logger = logger;
     }
 
-    /// <summary>
-    /// Get statistics about entities in the database.
-    /// </summary>
-    /// <returns>Entity counts.</returns>
     [HttpGet("Stats")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public ActionResult<DatabaseStats> GetStats()
     {
-        _logger.LogInformation("[Xtream] Developer: Getting database stats");
-
-        var stats = new DatabaseStats
+        return Ok(new DatabaseStats
         {
             MovieCount = _movieRepo.Count(),
             SeriesCount = _seriesRepo.Count(),
             ChannelCount = _channelRepo.Count()
-        };
-
-        _logger.LogInformation(
-            "[Xtream] Developer: Returning stats - Movies: {Movies}, Series: {Series}, Channels: {Channels}",
-            stats.MovieCount, stats.SeriesCount, stats.ChannelCount);
-
-        return Ok(stats);
+        });
     }
 
-    /// <summary>
-    /// Clear all data from the LiteDB database.
-    /// </summary>
-    /// <returns>Result of the operation.</returns>
     [HttpPost("ClearDatabase")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public ActionResult<ClearDatabaseResult> ClearDatabase()
     {
-        _logger.LogWarning("[Xtream] Developer: Clearing database - ALL DATA WILL BE DELETED");
+        _logger.LogWarning("[Xtream] Developer: Clearing database + STRM files");
 
         try
         {
@@ -74,9 +62,7 @@ public class XtreamDeveloperController : ControllerBase
             var seriesDeleted = _seriesRepo.DeleteAll();
             var channelsDeleted = _channelRepo.DeleteAll();
 
-            _logger.LogInformation(
-                "[Xtream] Developer: Database cleared - {Movies} movies, {Series} series, {Channels} channels deleted",
-                moviesDeleted, seriesDeleted, channelsDeleted);
+            var strmDeleted = DeleteStrmFiles(true, true);
 
             return Ok(new ClearDatabaseResult
             {
@@ -84,66 +70,152 @@ public class XtreamDeveloperController : ControllerBase
                 MoviesDeleted = moviesDeleted,
                 SeriesDeleted = seriesDeleted,
                 ChannelsDeleted = channelsDeleted,
-                Message = $"Database cleared: {moviesDeleted} movies, {seriesDeleted} series, {channelsDeleted} channels deleted"
+                Message = $"Cleared: {moviesDeleted} movies, {seriesDeleted} series, {channelsDeleted} channels, {strmDeleted} STRM files"
             });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "[Xtream] Developer: Failed to clear database");
-            return StatusCode(500, new ClearDatabaseResult
-            {
-                Success = false,
-                Message = $"Failed to clear database: {ex.Message}"
-            });
+            return StatusCode(500, new ClearDatabaseResult { Success = false, Message = ex.Message });
         }
     }
 
-    /// <summary>
-    /// Get all movies from the database.
-    /// </summary>
-    /// <param name="limit">Maximum number of results (default: 50, max: 500).</param>
-    /// <returns>List of movies.</returns>
+    [HttpPost("DeleteMovies")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public ActionResult<ClearDatabaseResult> DeleteMovies()
+    {
+        try
+        {
+            var deleted = _movieRepo.DeleteAll();
+            var strmDeleted = DeleteStrmFiles(true, false);
+
+            return Ok(new ClearDatabaseResult
+            {
+                Success = true,
+                MoviesDeleted = deleted,
+                Message = $"Deleted: {deleted} movies, {strmDeleted} STRM files"
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new ClearDatabaseResult { Success = false, Message = ex.Message });
+        }
+    }
+
+    [HttpPost("DeleteSeries")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public ActionResult<ClearDatabaseResult> DeleteSeries()
+    {
+        try
+        {
+            var deleted = _seriesRepo.DeleteAll();
+            var strmDeleted = DeleteStrmFiles(false, true);
+
+            return Ok(new ClearDatabaseResult
+            {
+                Success = true,
+                SeriesDeleted = deleted,
+                Message = $"Deleted: {deleted} series, {strmDeleted} STRM files"
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new ClearDatabaseResult { Success = false, Message = ex.Message });
+        }
+    }
+
+    [HttpPost("DeleteChannels")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public ActionResult<ClearDatabaseResult> DeleteChannels()
+    {
+        try
+        {
+            var deleted = _channelRepo.DeleteAll();
+
+            return Ok(new ClearDatabaseResult
+            {
+                Success = true,
+                ChannelsDeleted = deleted,
+                Message = $"Deleted: {deleted} channels"
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new ClearDatabaseResult { Success = false, Message = ex.Message });
+        }
+    }
+
+    [HttpPost("RegenerateStrm")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult<ClearDatabaseResult>> RegenerateStrm(CancellationToken ct)
+    {
+        try
+        {
+            var strmDeleted = DeleteStrmFiles(true, true);
+            await _strmGenerator.GenerateAllAsync(ct).ConfigureAwait(false);
+
+            return Ok(new ClearDatabaseResult
+            {
+                Success = true,
+                Message = $"Regenerated STRM files ({strmDeleted} old files removed)"
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new ClearDatabaseResult { Success = false, Message = ex.Message });
+        }
+    }
+
     [HttpGet("Movies")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public ActionResult<IEnumerable<XtreamMovie>> GetMovies([FromQuery] int limit = 50)
     {
         limit = Math.Min(Math.Max(limit, 1), 500);
-        _logger.LogInformation("[Xtream] Developer: Getting {Limit} movies", limit);
-
-        var movies = _movieRepo.GetAll().Take(limit);
-        return Ok(movies);
+        return Ok(_movieRepo.GetAll().Take(limit));
     }
 
-    /// <summary>
-    /// Get all series from the database.
-    /// </summary>
-    /// <param name="limit">Maximum number of results (default: 50, max: 500).</param>
-    /// <returns>List of series.</returns>
     [HttpGet("Series")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public ActionResult<IEnumerable<XtreamSeries>> GetSeries([FromQuery] int limit = 50)
     {
         limit = Math.Min(Math.Max(limit, 1), 500);
-        _logger.LogInformation("[Xtream] Developer: Getting {Limit} series", limit);
-
-        var series = _seriesRepo.GetAll().Take(limit);
-        return Ok(series);
+        return Ok(_seriesRepo.GetAll().Take(limit));
     }
 
-    /// <summary>
-    /// Get all channels from the database.
-    /// </summary>
-    /// <param name="limit">Maximum number of results (default: 50, max: 500).</param>
-    /// <returns>List of channels.</returns>
     [HttpGet("Channels")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public ActionResult<IEnumerable<XtreamChannel>> GetChannels([FromQuery] int limit = 50)
     {
         limit = Math.Min(Math.Max(limit, 1), 500);
-        _logger.LogInformation("[Xtream] Developer: Getting {Limit} channels", limit);
+        return Ok(_channelRepo.GetAll().Take(limit));
+    }
 
-        var channels = _channelRepo.GetAll().Take(limit);
-        return Ok(channels);
+    private int DeleteStrmFiles(bool movies, bool series)
+    {
+        var config = Plugin.Instance?.Configuration;
+        if (config == null) return 0;
+
+        var count = 0;
+
+        if (movies && !string.IsNullOrWhiteSpace(config.StrmMoviesPath) && Directory.Exists(config.StrmMoviesPath))
+        {
+            count += CountFiles(config.StrmMoviesPath, "*.strm");
+            Directory.Delete(config.StrmMoviesPath, true);
+        }
+
+        if (series && !string.IsNullOrWhiteSpace(config.StrmSeriesPath) && Directory.Exists(config.StrmSeriesPath))
+        {
+            count += CountFiles(config.StrmSeriesPath, "*.strm");
+            Directory.Delete(config.StrmSeriesPath, true);
+        }
+
+        return count;
+    }
+
+    private static int CountFiles(string path, string pattern)
+    {
+        try { return Directory.GetFiles(path, pattern, SearchOption.AllDirectories).Length; }
+        catch { return 0; }
     }
 }
 

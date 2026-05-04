@@ -24,6 +24,10 @@ public static partial class ChannelNameCleaner
     [GeneratedRegex(@"\b(H\.?265|HEVC|UHD|FHD|HD|SD|4K)\s*$", RegexOptions.Compiled | RegexOptions.IgnoreCase)]
     private static partial Regex QualitySuffixPattern();
 
+    // 3b. Language/version suffixes: VF, VOSTFR, MULTI, QFR, TRUEFRENCH
+    [GeneratedRegex(@"\b(VF|VO|VOSTFR|MULTI|QFR|TRUEFRENCH|FRENCH)\s*$", RegexOptions.Compiled | RegexOptions.IgnoreCase)]
+    private static partial Regex LanguageSuffixPattern();
+
     // 4. Trailing separators left after other removals
     [GeneratedRegex(@"[\s\|\-\.\:]+$", RegexOptions.Compiled)]
     private static partial Regex TrailingSeparatorPattern();
@@ -55,6 +59,9 @@ public static partial class ChannelNameCleaner
 
         // 3. Remove quality suffix
         name = QualitySuffixPattern().Replace(name, string.Empty);
+
+        // 3b. Remove language/version suffix
+        name = LanguageSuffixPattern().Replace(name, string.Empty);
 
         // 4. Remove trailing separators
         name = TrailingSeparatorPattern().Replace(name, string.Empty);

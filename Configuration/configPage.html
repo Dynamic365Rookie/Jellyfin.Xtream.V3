@@ -128,6 +128,14 @@
                             <div class="fieldDescription checkboxFieldDescription">Generate .strm files so movies and series appear in the standard Jellyfin library (requires adding the output paths as library sources)</div>
                         </div>
 
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input type="checkbox" is="emby-checkbox" id="chkEnableTitleCleaning" />
+                                <span>Clean Titles for Metadata Matching</span>
+                            </label>
+                            <div class="fieldDescription checkboxFieldDescription">Remove language tags (VF, VOSTFR, MULTI), quality suffixes (4K, HD), country prefixes (|FR|) and bracketed tags from movie/series titles. Improves TMDb matching for posters and descriptions.</div>
+                        </div>
+
                         <div class="inputContainer">
                             <label class="inputLabel" for="txtStrmMoviesPath">STRM Movies Path</label>
                             <input id="txtStrmMoviesPath" type="text" is="emby-input" />
@@ -240,12 +248,32 @@
                             </div>
                         </div>
 
+                        <div style="background: #1c1c1c; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
+                            <h3 style="margin-top: 0;">STRM Management</h3>
+                            <p style="color: #ccc;">Regenerate all STRM files with cleaned titles. Use after enabling title cleaning or changing paths.</p>
+                            <button is="emby-button" type="button" class="raised block" id="btnRegenerateStrm" style="margin-top: 10px;">
+                                <span>Régénérer les STRM</span>
+                            </button>
+                            <div id="regenerateResult" style="margin-top: 10px; display: none;"></div>
+                        </div>
+
                         <div style="background: #2c1c1c; padding: 15px; border-radius: 4px; border: 1px solid #cc0000;">
                             <h3 style="margin-top: 0; color: #ff4444;">⚠️ Danger Zone</h3>
-                            <p style="color: #ccc;">Clear all synchronized data from the database. This action will remove all movies, series, and channels. You will need to run synchronization again to restore them.</p>
-                            <button is="emby-button" type="button" class="raised button-delete block" id="btnClearDatabase" style="background: #cc0000;">
-                                <span>Clear Database</span>
-                            </button>
+                            <p style="color: #ccc;">Delete data from the database and associated STRM files.</p>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                                <button is="emby-button" type="button" class="raised" id="btnDeleteMovies" style="background: #993300;">
+                                    <span>Delete Movies</span>
+                                </button>
+                                <button is="emby-button" type="button" class="raised" id="btnDeleteSeries" style="background: #993300;">
+                                    <span>Delete Series</span>
+                                </button>
+                                <button is="emby-button" type="button" class="raised" id="btnDeleteChannels" style="background: #993300;">
+                                    <span>Delete Channels</span>
+                                </button>
+                                <button is="emby-button" type="button" class="raised" id="btnClearDatabase" style="background: #cc0000;">
+                                    <span>Clear All</span>
+                                </button>
+                            </div>
                             <div id="clearDbResult" style="margin-top: 10px; display: none;"></div>
                         </div>
                     </div>
@@ -293,6 +321,7 @@
                     document.getElementById('chkAppendLanguageToName').checked = config.AppendLanguageToChannelName === true;
                     document.getElementById('chkEnableChannelNameCleaning').checked = config.EnableChannelNameCleaning === true;
                     document.getElementById('chkEnableStrmGeneration').checked = config.EnableStrmGeneration !== false;
+                    document.getElementById('chkEnableTitleCleaning').checked = config.EnableTitleCleaning !== false;
                     document.getElementById('txtStrmMoviesPath').value = config.StrmMoviesPath || '/media/xtream/movies';
                     document.getElementById('txtStrmSeriesPath').value = config.StrmSeriesPath || '/media/xtream/series';
 
@@ -340,6 +369,7 @@
                     config.AppendLanguageToChannelName = document.getElementById('chkAppendLanguageToName').checked;
                     config.EnableChannelNameCleaning = document.getElementById('chkEnableChannelNameCleaning').checked;
                     config.EnableStrmGeneration = document.getElementById('chkEnableStrmGeneration').checked;
+                    config.EnableTitleCleaning = document.getElementById('chkEnableTitleCleaning').checked;
                     config.StrmMoviesPath = document.getElementById('txtStrmMoviesPath').value;
                     config.StrmSeriesPath = document.getElementById('txtStrmSeriesPath').value;
 
@@ -418,66 +448,58 @@
 
             // Developer Tools - Clear Database
             document.getElementById('btnClearDatabase').addEventListener('click', function () {
-                console.log('[Xtream] Clear Database button clicked');
+                if (!confirm('⚠️ This will delete ALL data (movies, series, channels) and all STRM files.\n\nContinue?')) return;
+                callDeveloperApi('ClearDatabase', 'POST', 'clearDbResult');
+            });
 
-                var confirmed = confirm('⚠️ WARNING: This will delete ALL synchronized data!\n\nAll movies, series, and channels will be removed from the database.\nYou will need to run synchronization again to restore them.\n\nThis action cannot be undone.\n\nClick OK to continue, or Cancel to abort.');
+            // Selective deletion
+            document.getElementById('btnDeleteMovies').addEventListener('click', function () {
+                if (!confirm('Delete all movies from database and their STRM files?')) return;
+                callDeveloperApi('DeleteMovies', 'POST', 'clearDbResult');
+            });
 
-                if (!confirmed) {
-                    console.log('[Xtream] Clear cancelled by user');
-                    return;
-                }
+            document.getElementById('btnDeleteSeries').addEventListener('click', function () {
+                if (!confirm('Delete all series from database and their STRM files?')) return;
+                callDeveloperApi('DeleteSeries', 'POST', 'clearDbResult');
+            });
 
-                console.log('[Xtream] Clear confirmed, calling API...');
+            document.getElementById('btnDeleteChannels').addEventListener('click', function () {
+                if (!confirm('Delete all channels from database?')) return;
+                callDeveloperApi('DeleteChannels', 'POST', 'clearDbResult');
+            });
+
+            // Regenerate STRM
+            document.getElementById('btnRegenerateStrm').addEventListener('click', function () {
+                if (!confirm('This will delete all existing STRM files and regenerate them with current settings.\n\nThis may take several minutes for large catalogs.\n\nContinue?')) return;
+                callDeveloperApi('RegenerateStrm', 'POST', 'regenerateResult');
+            });
+
+            function callDeveloperApi(endpoint, method, resultDivId) {
                 Dashboard.showLoadingMsg();
-
-                fetch(ApiClient.getUrl('Xtream/Developer/ClearDatabase'), {
-                    method: 'POST',
-                    headers: {
-                        'X-Emby-Token': ApiClient.accessToken()
-                    }
+                fetch(ApiClient.getUrl('Xtream/Developer/' + endpoint), {
+                    method: method,
+                    headers: { 'X-Emby-Token': ApiClient.accessToken() }
                 })
                 .then(function (response) {
-                    console.log('[Xtream] Clear response status:', response.status);
-                    if (!response.ok) {
-                        throw new Error('HTTP ' + response.status + ': ' + response.statusText);
-                    }
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
                     return response.json();
                 })
                 .then(function (result) {
-                    console.log('[Xtream] Clear result:', result);
                     Dashboard.hideLoadingMsg();
-
-                    var resultDiv = document.getElementById('clearDbResult');
+                    var resultDiv = document.getElementById(resultDivId);
                     resultDiv.style.display = 'block';
-
-                    // Support both PascalCase and camelCase
                     var success = result.Success || result.success;
                     var message = result.Message || result.message;
-
-                    if (success) {
-                        resultDiv.style.color = '#00ff00';
-                        resultDiv.innerHTML = '<strong>✓ Success:</strong> ' + message;
-
-                        // Refresh stats to show zeros
-                        setTimeout(function () {
-                            console.log('[Xtream] Refreshing stats after clear...');
-                            document.getElementById('btnRefreshStats').click();
-                        }, 1000);
-                    } else {
-                        resultDiv.style.color = '#ff4444';
-                        resultDiv.innerHTML = '<strong>✗ Error:</strong> ' + message;
-                    }
-
-                    // Hide result message after 10 seconds
-                    setTimeout(function () {
-                        resultDiv.style.display = 'none';
-                    }, 10000);
-                }).catch(function (err) {
-                    console.error('[Xtream] Clear error:', err);
+                    resultDiv.style.color = success ? '#00ff00' : '#ff4444';
+                    resultDiv.innerHTML = (success ? '<strong>✓</strong> ' : '<strong>✗</strong> ') + message;
+                    setTimeout(function () { resultDiv.style.display = 'none'; }, 10000);
+                    if (success) setTimeout(function () { document.getElementById('btnRefreshStats').click(); }, 1000);
+                })
+                .catch(function (err) {
                     Dashboard.hideLoadingMsg();
-                    alert('Failed to clear database: ' + err.message);
+                    alert('Error: ' + err.message);
                 });
-            });
+            }
 
             // Helper function to view data
             function viewData(type, endpoint) {

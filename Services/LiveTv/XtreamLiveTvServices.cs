@@ -1,3 +1,5 @@
+using System.Globalization;
+using Jellyfin.Xtream.Api;
 using Jellyfin.Xtream.Domain.Models;
 using Jellyfin.Xtream.Infrastructure.Persistence;
 using Jellyfin.Xtream.Services.Mapping;
@@ -157,14 +159,100 @@ public sealed class XtreamLiveTvService : ILiveTvService
     public Task ResetTuner(string id, CancellationToken cancellationToken) => Task.CompletedTask;
 
     /// <inheritdoc />
-    public Task<IEnumerable<ProgramInfo>> GetProgramsAsync(
+    public async Task<IEnumerable<ProgramInfo>> GetProgramsAsync(
         string channelId,
         DateTime startDateUtc,
         DateTime endDateUtc,
         CancellationToken cancellationToken)
     {
-        // EPG not implemented yet — Jellyfin will show channels without program data
-        return Task.FromResult(Enumerable.Empty<ProgramInfo>());
+        var config = Plugin.Instance?.Configuration;
+        if (config == null || !config.EnableEPG)
+        {
+            return Enumerable.Empty<ProgramInfo>();
+        }
+
+        if (!int.TryParse(channelId, out var streamId))
+        {
+            return Enumerable.Empty<ProgramInfo>();
+        }
+
+        try
+        {
+            var apiClient = _serviceProvider.GetRequiredService<XtreamApiClient>();
+            var url = XtreamApiEndpoints.FullEpg(config.ServerUrl, config.Username, config.Password, streamId);
+            var epgData = await apiClient.GetAsync<XtreamEpgResponse>(url, cancellationToken).ConfigureAwait(false);
+
+            if (epgData?.Listings == null || epgData.Listings.Count == 0)
+            {
+                return Enumerable.Empty<ProgramInfo>();
+            }
+
+            var programs = new List<ProgramInfo>();
+            foreach (var listing in epgData.Listings)
+            {
+                var start = ParseEpgDateTime(listing.Start, listing.StartTimestamp);
+                var end = ParseEpgDateTime(listing.End, listing.StopTimestamp);
+
+                if (start == null || end == null) continue;
+                if (end.Value < startDateUtc || start.Value > endDateUtc) continue;
+
+                programs.Add(new ProgramInfo
+                {
+                    Id = $"{channelId}_{listing.Id ?? start.Value.Ticks.ToString()}",
+                    ChannelId = channelId,
+                    Name = DecodeBase64IfNeeded(listing.Title),
+                    Overview = DecodeBase64IfNeeded(listing.Description),
+                    StartDate = start.Value,
+                    EndDate = end.Value
+                });
+            }
+
+            return programs;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "[Xtream] Failed to fetch EPG for channel {ChannelId}", channelId);
+            return Enumerable.Empty<ProgramInfo>();
+        }
+    }
+
+    private static DateTime? ParseEpgDateTime(string? dateStr, long? timestamp)
+    {
+        if (timestamp.HasValue && timestamp.Value > 0)
+        {
+            return DateTimeOffset.FromUnixTimeSeconds(timestamp.Value).UtcDateTime;
+        }
+
+        if (string.IsNullOrWhiteSpace(dateStr)) return null;
+
+        if (DateTime.TryParseExact(dateStr, "yyyy-MM-dd HH:mm:ss",
+            CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out var dt))
+        {
+            return dt;
+        }
+
+        if (DateTime.TryParse(dateStr, CultureInfo.InvariantCulture,
+            DateTimeStyles.AdjustToUniversal, out var dt2))
+        {
+            return dt2;
+        }
+
+        return null;
+    }
+
+    private static string DecodeBase64IfNeeded(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return string.Empty;
+
+        try
+        {
+            var bytes = Convert.FromBase64String(value);
+            return System.Text.Encoding.UTF8.GetString(bytes);
+        }
+        catch
+        {
+            return value;
+        }
     }
 
     #region Timer stubs (Xtream does not support recording)
