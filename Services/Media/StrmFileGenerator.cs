@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Jellyfin.Xtream.Api;
 using Jellyfin.Xtream.Domain.Models;
 using Jellyfin.Xtream.Infrastructure.Persistence;
+using Jellyfin.Xtream.Infrastructure.Utilities;
 using Jellyfin.Xtream.Services.LiveTv;
 using Jellyfin.Xtream.Services.Mapping;
 using Jellyfin.Xtream.V3;
@@ -19,8 +20,6 @@ public sealed class StrmFileGenerator
     private readonly IXtreamRepository<XtreamSeries> _seriesRepo;
     private readonly XtreamApiClient _apiClient;
     private readonly ILogger<StrmFileGenerator> _logger;
-
-    private static readonly char[] InvalidFileChars = Path.GetInvalidFileNameChars();
 
     public StrmFileGenerator(
         IXtreamRepository<XtreamMovie> movieRepo,
@@ -81,7 +80,7 @@ public sealed class StrmFileGenerator
         {
             try
             {
-                var categoryFolder = SanitizeFileName(movie.CategoryName ?? "Uncategorized");
+                var categoryFolder = FileNameNormalizer.Normalize(movie.CategoryName ?? "Uncategorized");
                 var movieName = BuildMovieFileName(movie, config.EnableTitleCleaning);
                 var dirPath = Path.Combine(moviesPath, categoryFolder);
                 var filePath = Path.Combine(dirPath, movieName + ".strm");
@@ -131,8 +130,8 @@ public sealed class StrmFileGenerator
                         ? ChannelNameCleaner.Clean(series.Name)
                         : series.Name;
                     var seriesFolderName = series.Year.HasValue && series.Year > 0
-                        ? $"{SanitizeFileName(rawName)} ({series.Year})"
-                        : SanitizeFileName(rawName);
+                        ? $"{FileNameNormalizer.Normalize(rawName)} ({series.Year})"
+                        : FileNameNormalizer.Normalize(rawName);
 
                     var seriesDirPath = Path.Combine(seriesPath, seriesFolderName);
 
@@ -153,7 +152,7 @@ public sealed class StrmFileGenerator
                         {
                             var epName = string.IsNullOrWhiteSpace(ep.Name)
                                 ? $"S{seasonNum:D2}E{ep.EpisodeNumber:D2}"
-                                : $"S{seasonNum:D2}E{ep.EpisodeNumber:D2} - {SanitizeFileName(ep.Name)}";
+                                : $"S{seasonNum:D2}E{ep.EpisodeNumber:D2} - {FileNameNormalizer.Normalize(ep.Name)}";
 
                             var filePath = Path.Combine(seasonDir, epName + ".strm");
 
@@ -202,30 +201,12 @@ public sealed class StrmFileGenerator
     private static string BuildMovieFileName(XtreamMovie movie, bool cleanTitle)
     {
         var rawName = cleanTitle ? ChannelNameCleaner.Clean(movie.Name) : movie.Name;
-        var name = SanitizeFileName(rawName);
+        var name = FileNameNormalizer.Normalize(rawName);
         if (movie.Year.HasValue && movie.Year > 0)
         {
             name = $"{name} ({movie.Year})";
         }
 
         return name;
-    }
-
-    private static string SanitizeFileName(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            return "Unknown";
-        }
-
-        var sanitized = name;
-        foreach (var c in InvalidFileChars)
-        {
-            sanitized = sanitized.Replace(c, '_');
-        }
-
-        sanitized = sanitized.Replace(':', '-').Replace('/', '_').Replace('\\', '_');
-
-        return sanitized.Trim().TrimEnd('.');
     }
 }
