@@ -5,9 +5,9 @@
   "overview": "Stream Live TV, Movies, and Series from an Xtream-compatible server using this optimized plugin.",
   "owner": "Dynamic365Rookie",
   "category": "LiveTV",
-  "version": "3.9.0",
+  "version": "3.9.1",
   "targetAbi": "10.11.0.0",
   "imageUrl": "https://raw.githubusercontent.com/Dynamic365Rookie/Jellyfin.Xtream.V3/main/Resources/thumb.png",
-  "changelog": "Unicode normalization for international titles, professional plugin logo, Docker permission fix for STRM deletion, improved documentation.",
-  "timestamp": "2026-05-04T12:00:00Z"
+  "changelog": "Test namespace fix for LogoGenerator import.",
+  "timestamp": "2026-05-04T10:15:00Z"
 }
