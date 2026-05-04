@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Solution 2: Symbole Technique -->
+  <defs>
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#16213e;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Fond -->
+  <circle cx="100" cy="100" r="95" fill="url(#grad2)" stroke="#D4AF37" stroke-width="2"/>
+
+  <!-- Tube/Conduit (flux gauche) -->
+  <g>
+    <rect x="45" y="85" width="50" height="30" rx="15" fill="none" stroke="#00D4FF" stroke-width="3"/>
+    <!-- Particules de flux -->
+    <circle cx="55" cy="100" r="2" fill="#00D4FF"/>
+    <circle cx="65" cy="100" r="2" fill="#00D4FF"/>
+    <circle cx="75" cy="100" r="2" fill="#00D4FF"/>
+  </g>
+
+  <!-- Écran/Moniteur Jellyfin (droite) -->
+  <g>
+    <rect x="105" y="75" width="50" height="50" rx="3" fill="none" stroke="#D4AF37" stroke-width="2.5"/>
+    <!-- Play button dans l'écran -->
+    <polygon points="125,95 125,115 145,105" fill="#D4AF37"/>
+    <!-- Base moniteur -->
+    <line x1="115" y1="125" x2="145" y1="125" stroke="#D4AF37" stroke-width="2"/>
+    <line x1="127" y1="125" x2="133" y1="135" stroke="#D4AF37" stroke-width="2"/>
+  </g>
+
+  <!-- Flèche de connexion -->
+  <path d="M 100 100 L 105 100" stroke="#D4AF37" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#D4AF37"/>
+    </marker>
+  </defs>
+</svg>

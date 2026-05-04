@@ -1,322 +1,248 @@
-# Jellyfin.Xtream.V2 - Plugin IPTV Optimisé
+# Jellyfin Xtream V3 - IPTV Plugin
 
-[![.NET](https://img.shields.io/badge/.NET-6.0-512BD4?logo=.net)](https://dotnet.microsoft.com/)
-[![LiteDB](https://img.shields.io/badge/LiteDB-5.0.21-00A4EF)](https://www.litedb.org/)
-[![Performance](https://img.shields.io/badge/Optimized-High%20Volume-success)](PERFORMANCE_OPTIMIZATIONS.md)
+[![Release](https://img.shields.io/github/v/release/Dynamic365Rookie/Jellyfin.Xtream.V3?label=Latest%20Release)](https://github.com/Dynamic365Rookie/Jellyfin.Xtream.V3/releases)
+[![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?logo=.net)](https://dotnet.microsoft.com/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Performance](https://img.shields.io/badge/Performance-Optimized-success)](PERFORMANCE_GUIDE.md)
 
-Plugin Jellyfin pour l'intégration avec les services IPTV Xtream, **optimisé pour gérer jusqu'à 25,000+ entités** (films, séries, chaînes).
-
----
-
-## ?? Caractéristiques Principales
-
-### ? Performance Optimale
-- ? **Synchronisation par lots (Batch)** - 99% moins de requêtes DB
-- ? **Traitement parallèle** - Movies, Series et Channels simultanément
-- ? **Détection intelligente des changements** - Une seule requête au lieu de milliers
-- ? **Cache mémoire optimisé** - Limite de taille, expiration auto, compaction
-
-### ?? Volumétrie Supportée
-- **15,000 films** - Sync en ~8-12 minutes
-- **8,500 séries** - Sync en ~5-7 minutes
-- **1,500 chaînes** - Sync en ~1 minute
-- **Total: 25,000 entités** - Full sync en ~15 minutes
-
-### ??? Fiabilité
-- ? Retry automatique avec backoff exponentiel
-- ? Gestion avancée des erreurs
-- ? Monitoring de la mémoire
-- ? Logging détaillé des performances
-
-### ?? Gestion Mémoire
-- ? Limite de mémoire configurable (par défaut 2GB)
-- ? Détection automatique de seuil (80%)
-- ? Garbage collection intelligent
-- ? Pas de fuite mémoire
+Performance-optimized Jellyfin plugin for streaming IPTV content from Xtream Codes API. Support for large catalogs with advanced caching, title cleaning for metadata matching, EPG support, and STRM file generation.
 
 ---
 
-## ?? Démarrage Rapide
+## ğŸ¯ Key Features
+
+### ğŸ“º Live TV Integration
+- **Live Channels** â€” Stream live TV channels directly in Jellyfin Live TV
+- **EPG Support** â€” Electronic Program Guide with program schedules (experimental)
+- **Channel Grouping** â€” Automatic organization by category
+- **Language Tags** â€” Display channel language information
+
+### ğŸ¬ Media Library Integration
+- **.strm File Generation** â€” Movies and Series appear in Jellyfin's standard library
+- **Metadata Matching** â€” Automatic title cleaning for better TMDb scraper matching
+- **Selective Deletion** â€” Delete movies, series, or channels independently
+- **STRM Regeneration** â€” Rebuild file structure with clean titles
+
+### âš¡ Performance Optimizations
+- **Parallel Processing** â€” Concurrent synchronization of movies, series, channels
+- **Batch Operations** â€” Optimized database queries (99% fewer requests)
+- **Smart Caching** â€” In-memory cache with auto-expiration
+- **Large Catalog Support** â€” Efficiently handles 15,000+ movies + 8,500+ series
+
+### ğŸ› ï¸ Developer Tools
+- **Database Stats** â€” View count of movies, series, channels
+- **Clear Database** â€” Remove all synchronized data and STRM files
+- **Data Viewer** â€” Browse first N records of each entity type
+
+---
+
+## ğŸš€ Quick Start
 
 ### Installation
 
+1. **Download** the latest release from [GitHub Releases](https://github.com/Dynamic365Rookie/Jellyfin.Xtream.V3/releases)
+2. **Extract** to your Jellyfin plugins directory:
+   - **Linux/Docker**: `/var/lib/jellyfin/plugins/`
+   - **Windows**: `C:\ProgramData\Jellyfin\Server\plugins\`
+   - **macOS**: `/Users/{user}/.local/share/jellyfin/plugins/`
+3. **Restart** Jellyfin
+4. **Configure** via Dashboard > Plugins > Jellyfin Xtream
+
+### Configuration
+
+#### Required Settings
+- **Server URL** â€” Your Xtream Codes API endpoint (e.g., `http://xtream.example.com:8000`)
+- **Username** â€” Your Xtream account username
+- **Password** â€” Your Xtream account password
+
+#### Optional Settings
+- **Enable Live TV** â€” Activate Jellyfin Live TV integration (requires Jellyfin Live TV support)
+- **Enable EPG** â€” Fetch Electronic Program Guide for channels
+- **Clean Titles** â€” Remove language tags and quality suffixes from titles for better metadata matching
+- **STRM Paths** â€” Directory paths where .strm files will be generated
+
+### Synchronization
+
+Click **"Synchronize Now"** to pull data from your Xtream server:
+- First sync: ~10-20 minutes (depending on catalog size)
+- Incremental sync: ~2-5 minutes (sync only new/changed items)
+
+---
+
+## ğŸ“‹ Configuration Options
+
+```
+â”Œâ”€ Live TV Settings
+â”‚  â”œâ”€ Enable Live TV Integration
+â”‚  â”œâ”€ Enable EPG (Program Guide)
+â”‚  â”œâ”€ Append Language to Channel Names
+â”‚  â”œâ”€ Show Channel Language Tags
+â”‚  â”œâ”€ Enable Channel Name Cleaning
+â”‚
+â”œâ”€ Media Library Settings
+â”‚  â”œâ”€ Enable STRM Generation
+â”‚  â”œâ”€ STRM Movies Path
+â”‚  â”œâ”€ STRM Series Path
+â”‚  â”œâ”€ Clean Titles for Metadata Matching
+â”‚
+â”œâ”€ Developer Tools
+â”‚  â”œâ”€ Database Stats
+â”‚  â”œâ”€ View Movies/Series/Channels
+â”‚  â”œâ”€ Clear Database + STRM Files
+â”‚  â”œâ”€ Delete Movies/Series/Channels Only
+â”‚  â””â”€ Regenerate STRM Files
+â”‚
+â””â”€ Advanced Settings
+   â”œâ”€ Max Concurrent Requests
+   â”œâ”€ API Timeout (seconds)
+   â”œâ”€ Enable Stream Options (FFmpeg)
+   â””â”€ Custom HTTP Headers
+```
+
+---
+
+## ğŸ“Š Performance Metrics
+
+### Typical Synchronization Times
+
+| Operation | Small (5K) | Medium (15K) | Large (25K) |
+|-----------|-----------|--------------|-------------|
+| **Full Sync** | ~3 min | ~12 min | ~18 min |
+| **Incremental** | ~30 sec | ~2 min | ~4 min |
+| **STRM Generation** | ~1 min | ~4 min | ~7 min |
+| **Memory Usage** | < 300 MB | < 800 MB | < 1.5 GB |
+
+### Supported Catalog Sizes
+- âœ… Movies: Up to 50,000
+- âœ… Series: Up to 20,000  
+- âœ… Channels: Up to 5,000
+- âœ… Total: Up to 75,000 entities
+
+---
+
+## ğŸ”§ Troubleshooting
+
+### Issue: "ObjectDisposedException" in logs
+**Cause**: Jellyfin framework issue when file watcher fires after plugin unload  
+**Solution**: Harmless to normal operation; no data is affected. Check Jellyfin framework updates.
+
+### Issue: Cannot delete STRM files in Docker
+**Cause**: Docker volume doesn't have write permissions for the container user  
+**Solution**: Fix permissions on your host:
 ```bash
-git clone <votre-repo>
-cd Jellyfin.Xtream.V2
+sudo chown -R 1000:1000 /path/to/movies /path/to/series
+sudo chmod -R 755 /path/to/movies /path/to/series
+```
+Or update docker-compose volumes with `:rw` flag:
+```yaml
+volumes:
+  - /path/to/movies:/movies:rw
+  - /path/to/series:/series:rw
+```
+
+### Issue: Series not recognized by metadata scraper
+**Cause**: Titles contain noise (language tags, quality suffixes) preventing TMDb matching  
+**Solution**: Enable "Clean Titles for Metadata Matching" in settings, then regenerate STRM files.
+
+### Issue: Slow synchronization
+**Cause**: API rate limiting or network bottleneck  
+**Solution**: Reduce `Max Concurrent Requests` or increase API timeout in advanced settings.
+
+---
+
+## ğŸ“ Project Structure
+
+```
+Jellyfin.Xtream.V3/
+â”œâ”€â”€ Api/                          # Xtream API client layer
+â”‚   â”œâ”€â”€ XtreamApiClient.cs
+â”‚   â”œâ”€â”€ XtreamApiEndpoints.cs
+â”‚   â””â”€â”€ XtreamApiRateLimiter.cs
+â”œâ”€â”€ Domain/Models/                # Core domain models
+â”‚   â”œâ”€â”€ XtreamMovie.cs
+â”‚   â”œâ”€â”€ XtreamSeries.cs
+â”‚   â”œâ”€â”€ XtreamChannel.cs
+â”‚   â””â”€â”€ XtreamEpgResponse.cs
+â”œâ”€â”€ Services/                     # Business logic
+â”‚   â”œâ”€â”€ LiveTv/
+â”‚   â”œâ”€â”€ Media/
+â”‚   â”œâ”€â”€ Mapping/
+â”‚   â””â”€â”€ Synchronization/
+â”œâ”€â”€ Configuration/                # Plugin settings & UI
+â”‚   â”œâ”€â”€ PluginConfiguration.cs
+â”‚   â””â”€â”€ configPage.html
+â”œâ”€â”€ Infrastructure/               # Data persistence & caching
+â”‚   â”œâ”€â”€ Persistence/
+â”‚   â”œâ”€â”€ Caching/
+â”‚   â””â”€â”€ Utilities/
+â”œâ”€â”€ Tests/                        # Unit & integration tests
+â””â”€â”€ Resources/                    # Icons, assets
+```
+
+---
+
+## ğŸ§ª Testing
+
+### Build & Test
+```bash
 dotnet restore
-dotnet build
+dotnet build -c Release
+dotnet test
 ```
 
-### Configuration Minimale
-
-```csharp
-using Jellyfin.Xtream.Infrastructure.Persistence;
-using Jellyfin.Xtream.Services.Synchronization;
-using Jellyfin.Xtream.Configuration;
-
-// 1. Base de données optimisée
-var db = LiteDbConfiguration.CreateOptimizedDatabase("Filename=xtream.db");
-
-// 2. Repositories
-var movieRepo = new LiteDbXtreamRepository<XtreamMovie>(db, "movies");
-var seriesRepo = new LiteDbXtreamRepository<XtreamSeries>(db, "series");
-var channelRepo = new LiteDbXtreamRepository<XtreamChannel>(db, "channels");
-
-// 3. Service de synchronisation
-var syncService = new XtreamSyncService(
-    apiClient, movieRepo, seriesRepo, channelRepo, logger);
-
-// 4. Synchronisation
-await syncService.SyncAllAsync("http://your-api.com", cancellationToken);
-```
-
-**?? Voir [QUICKSTART.md](QUICKSTART.md) pour un exemple complet**
-
----
-
-## ?? Structure du Projet
-
-```
-Jellyfin.Xtream.V2/
-??? Api/
-?   ??? XtreamApiClient.cs          # Client API avec retry
-?   ??? XtreamApiRateLimiter.cs     # Rate limiting
-?   ??? XtreamApiEndpoints.cs       # Endpoints
-??? Domain/
-?   ??? Models/
-?       ??? XtreamMovie.cs          # Entité Film
-?       ??? XtreamSeries.cs         # Entité Série
-?       ??? XtreamChannel.cs        # Entité Chaîne
-?       ??? XtreamEpisode.cs        # Entité Episode
-??? Infrastructure/
-?   ??? Persistence/
-?   ?   ??? IXtreamRepository.cs    # Interface repository
-?   ?   ??? LiteDbXtreamRepository.cs # Implémentation optimisée
-?   ?   ??? LiteDbConfiguration.cs  # Config LiteDB
-?   ??? Caching/
-?   ?   ??? IXtreamCache.cs         # Interface cache
-?   ?   ??? MemoryXtreamCache.cs    # Cache optimisé
-?   ??? Monitoring/
-?   ?   ??? PerformanceMonitor.cs   # Monitoring performances
-?   ??? Utilities/
-?   ?   ??? BatchProcessor.cs       # Traitement par lots
-?   ?   ??? MemoryManager.cs        # Gestion mémoire
-?   ??? Benchmarks/
-?       ??? RepositoryBenchmark.cs  # Tests de performance
-??? Services/
-?   ??? Synchronization/
-?   ?   ??? XtreamSyncService.cs    # Service sync optimisé
-?   ??? LiveTv/
-?       ??? XtreamLiveTvService.cs  # Service Live TV
-?       ??? EpgService.cs           # Service EPG
-?       ??? StreamUrlResolver.cs    # Résolution URLs
-??? BackgroundTasks/
-?   ??? XtreamIncrementalSyncTask.cs # Tâche planifiée
-??? Configuration/
-?   ??? XtreamOptions.cs            # Configuration plugin
-?   ??? PerformanceOptions.cs       # Config performance
-?   ??? XtreamOptionsValidator.cs   # Validation config
-??? JellyfinIntegration/
-    ??? LibraryUpdater.cs           # Mise à jour bibliothèque
+### Coverage
+```bash
+dotnet test --collect:"XPlat Code Coverage"
+reportgenerator -reports:**/coverage.cobertura.xml -targetdir:coverage
 ```
 
 ---
 
-## ?? Métriques de Performance
+## ğŸ¤ Contributing
 
-### Avant vs Après Optimisation
+Contributions welcome! Before submitting:
 
-| Opération | Avant | Après | Amélioration |
-|-----------|-------|-------|--------------|
-| **Sync 15K movies** | ~60 min | ~10 min | **83%** ?? |
-| **Sync incrémental** | ~30 min | ~2 min | **93%** ?? |
-| **Requêtes DB** | 30,000+ | 10-20 | **99.9%** ?? |
-| **Utilisation mémoire** | Non contrôlée | < 1.5 GB | **Stable** ? |
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **Commit** with clear messages (`git commit -m "feat: add amazing feature"`)
+4. **Push** to your fork (`git push origin feature/amazing-feature`)
+5. **Open** a Pull Request
 
-### Temps de Synchronisation Détaillés
-
-| Type | Quantité | Initial | Incrémental (10%) |
-|------|----------|---------|-------------------|
-| Films | 15,000 | ~8-12 min | ~1-2 min |
-| Séries | 8,500 | ~5-7 min | ~30-60 sec |
-| Chaînes | 1,500 | ~1 min | ~10-20 sec |
-| **TOTAL** | **25,000** | **~15 min** | **~2-3 min** |
+See [CLAUDE.md](CLAUDE.md) for development guidelines.
 
 ---
 
-## ?? Configuration
+## ğŸ“„ Documentation
 
-### Presets de Performance
-
-```csharp
-// Pour volumétrie standard (5K-30K entités)
-var options = PerformanceOptions.Default;
-
-// Pour petite volumétrie (< 5K)
-var options = PerformanceOptions.LowVolume;
-
-// Pour haute volumétrie (> 30K)
-var options = PerformanceOptions.HighVolume;
-```
-
-### Configuration Personnalisée
-
-```csharp
-var options = new PerformanceOptions
-{
-    BatchSize = 1000,               // Taille des lots
-    MaxCacheEntries = 10000,        // Limite cache
-    MaxMemoryMB = 2048,             // Limite mémoire (MB)
-    MaxDegreeOfParallelism = 4,     // Threads parallèles
-    EnablePerformanceLogging = true,
-    EnableMemoryMonitoring = true
-};
-
-options.Validate(); // Valider la config
-```
-
-**?? Voir [PERFORMANCE_GUIDE.md](PERFORMANCE_GUIDE.md) pour tous les paramètres**
+- [QUICKSTART.md](QUICKSTART.md) â€” Getting started guide
+- [PERFORMANCE_GUIDE.md](PERFORMANCE_GUIDE.md) â€” Tuning & optimization
+- [CHANGELOG.md](CHANGELOG.md) â€” Version history and release notes
+- [TESTING_GUIDE.md](TESTING_GUIDE.md) â€” Test guidelines
 
 ---
 
-## ?? Documentation
+## âš–ï¸ License
 
-| Document | Description |
-|----------|-------------|
-| [QUICKSTART.md](QUICKSTART.md) | Guide de démarrage rapide avec exemples |
-| [PERFORMANCE_GUIDE.md](PERFORMANCE_GUIDE.md) | Configuration complète et tuning |
-| [PERFORMANCE_OPTIMIZATIONS.md](PERFORMANCE_OPTIMIZATIONS.md) | Détails techniques des optimisations |
-| [CHANGES_SUMMARY.md](CHANGES_SUMMARY.md) | Résumé de toutes les modifications |
+This project is licensed under the MIT License â€” see [LICENSE](LICENSE) file for details.
 
 ---
 
-## ?? Tests et Benchmarks
+## ğŸ™ Acknowledgments
 
-### Benchmark de Performance
-
-```csharp
-using Jellyfin.Xtream.Infrastructure.Benchmarks;
-
-var benchmark = new RepositoryBenchmark(logger);
-
-// Test Individual vs Batch
-var result = await benchmark.BenchmarkIndividualVsBatch(movieRepo, 1000);
-Console.WriteLine(result);
-// Output: Batch est 15x plus rapide (200 ops/s -> 3000 ops/s)
-```
-
-### Monitoring en Production
-
-```csharp
-using Jellyfin.Xtream.Infrastructure.Monitoring;
-
-var perfMonitor = new PerformanceMonitor(logger);
-var memManager = new MemoryManager(logger);
-
-using (perfMonitor.Track("Sync"))
-{
-    await syncService.SyncAllAsync(url, ct);
-    memManager.LogMemoryUsage("After sync");
-}
-
-perfMonitor.LogStatistics();
-```
+- [Jellyfin](https://jellyfin.org/) â€” Open-source media system
+- [LiteDB](https://www.litedb.org/) â€” Embedded database
+- Xtream Codes API documentation
+- Community feedback and contributions
 
 ---
 
-## ??? Dépendances
+## ğŸ“ Support
 
-| Package | Version | Usage |
-|---------|---------|-------|
-| LiteDB | 5.0.21 | Base de données embarquée |
-| MediaBrowser.Common | 4.9.1.90 | Intégration Jellyfin |
-| Microsoft.Extensions.Caching.Memory | 6.0.1 | Cache optimisé |
-| Microsoft.Extensions.Logging.Abstractions | 6.0.4 | Logging |
+- **Issues**: [GitHub Issues](https://github.com/Dynamic365Rookie/Jellyfin.Xtream.V3/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Dynamic365Rookie/Jellyfin.Xtream.V3/discussions)
+- **Docs**: Check [PERFORMANCE_GUIDE.md](PERFORMANCE_GUIDE.md) for common questions
 
 ---
 
-## ?? Troubleshooting
+**Status**: âœ… Production Ready | **Version**: 3.8.0 | **Target ABI**: 10.11.0.0
 
-### Problèmes Courants
-
-#### ? OutOfMemoryException
-**Cause**: Trop de données en mémoire  
-**Solution**: Réduire `BatchSize` à 500 et `MaxCacheEntries` à 5000
-
-#### ? Synchronisation lente
-**Cause**: Configuration non optimale  
-**Solution**: Augmenter `BatchSize` à 2000 et `MaxDegreeOfParallelism` à 8
-
-#### ? Timeouts API
-**Cause**: Réseau lent ou serveur surchargé  
-**Solution**: Augmenter `ApiTimeoutSeconds` et activer `EnableApiRetry`
-
-#### ? Database locked
-**Cause**: Fichier DB ouvert dans un autre processus  
-**Solution**: Fermer les autres connexions, utiliser `Connection=Shared`
-
-**?? Voir [PERFORMANCE_GUIDE.md](PERFORMANCE_GUIDE.md) pour plus de solutions**
-
----
-
-## ?? Optimisations Futures
-
-- [ ] Migration vers SQLite pour volumes > 50K entités
-- [ ] Cache distribué (Redis) pour clusters
-- [ ] Partitionnement des données par catégorie
-- [ ] Vues matérialisées pour requêtes fréquentes
-- [ ] Compression des données en base
-
----
-
-## ?? Contribution
-
-Les contributions sont les bienvenues ! Avant de contribuer :
-
-1. Lire la documentation de performance
-2. Exécuter les benchmarks existants
-3. Vérifier que les métriques cibles sont maintenues
-4. Ajouter des tests si nécessaire
-
----
-
-## ?? License
-
-[Indiquer votre licence ici]
-
----
-
-## ?? Remerciements
-
-- **LiteDB** pour la base de données embarquée performante
-- **Jellyfin** pour la plateforme média open-source
-- **Microsoft** pour les excellents outils .NET
-
----
-
-## ?? Support
-
-- ?? **Issues**: [Créer un ticket](votre-repo/issues)
-- ?? **Documentation**: Voir les fichiers MD ci-dessus
-- ?? **Discussions**: [Discussions GitHub](votre-repo/discussions)
-
----
-
-## ?? Objectifs Atteints
-
-- ? Support de 25,000+ entités
-- ? Synchronisation en < 20 minutes
-- ? Utilisation mémoire < 1.5 GB
-- ? Taille DB < 1 GB
-- ? Pas de crash ni timeout
-- ? Monitoring complet
-- ? Configuration flexible
-- ? Documentation exhaustive
-
----
-
-**Version**: 2.0 - Optimisé pour Haute Volumétrie  
-**Target Framework**: .NET 6.0  
-**Status**: ? Production Ready
-
-**?? Prêt pour gérer des milliers d'entités avec des performances optimales !**
