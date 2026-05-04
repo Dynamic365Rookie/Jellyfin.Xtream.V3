@@ -7,6 +7,7 @@
   "category": "LiveTV",
   "version": "3.8.0",
   "targetAbi": "10.11.0.0",
+  "imageUrl": "https://raw.githubusercontent.com/Dynamic365Rookie/Jellyfin.Xtream.V3/main/Resources/thumb.png",
   "changelog": "Title cleaning for metadata matching, EPG support, selective deletion, STRM regeneration button, plugin thumbnail fix.",
   "timestamp": "2026-04-30T12:00:00Z"
 }
