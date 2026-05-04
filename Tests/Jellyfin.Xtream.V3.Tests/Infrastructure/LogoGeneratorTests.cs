@@ -1,4 +1,5 @@
 using Xunit;
+using Jellyfin.Xtream.V3.Utilities;
 
 namespace Jellyfin.Xtream.V3.Tests.Infrastructure;
 
@@ -18,7 +19,7 @@ public class LogoGeneratorTests
             Directory.CreateDirectory(directory!);
         }
 
-        Jellyfin.Xtream.V3.Infrastructure.Utilities.LogoGenerator.GenerateLogo(fullPath);
+        LogoGenerator.GenerateLogo(fullPath);
 
         Assert.True(File.Exists(fullPath), "PNG file was not created");
 
