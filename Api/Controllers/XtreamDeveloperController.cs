@@ -199,14 +199,28 @@ public class XtreamDeveloperController : ControllerBase
 
         if (movies && !string.IsNullOrWhiteSpace(config.StrmMoviesPath) && Directory.Exists(config.StrmMoviesPath))
         {
-            count += CountFiles(config.StrmMoviesPath, "*.strm");
-            Directory.Delete(config.StrmMoviesPath, true);
+            try
+            {
+                count += CountFiles(config.StrmMoviesPath, "*.strm");
+                Directory.Delete(config.StrmMoviesPath, true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "[Xtream] Warning: Could not delete STRM movies directory '{Path}'. Check Docker volume permissions.", config.StrmMoviesPath);
+            }
         }
 
         if (series && !string.IsNullOrWhiteSpace(config.StrmSeriesPath) && Directory.Exists(config.StrmSeriesPath))
         {
-            count += CountFiles(config.StrmSeriesPath, "*.strm");
-            Directory.Delete(config.StrmSeriesPath, true);
+            try
+            {
+                count += CountFiles(config.StrmSeriesPath, "*.strm");
+                Directory.Delete(config.StrmSeriesPath, true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "[Xtream] Warning: Could not delete STRM series directory '{Path}'. Check Docker volume permissions.", config.StrmSeriesPath);
+            }
         }
 
         return count;
