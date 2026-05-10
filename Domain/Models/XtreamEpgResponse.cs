@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Jellyfin.Xtream.Infrastructure.Serialization;
 
 namespace Jellyfin.Xtream.Domain.Models;
 
@@ -41,8 +42,10 @@ public sealed class XtreamEpgListing
     public string? ChannelId { get; set; }
 
     [JsonPropertyName("start_timestamp")]
+    [JsonConverter(typeof(FlexibleInt64JsonConverter))]
     public long? StartTimestamp { get; set; }
 
     [JsonPropertyName("stop_timestamp")]
+    [JsonConverter(typeof(FlexibleInt64JsonConverter))]
     public long? StopTimestamp { get; set; }
 }
