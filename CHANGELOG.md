@@ -7,7 +7,7 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
-## [3.9.2] - 2026-05-10
+## [3.9.3] - 2026-05-10
 
 ### Fixed
 - **EPG JSON deserialization errors** — Fixed handling of Xtream API inconsistent timestamp formats
