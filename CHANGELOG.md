@@ -7,6 +7,18 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [3.9.2] - 2026-05-10
+
+### Fixed
+- **EPG JSON deserialization errors** — Fixed handling of Xtream API inconsistent timestamp formats
+  - Created `FlexibleInt64JsonConverter` to handle both numeric and string timestamp values
+  - EPG listings now parse successfully regardless of API response format
+  - Added graceful fallback for null, empty, and invalid timestamp strings
+  - Fixes: "Cannot get the value of a token type 'String' as a number" error
+  - Comprehensive unit tests added for timestamp conversion edge cases
+
+---
+
 ## [3.5.7] - 2026-04-23
 
 ### Fixed
