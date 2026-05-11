@@ -13,12 +13,16 @@ public sealed class XtreamChannelJsonConverter : JsonConverter<XtreamChannel>
 
         var streamId = root.TryGetProperty("stream_id", out var sid) ? sid.GetFlexibleInt32() : 0;
 
+        var icon = root.TryGetProperty("stream_icon", out var streamIcon)
+            ? streamIcon.GetFlexibleString()
+            : (root.TryGetProperty("icon", out var iconProp) ? iconProp.GetFlexibleString() : null);
+
         return new XtreamChannel
         {
             Id = streamId,
             StreamId = streamId,
             Name = root.TryGetProperty("name", out var name) ? name.GetFlexibleString() ?? string.Empty : string.Empty,
-            Icon = root.TryGetProperty("icon", out var icon) ? icon.GetFlexibleString() : null,
+            Icon = icon,
             CategoryId = root.TryGetProperty("category_id", out var catId) ? catId.GetFlexibleNullableInt32() : null,
             CategoryName = root.TryGetProperty("category_name", out var catName) ? catName.GetFlexibleString() : null,
             EpgChannelId = root.TryGetProperty("epg_channel_id", out var epgId) ? epgId.GetFlexibleNullableInt32() : null,

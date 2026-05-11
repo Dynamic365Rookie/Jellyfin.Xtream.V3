@@ -6,6 +6,28 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [3.9.7] - 2026-05-11
+
+### Security
+- **Debug endpoints now require Jellyfin admin authentication**
+  - `/Xtream/Debug/*` endpoints now protected with `[Authorize(Policy = "RequiresElevation")]`
+  - Prevents unauthorized access to plugin configuration and EPG data
+  - Fixes: Unauthenticated access to diagnostic information
+
+## [3.9.6] - 2026-05-11
+
+### Added
+- **EPG test endpoint** — `GET /Xtream/Debug/epg/test/{streamId}` for troubleshooting specific channels
+  - Tests EPG API connectivity and data retrieval per channel
+  - Useful for identifying which channels have EPG data available
+
+### Note
+- **Channel logos**: Xtream API returns `null` for icon URLs — this is expected behavior and cannot be fixed at plugin level
+  - Channels display without logos in Jellyfin
+  - Consider using external metadata sources (TMDb) for artwork
+- **EPG programs**: Verified working with proper base64 title decoding
+  - Ensure Jellyfin's Live TV guide is refreshed (may require manual trigger or service restart)
+
 ## [3.9.5] - 2026-05-11
 
 ### Fixed
