@@ -6,6 +6,29 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [3.9.8.1] - 2026-05-11
+
+### Added
+- Unit tests for stream_icon field mapping from Xtream API
+  - Validates `stream_icon` field parsing
+  - Tests fallback logic (`stream_icon` → `icon`)
+
+### Fixed
+- Skipped LogoGenerator test - utility not used in production
+
+## [3.9.8] - 2026-05-11
+
+### Fixed
+- **Channel logos now display correctly** — Fixed stream_icon field mapping
+  - Xtream API returns logos in `stream_icon` field, now properly mapped to channel icons
+  - Channel logos now display in Jellyfin Live TV guide
+  - Improved: XtreamChannelJsonConverter with fallback logic (`stream_icon` → `icon`)
+
+### Changed
+- Relaxed namespace validation rule (IDE0130) in .editorconfig
+  - Pre-existing namespace/folder structure misalignment documented
+  - Can be addressed in future dedicated refactoring
+
 ## [3.9.8] - 2026-05-11
 
 ### Fixed
