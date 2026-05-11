@@ -130,4 +130,40 @@ public sealed class DebugController : ControllerBase
             return StatusCode(500, new { error = ex.Message });
         }
     }
+
+    /// <summary>
+    /// Test EPG fetching for a specific channel (debug only).
+    /// </summary>
+    /// <param name="streamId">Stream ID to test EPG for</param>
+    [HttpGet("epg/test/{streamId}")]
+    public async Task<IActionResult> TestEpgFetch(int streamId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var config = Plugin.Instance?.Configuration;
+            _logger.LogInformation("[Debug] Testing EPG fetch for stream {StreamId}", streamId);
+
+            if (config == null || !config.EnableEPG)
+                return BadRequest(new { error = "EPG disabled in configuration" });
+
+            var channel = _channelRepository.GetAll()
+                .FirstOrDefault(c => c.StreamId == streamId);
+            if (channel == null)
+                return NotFound(new { error = $"Channel with stream_id {streamId} not found" });
+
+            var result = await _diagnostics.DiagnoseEpgAsync(
+                new List<XtreamChannel> { channel },
+                config.ServerUrl,
+                config.Username,
+                config.Password,
+                cancellationToken);
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[Debug] EPG test failed");
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
 }
