@@ -1,5 +1,6 @@
 using Jellyfin.Xtream.Api;
 using Jellyfin.Xtream.Domain.Models;
+using Jellyfin.Xtream.V3.Infrastructure.Diagnostics;
 using Jellyfin.Xtream.Infrastructure.Persistence;
 using Jellyfin.Xtream.Services.LiveTv;
 using Jellyfin.Xtream.Services.Media;
@@ -55,6 +56,9 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
                 new HttpClient(),
                 sp.GetRequiredService<XtreamApiRateLimiter>(),
                 sp.GetRequiredService<ILogger<XtreamApiClient>>()));
+
+        // Debug diagnostics — for troubleshooting icons and EPG
+        serviceCollection.AddSingleton<ChannelDiagnostics>();
 
         // Services
         serviceCollection.AddSingleton<XtreamSyncValidator>();
