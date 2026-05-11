@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Jellyfin.Xtream.V3.Infrastructure.Diagnostics;
 using Jellyfin.Xtream.V3;
@@ -9,9 +10,11 @@ namespace Jellyfin.Xtream.V3.Api.Controllers;
 
 /// <summary>
 /// Debug endpoints for diagnosing channel icons and EPG issues.
+/// Requires Jellyfin administrator authentication.
 /// </summary>
 [ApiController]
 [Route("Xtream/Debug")]
+[Authorize(Policy = "RequiresElevation")]
 public sealed class DebugController : ControllerBase
 {
     private readonly IXtreamRepository<XtreamChannel> _channelRepository;

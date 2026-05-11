@@ -6,6 +6,14 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [3.9.7] - 2026-05-11
+
+### Security
+- **Debug endpoints now require Jellyfin admin authentication**
+  - `/Xtream/Debug/*` endpoints now protected with `[Authorize(Policy = "RequiresElevation")]`
+  - Prevents unauthorized access to plugin configuration and EPG data
+  - Fixes: Unauthenticated access to diagnostic information
+
 ## [3.9.6] - 2026-05-11
 
 ### Added
