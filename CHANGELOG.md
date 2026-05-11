@@ -6,6 +6,13 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [3.9.5] - 2026-05-11
+
+### Fixed
+- **Debug endpoints** — Fixed PluginConfiguration dependency injection
+  - Use Plugin.Instance pattern for configuration access
+  - Fixes: "Unable to resolve service" error on /Xtream/Debug/* endpoints
+
 ## [3.9.4] - 2026-05-10
 
 ### Added
