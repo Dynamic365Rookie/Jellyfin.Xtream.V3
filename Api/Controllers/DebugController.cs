@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Jellyfin.Xtream.V3.Infrastructure.Diagnostics;
+using Jellyfin.Xtream.V3;
 using Jellyfin.Xtream.Infrastructure.Persistence;
 using Jellyfin.Xtream.Domain.Models;
-using Jellyfin.Xtream.V3.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Xtream.V3.Api.Controllers;
@@ -16,18 +16,15 @@ public sealed class DebugController : ControllerBase
 {
     private readonly IXtreamRepository<XtreamChannel> _channelRepository;
     private readonly ChannelDiagnostics _diagnostics;
-    private readonly PluginConfiguration _config;
     private readonly ILogger<DebugController> _logger;
 
     public DebugController(
         IXtreamRepository<XtreamChannel> channelRepository,
         ChannelDiagnostics diagnostics,
-        PluginConfiguration config,
         ILogger<DebugController> logger)
     {
         _channelRepository = channelRepository;
         _diagnostics = diagnostics;
-        _config = config;
         _logger = logger;
     }
 
@@ -39,7 +36,13 @@ public sealed class DebugController : ControllerBase
     {
         try
         {
+            var config = Plugin.Instance?.Configuration;
             _logger.LogInformation("[Debug] Diagnosing channel icons");
+
+            if (config == null || string.IsNullOrWhiteSpace(config.ServerUrl))
+            {
+                return BadRequest(new { error = "Xtream configuration incomplete" });
+            }
 
             var channels = _channelRepository.GetAll().ToList();
             if (channels.Count == 0)
@@ -47,7 +50,7 @@ public sealed class DebugController : ControllerBase
 
             var result = await _diagnostics.DiagnoseChannelIconsAsync(
                 channels,
-                _config.ServerUrl,
+                config.ServerUrl,
                 cancellationToken);
 
             return Ok(result);
@@ -67,11 +70,12 @@ public sealed class DebugController : ControllerBase
     {
         try
         {
+            var config = Plugin.Instance?.Configuration;
             _logger.LogInformation("[Debug] Diagnosing EPG data");
 
-            if (string.IsNullOrWhiteSpace(_config.ServerUrl) ||
-                string.IsNullOrWhiteSpace(_config.Username) ||
-                string.IsNullOrWhiteSpace(_config.Password))
+            if (config == null || string.IsNullOrWhiteSpace(config.ServerUrl) ||
+                string.IsNullOrWhiteSpace(config.Username) ||
+                string.IsNullOrWhiteSpace(config.Password))
             {
                 return BadRequest(new { error = "Xtream configuration incomplete" });
             }
@@ -82,9 +86,9 @@ public sealed class DebugController : ControllerBase
 
             var result = await _diagnostics.DiagnoseEpgAsync(
                 channels,
-                _config.ServerUrl,
-                _config.Username,
-                _config.Password,
+                config.ServerUrl,
+                config.Username,
+                config.Password,
                 cancellationToken);
 
             return Ok(result);
@@ -104,16 +108,20 @@ public sealed class DebugController : ControllerBase
     {
         try
         {
+            var config = Plugin.Instance?.Configuration;
+            if (config == null)
+                return BadRequest(new { error = "Plugin not initialized" });
+
             return Ok(new
             {
-                ServerUrl = _config.ServerUrl,
-                Username = string.IsNullOrEmpty(_config.Username) ? "(not set)" : "***",
-                Password = string.IsNullOrEmpty(_config.Password) ? "(not set)" : "***",
-                EnableEPG = _config.EnableEPG,
-                EnableLiveTV = _config.EnableLiveTV,
-                EnableChannelNameCleaning = _config.EnableChannelNameCleaning,
-                ShowChannelLanguageTags = _config.ShowChannelLanguageTags,
-                AppendLanguageToChannelName = _config.AppendLanguageToChannelName,
+                ServerUrl = config.ServerUrl,
+                Username = string.IsNullOrEmpty(config.Username) ? "(not set)" : "***",
+                Password = string.IsNullOrEmpty(config.Password) ? "(not set)" : "***",
+                EnableEPG = config.EnableEPG,
+                EnableLiveTV = config.EnableLiveTV,
+                EnableChannelNameCleaning = config.EnableChannelNameCleaning,
+                ShowChannelLanguageTags = config.ShowChannelLanguageTags,
+                AppendLanguageToChannelName = config.AppendLanguageToChannelName,
             });
         }
         catch (Exception ex)
