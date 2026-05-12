@@ -4,6 +4,7 @@ using Jellyfin.Xtream.V3.Infrastructure.Diagnostics;
 using Jellyfin.Xtream.V3;
 using Jellyfin.Xtream.Infrastructure.Persistence;
 using Jellyfin.Xtream.Domain.Models;
+using Jellyfin.Xtream.Services.Synchronization;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Xtream.V3.Api.Controllers;
@@ -19,15 +20,18 @@ public sealed class DebugController : ControllerBase
 {
     private readonly IXtreamRepository<XtreamChannel> _channelRepository;
     private readonly ChannelDiagnostics _diagnostics;
+    private readonly SyncHistoryService _syncHistory;
     private readonly ILogger<DebugController> _logger;
 
     public DebugController(
         IXtreamRepository<XtreamChannel> channelRepository,
         ChannelDiagnostics diagnostics,
+        SyncHistoryService syncHistory,
         ILogger<DebugController> logger)
     {
         _channelRepository = channelRepository;
         _diagnostics = diagnostics;
+        _syncHistory = syncHistory;
         _logger = logger;
     }
 
@@ -166,6 +170,46 @@ public sealed class DebugController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "[Debug] EPG test failed");
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Get recent synchronization history (last 20 by default).
+    /// </summary>
+    /// <param name="count">Number of history entries to retrieve (max 100)</param>
+    [HttpGet("sync/recent")]
+    public IActionResult GetRecentSyncHistory([FromQuery] int count = 20)
+    {
+        try
+        {
+            var history = _syncHistory.GetRecentHistory(Math.Min(count, 100));
+            return Ok(history);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[Debug] Failed to retrieve sync history");
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Get the last synchronization operation details.
+    /// </summary>
+    [HttpGet("sync/last")]
+    public IActionResult GetLastSync()
+    {
+        try
+        {
+            var lastSync = _syncHistory.GetLastSync();
+            if (lastSync == null)
+                return Ok(new { message = "No synchronization history available" });
+
+            return Ok(lastSync);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[Debug] Failed to retrieve last sync");
             return StatusCode(500, new { error = ex.Message });
         }
     }

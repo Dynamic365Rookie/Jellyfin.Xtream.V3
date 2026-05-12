@@ -62,6 +62,7 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
 
         // Services
         serviceCollection.AddSingleton<XtreamSyncValidator>();
+        serviceCollection.AddSingleton<SyncHistoryService>();
         serviceCollection.AddSingleton<XtreamSyncService>();
         serviceCollection.AddSingleton<StrmFileGenerator>();
 

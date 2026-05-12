@@ -6,6 +6,29 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [3.9.9] - 2026-05-12
+
+### Added
+- **Improved log management** — Reduced production log verbosity
+  - Created `SyncHistoryService` to track synchronization operations in memory
+  - Added `SyncHistory` model with detailed sync statistics (movies/series/channels)
+  - New debug endpoints for accessing detailed sync logs:
+    - `GET /Xtream/Debug/sync/recent` — Recent sync history (last 20 by default)
+    - `GET /Xtream/Debug/sync/last` — Last synchronization details
+  
+### Changed
+- **Cleaner production logs** — Reduced verbosity for synchronization operations
+  - Changed detailed sync logs from `LogInformation` to `LogDebug` level
+  - Only final summaries and errors appear in production logs
+  - Detailed step-by-step sync progress available via debug logging mode
+- `XtreamSyncService` methods now return `SyncEntityResult` with statistics
+  - Enables tracking of new/updated/deleted entity counts
+  - `SyncAllAsync` creates comprehensive `SyncHistory` entries
+  - Failed syncs properly logged with error details
+
+### Fixed
+- Improved error tracking in sync operations with detailed history
+
 ## [3.9.8.1] - 2026-05-11
 
 ### Added

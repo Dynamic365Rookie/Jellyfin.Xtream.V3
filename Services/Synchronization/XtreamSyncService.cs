@@ -13,6 +13,7 @@ public sealed class XtreamSyncService
     private readonly IXtreamRepository<XtreamMovie> _movies;
     private readonly IXtreamRepository<XtreamSeries> _series;
     private readonly IXtreamRepository<XtreamChannel> _channels;
+    private readonly SyncHistoryService _syncHistory;
     private readonly ILogger<XtreamSyncService> _logger;
 
     public XtreamSyncService(
@@ -21,6 +22,7 @@ public sealed class XtreamSyncService
         IXtreamRepository<XtreamMovie> movies,
         IXtreamRepository<XtreamSeries> series,
         IXtreamRepository<XtreamChannel> channels,
+        SyncHistoryService syncHistory,
         ILogger<XtreamSyncService> logger)
     {
         _api = api;
@@ -28,69 +30,76 @@ public sealed class XtreamSyncService
         _movies = movies;
         _series = series;
         _channels = channels;
+        _syncHistory = syncHistory;
         _logger = logger;
     }
 
-    public async Task SyncMoviesAsync(string url, CancellationToken ct)
+    public async Task<SyncEntityResult> SyncMoviesAsync(string url, CancellationToken ct)
     {
-        _logger.LogInformation("Starting movies synchronization...");
+        _logger.LogDebug("Starting movies synchronization...");
         var startTime = DateTime.UtcNow;
 
         var movies = await _api.GetAsync<IEnumerable<XtreamMovie>>(url, ct)
                      ?? Enumerable.Empty<XtreamMovie>();
 
         var moviesList = movies.ToList();
-        _logger.LogInformation("Retrieved {Count} movies from API", moviesList.Count);
+        _logger.LogDebug("Retrieved {Count} movies from API", moviesList.Count);
 
-        await SyncEntitiesOptimizedAsync(_movies, moviesList, ct);
+        var result = await SyncEntitiesOptimizedAsync(_movies, moviesList, ct);
 
         var duration = DateTime.UtcNow - startTime;
-        _logger.LogInformation("Movies synchronization completed in {Duration}ms", duration.TotalMilliseconds);
+        _logger.LogDebug("Movies synchronization completed in {Duration}ms", duration.TotalMilliseconds);
+
+        return result;
     }
 
-    public async Task SyncSeriesAsync(string url, CancellationToken ct)
+    public async Task<SyncEntityResult> SyncSeriesAsync(string url, CancellationToken ct)
     {
-        _logger.LogInformation("Starting series synchronization...");
+        _logger.LogDebug("Starting series synchronization...");
         var startTime = DateTime.UtcNow;
 
         var series = await _api.GetAsync<IEnumerable<XtreamSeries>>(url, ct)
                      ?? Enumerable.Empty<XtreamSeries>();
 
         var seriesList = series.ToList();
-        _logger.LogInformation("Retrieved {Count} series from API", seriesList.Count);
+        _logger.LogDebug("Retrieved {Count} series from API", seriesList.Count);
 
-        await SyncEntitiesOptimizedAsync(_series, seriesList, ct);
+        var result = await SyncEntitiesOptimizedAsync(_series, seriesList, ct);
 
         var duration = DateTime.UtcNow - startTime;
-        _logger.LogInformation("Series synchronization completed in {Duration}ms", duration.TotalMilliseconds);
+        _logger.LogDebug("Series synchronization completed in {Duration}ms", duration.TotalMilliseconds);
+
+        return result;
     }
 
-    public async Task SyncChannelsAsync(string url, CancellationToken ct)
+    public async Task<SyncEntityResult> SyncChannelsAsync(string url, CancellationToken ct)
     {
-        _logger.LogInformation("Starting channels synchronization...");
+        _logger.LogDebug("Starting channels synchronization...");
         var startTime = DateTime.UtcNow;
 
         var channels = await _api.GetAsync<IEnumerable<XtreamChannel>>(url, ct)
                        ?? Enumerable.Empty<XtreamChannel>();
 
         var channelsList = channels.ToList();
-        _logger.LogInformation("Retrieved {Count} channels from API", channelsList.Count);
+        _logger.LogDebug("Retrieved {Count} channels from API", channelsList.Count);
 
-        await SyncEntitiesOptimizedAsync(_channels, channelsList, ct);
+        var result = await SyncEntitiesOptimizedAsync(_channels, channelsList, ct);
 
         var duration = DateTime.UtcNow - startTime;
-        _logger.LogInformation("Channels synchronization completed in {Duration}ms", duration.TotalMilliseconds);
+        _logger.LogDebug("Channels synchronization completed in {Duration}ms", duration.TotalMilliseconds);
+
+        return result;
     }
 
-    private async Task SyncEntitiesOptimizedAsync<T>(
+    private async Task<SyncEntityResult> SyncEntitiesOptimizedAsync<T>(
         IXtreamRepository<T> repository,
         List<T> newEntities,
         CancellationToken ct) where T : class, IEntity
     {
         if (!newEntities.Any())
         {
-            _logger.LogInformation("No entities to sync");
-            return;
+            _logger.LogDebug("No entities to sync");
+            return new SyncEntityResult(0, 0, 0, 0);
         }
 
         ct.ThrowIfCancellationRequested();
@@ -122,46 +131,79 @@ public sealed class XtreamSyncService
             }
         }
 
-        _logger.LogInformation("Found {Count} entities to update out of {Total}", 
+        _logger.LogDebug("Found {Count} entities to update out of {Total}",
             entitiesToUpdate.Count, newEntities.Count);
+
+        var newCount = 0;
+        var updatedCount = 0;
 
         if (entitiesToUpdate.Any())
         {
+            // Compter les nouvelles entités vs mises à jour
+            newCount = entitiesToUpdate.Count(e => !existingLastModified.ContainsKey(e.Id));
+            updatedCount = entitiesToUpdate.Count - newCount;
+
             // Batch upsert pour meilleures performances
             await Task.Run(() => repository.UpsertBatch(entitiesToUpdate), ct);
-            _logger.LogInformation("Batch upsert completed for {Count} entities", entitiesToUpdate.Count);
+            _logger.LogDebug("Batch upsert completed for {Count} entities", entitiesToUpdate.Count);
         }
 
         // Optionnel: Supprimer les entités qui n'existent plus dans l'API
         var newEntityIds = newEntities.Select(e => e.Id).ToHashSet();
         var entitiesToDelete = existingLastModified.Keys.Where(id => !newEntityIds.Contains(id)).ToList();
-        
+
         if (entitiesToDelete.Any())
         {
-            _logger.LogInformation("Removing {Count} obsolete entities", entitiesToDelete.Count);
+            _logger.LogDebug("Removing {Count} obsolete entities", entitiesToDelete.Count);
             await Task.Run(() => repository.DeleteNotInList(newEntityIds), ct);
         }
+
+        return new SyncEntityResult(newEntities.Count, newCount, updatedCount, entitiesToDelete.Count);
     }
+
+    public sealed record SyncEntityResult(int Total, int New, int Updated, int Deleted);
 
     public async Task SyncAllAsync(string baseUrl, string username, string password, CancellationToken ct)
     {
-        _logger.LogInformation("Starting full synchronization...");
+        _logger.LogDebug("Starting full synchronization...");
         var startTime = DateTime.UtcNow;
 
         var cleanBaseUrl = baseUrl.TrimEnd('/');
 
         // Synchroniser en parallèle pour améliorer les performances
-        var tasks = new[]
-        {
-            SyncMoviesAsync(XtreamApiEndpoints.Movies(cleanBaseUrl, username, password), ct),
-            SyncSeriesAsync(XtreamApiEndpoints.Series(cleanBaseUrl, username, password), ct),
-            SyncChannelsAsync(XtreamApiEndpoints.LiveStreams(cleanBaseUrl, username, password), ct)
-        };
+        var movieTask = SyncMoviesAsync(XtreamApiEndpoints.Movies(cleanBaseUrl, username, password), ct);
+        var seriesTask = SyncSeriesAsync(XtreamApiEndpoints.Series(cleanBaseUrl, username, password), ct);
+        var channelsTask = SyncChannelsAsync(XtreamApiEndpoints.LiveStreams(cleanBaseUrl, username, password), ct);
 
-        await Task.WhenAll(tasks);
+        await Task.WhenAll(movieTask, seriesTask, channelsTask);
+
+        var movieResult = movieTask.Result;
+        var seriesResult = seriesTask.Result;
+        var channelsResult = channelsTask.Result;
 
         var duration = DateTime.UtcNow - startTime;
-        _logger.LogInformation("Full synchronization completed in {Duration}s", duration.TotalSeconds);
+
+        // Créer l'entrée d'historique
+        var history = new SyncHistory
+        {
+            StartTime = startTime,
+            EndTime = DateTime.UtcNow,
+            Status = "Success",
+            DurationSeconds = duration.TotalSeconds,
+            MoviesTotal = movieResult.Total,
+            MoviesNew = movieResult.New,
+            MoviesUpdated = movieResult.Updated,
+            SeriesTotal = seriesResult.Total,
+            SeriesNew = seriesResult.New,
+            SeriesUpdated = seriesResult.Updated,
+            ChannelsTotal = channelsResult.Total,
+            ChannelsNew = channelsResult.New,
+            ChannelsUpdated = channelsResult.Updated,
+            ErrorCount = 0
+        };
+
+        _syncHistory.AddHistory(history);
+        _logger.LogInformation(history.GetSummary());
     }
 
     /// <summary>
@@ -169,7 +211,7 @@ public sealed class XtreamSyncService
     /// </summary>
     public async Task<SyncResult> SyncAllWithValidationAsync(string baseUrl, string username, string password, CancellationToken ct)
     {
-        _logger.LogInformation("Starting synchronized data load with validation");
+        _logger.LogDebug("Starting synchronized data load with validation");
         var startTime = DateTime.UtcNow;
 
         // Validate before sync
@@ -178,24 +220,57 @@ public sealed class XtreamSyncService
         {
             var errorMessage = $"Sync validation failed: {string.Join("; ", validationResult.Errors)}";
             _logger.LogError(errorMessage);
+
+            var failedHistory = new SyncHistory
+            {
+                StartTime = startTime,
+                EndTime = DateTime.UtcNow,
+                Status = "Failed",
+                DurationSeconds = (DateTime.UtcNow - startTime).TotalSeconds,
+                ErrorCount = validationResult.Errors.Count(),
+                ErrorMessage = errorMessage
+            };
+            _syncHistory.AddHistory(failedHistory);
+
             return SyncResult.Failure(validationResult.Errors);
         }
 
         try
         {
             await SyncAllAsync(baseUrl, username, password, ct);
-            var duration = DateTime.UtcNow - startTime;
-            _logger.LogInformation("Data synchronization completed successfully in {Duration}ms", duration.TotalMilliseconds);
             return SyncResult.Success();
         }
         catch (OperationCanceledException)
         {
             _logger.LogWarning("Synchronization was cancelled");
+
+            var cancelledHistory = new SyncHistory
+            {
+                StartTime = startTime,
+                EndTime = DateTime.UtcNow,
+                Status = "Cancelled",
+                DurationSeconds = (DateTime.UtcNow - startTime).TotalSeconds,
+                ErrorMessage = "Synchronization was cancelled"
+            };
+            _syncHistory.AddHistory(cancelledHistory);
+
             return SyncResult.Failure(new[] { "Synchronization was cancelled" });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unexpected error during synchronization");
+
+            var errorHistory = new SyncHistory
+            {
+                StartTime = startTime,
+                EndTime = DateTime.UtcNow,
+                Status = "Failed",
+                DurationSeconds = (DateTime.UtcNow - startTime).TotalSeconds,
+                ErrorCount = 1,
+                ErrorMessage = ex.Message
+            };
+            _syncHistory.AddHistory(errorHistory);
+
             return SyncResult.Failure(new[] { $"Synchronization error: {ex.Message}" });
         }
     }
